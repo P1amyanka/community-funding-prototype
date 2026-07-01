@@ -1,1 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community Funding Prototype</title>
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f7fb;
+  color: #222;
+}
 
+.container {
+  max-width: 420px;
+  margin: auto;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+h1 {
+  font-size: 24px;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+button {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  background: #2563eb;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.result {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #eef4ff;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <h1>Community Funding</h1>
+    <p>Anonymous contribution round</p>
+
+    <label>Problem</label>
+    <input id="problem" value="Repair entrance door">
+
+    <label>Target Amount (UAH)</label>
+    <input id="target" type="number" value="15000">
+
+    <label>Your Contribution (UAH)</label>
+    <input id="contribution" type="number">
+
+    <button onclick="submitContribution()">Submit</button>
+
+    <div class="result" id="result">
+      Waiting for contributions...
+    </div>
+  </div>
+</div>
+
+<script>
+let total = 0;
+
+function submitContribution() {
+  const target = Number(document.getElementById("target").value);
+  const contribution = Number(document.getElementById("contribution").value);
+
+  total += contribution;
+
+  const result = document.getElementById("result");
+
+  if (total >= target) {
+    result.innerHTML = "Equilibrium reached! Funding goal achieved.";
+  } else {
+    result.innerHTML = `Not enough yet. Missing ${target - total} UAH.`;
+  }
+
+  document.getElementById("contribution").value = "";
+}
+</script>
+</body>
+</html>
