@@ -1,104 +1,334 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Community Funding Prototype</title>
-<style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f5f7fb;
-  color: #222;
-}
-
-.container {
-  max-width: 420px;
-  margin: auto;
-  padding: 20px;
-}
-
-.card {
-  background: white;
-  padding: 20px;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-}
-
-h1 {
-  font-size: 24px;
-}
-
-input {
-  width: 100%;
-  padding: 14px;
-  margin: 10px 0;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-}
-
-button {
-  width: 100%;
-  padding: 16px;
-  border: none;
-  border-radius: 12px;
-  background: #2563eb;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.result {
-  margin-top: 20px;
-  padding: 16px;
-  border-radius: 12px;
-  background: #eef4ff;
-}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#245447" />
+  <title>Equilibrium — мобільний прототип</title>
+  <style>
+    :root {
+      --bg: #f7f3ec;
+      --card: #fffdf9;
+      --ink: #1f211f;
+      --muted: #706b62;
+      --line: #e5ded2;
+      --accent: #245447;
+      --accent-soft: #e0eee6;
+      --ok: #267044;
+      --warn: #a14c32;
+      --blue: #315f8c;
+      --shadow: 0 16px 40px rgba(31, 33, 31, .08);
+      --radius: 24px;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at 30% 0%, #fff 0%, var(--bg) 42%, #efe8dc 100%);
+      color: var(--ink);
+      min-height: 100svh;
+    }
+    .app { max-width: 560px; margin: 0 auto; padding: 12px 14px 110px; }
+    .topbar {
+      position: sticky; top: 0; z-index: 30;
+      margin: 0 -14px 10px; padding: calc(env(safe-area-inset-top) + 10px) 14px 10px;
+      backdrop-filter: blur(18px); background: rgba(247,243,236,.82); border-bottom: 1px solid rgba(229,222,210,.8);
+    }
+    .topbar-inner { max-width: 560px; margin: 0 auto; display:flex; align-items:center; justify-content:space-between; gap: 10px; }
+    .brand { display:flex; align-items:center; gap:10px; font-weight: 900; letter-spacing: -.04em; font-size: 20px; }
+    .logo { width: 34px; height: 34px; border-radius: 12px; background: var(--accent); color:white; display:grid; place-items:center; font-weight: 900; }
+    .pill { border: 1px solid var(--line); background: #fffdf9; color: var(--muted); border-radius: 999px; padding: 8px 10px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .hero { padding: 26px 4px 18px; }
+    h1 { margin: 0 0 12px; font-size: clamp(34px, 10vw, 54px); line-height: .94; letter-spacing: -.075em; }
+    .lead { color: var(--muted); font-size: 17px; line-height: 1.5; margin: 0; }
+    .card { background: rgba(255,253,249,.95); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; margin: 14px 0; }
+    .card.compact { padding: 14px; }
+    .title-row { display:flex; align-items:flex-start; justify-content:space-between; gap: 12px; margin-bottom: 14px; }
+    h2 { font-size: 22px; line-height: 1.1; letter-spacing: -.045em; margin: 0; }
+    h3 { font-size: 16px; margin: 0 0 8px; }
+    .caption { color: var(--muted); font-size: 14px; line-height: 1.4; margin: 0; }
+    .step-num { min-width: 32px; height: 32px; border-radius: 12px; display:grid; place-items:center; background: var(--accent-soft); color: var(--accent); font-weight: 900; }
+    label { display:block; font-size: 13px; font-weight: 850; margin: 14px 0 7px; }
+    input, textarea, select {
+      width: 100%; border: 1px solid var(--line); border-radius: 16px; padding: 14px 14px;
+      font: inherit; font-size: 16px; background: white; color: var(--ink); outline: none;
+    }
+    textarea { min-height: 74px; resize: vertical; }
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+    .money-row { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .money-row label { margin-top: 0; }
+    .money-row input { padding-left: 10px; padding-right: 10px; text-align:center; }
+    .btn-row { display:grid; grid-template-columns: 1fr; gap: 10px; margin-top: 14px; }
+    button, .button {
+      width: 100%; min-height: 50px; border: 0; border-radius: 999px; padding: 13px 16px;
+      background: var(--accent); color: white; font-weight: 900; font-size: 15px; cursor: pointer;
+      display:flex; align-items:center; justify-content:center; text-decoration:none;
+    }
+    button.secondary { background: white; color: var(--accent); border: 1px solid var(--line); }
+    button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent-soft); }
+    .status-box { border-radius: 22px; border: 1px solid var(--line); background: #fbfaf7; padding: 16px; }
+    .status-label { display:flex; align-items:center; gap: 8px; font-size: 13px; color: var(--muted); font-weight: 800; margin-bottom: 8px; }
+    .dot { width: 10px; height: 10px; border-radius: 99px; background: var(--warn); }
+    .dot.ok { background: var(--ok); }
+    .status-main { font-size: 24px; line-height: 1.05; letter-spacing: -.05em; font-weight: 950; margin-bottom: 6px; }
+    .status-text { color: var(--muted); line-height: 1.45; margin: 0 0 14px; }
+    .meter { height: 16px; border-radius: 999px; background: #e9e2d6; border: 1px solid var(--line); overflow:hidden; }
+    .bar { height: 100%; width: 0%; background: var(--accent); transition: width .35s ease; }
+    .stats { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .stat { border: 1px solid var(--line); background: white; border-radius: 18px; padding: 13px; }
+    .stat strong { display:block; font-size: 22px; letter-spacing: -.04em; }
+    .stat span { color: var(--muted); font-size: 12px; line-height: 1.25; display:block; margin-top: 3px; }
+    .privacy { background: var(--accent-soft); color: #244536; border-radius: 20px; padding: 14px; line-height: 1.45; font-size: 14px; }
+    .privacy b { color: #17382d; }
+    .rounds { display:grid; gap: 10px; }
+    .round { display:flex; align-items:center; justify-content:space-between; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 18px; background: white; }
+    .round b { font-size: 14px; }
+    .round small { color: var(--muted); display:block; margin-top: 3px; }
+    .tag { font-size: 12px; border-radius: 999px; padding: 6px 9px; font-weight: 900; background: #f2e9df; color: var(--warn); white-space: nowrap; }
+    .tag.ok { background: #e0f0e5; color: var(--ok); }
+    .bottom-nav {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+      padding: 10px 14px calc(env(safe-area-inset-bottom) + 10px);
+      background: rgba(255,253,249,.92); border-top: 1px solid var(--line); backdrop-filter: blur(18px);
+    }
+    .bottom-nav-inner { max-width: 560px; margin:0 auto; display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .mini { min-height: 46px; font-size: 14px; }
+    .list { display:grid; gap: 10px; }
+    .li { display:flex; gap: 12px; align-items:flex-start; padding: 12px; border: 1px solid var(--line); border-radius: 18px; background: white; }
+    .li .icon { width: 30px; height:30px; border-radius: 11px; display:grid; place-items:center; background:#f3eee6; font-weight:900; flex: 0 0 auto; }
+    .li p { margin: 0; color: var(--muted); line-height: 1.35; font-size: 14px; }
+    .toast { position: fixed; left: 14px; right:14px; bottom: 88px; z-index:60; max-width: 532px; margin: 0 auto; background: #1f211f; color:white; border-radius: 18px; padding: 13px 14px; box-shadow: var(--shadow); opacity:0; transform: translateY(12px); pointer-events:none; transition:.25s; }
+    .toast.show { opacity:1; transform: translateY(0); }
+    @media (min-width: 720px) {
+      .app { padding-left: 0; padding-right: 0; }
+      .btn-row { grid-template-columns: 1fr 1fr; }
+      .hero { padding-top: 34px; }
+    }
+    @media (max-width: 380px) {
+      .money-row { grid-template-columns: 1fr; }
+      h1 { font-size: 35px; }
+      .stats { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-  <div class="card">
-    <h1>Community Funding</h1>
-    <p>Anonymous contribution round</p>
-
-    <label>Problem</label>
-    <input id="problem" value="Repair entrance door">
-
-    <label>Target Amount (UAH)</label>
-    <input id="target" type="number" value="15000">
-
-    <label>Your Contribution (UAH)</label>
-    <input id="contribution" type="number">
-
-    <button onclick="submitContribution()">Submit</button>
-
-    <div class="result" id="result">
-      Waiting for contributions...
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand"><div class="logo">E</div> Equilibrium</div>
+      <div class="pill">mobile prototype</div>
     </div>
   </div>
-</div>
 
-<script>
-let total = 0;
+  <main class="app">
+    <section class="hero">
+      <h1>Анонімний раунд внесків для спільної проблеми.</h1>
+      <p class="lead">Кожен приватно вводить суму, яку готовий внести. Система не показує внески іншим — лише повідомляє, чи вистачає грошей для рішення.</p>
+    </section>
 
-function submitContribution() {
-  const target = Number(document.getElementById("target").value);
-  const contribution = Number(document.getElementById("contribution").value);
+    <section class="card" id="problem">
+      <div class="title-row">
+        <div>
+          <h2>1. Спільна проблема</h2>
+          <p class="caption">Для інтервʼю можна змінити сценарій під ОСББ або батьківську групу.</p>
+        </div>
+        <div class="step-num">1</div>
+      </div>
 
-  total += contribution;
+      <label for="community">Тип спільноти</label>
+      <select id="community">
+        <option>Батьківська група</option>
+        <option>ОСББ</option>
+        <option>Локальна ініціатива</option>
+      </select>
 
-  const result = document.getElementById("result");
+      <label for="title">Що потрібно профінансувати?</label>
+      <input id="title" value="Подарунок та організація свята для дітей" />
 
-  if (total >= target) {
-    result.innerHTML = "Equilibrium reached! Funding goal achieved.";
-  } else {
-    result.innerHTML = `Not enough yet. Missing ${target - total} UAH.`;
-  }
+      <label for="description">Короткий опис</label>
+      <textarea id="description">Потрібно зібрати бюджет, але не всі можуть або хочуть платити однакову суму.</textarea>
 
-  document.getElementById("contribution").value = "";
-}
-</script>
+      <label for="target">Необхідна сума, грн</label>
+      <input id="target" inputmode="numeric" type="number" value="12000" min="1" />
+
+      <div class="btn-row">
+        <button onclick="saveProblem()">Оновити проблему</button>
+        <button class="secondary" onclick="loadOsvbbDemo()">Демо ОСББ</button>
+      </div>
+    </section>
+
+    <section class="card" id="contribution">
+      <div class="title-row">
+        <div>
+          <h2>2. Мій приватний внесок</h2>
+          <p class="caption">У реальному продукті інші учасники не бачать ці суми.</p>
+        </div>
+        <div class="step-num">2</div>
+      </div>
+
+      <div class="money-row">
+        <div>
+          <label for="min">Мінімум</label>
+          <input id="min" inputmode="numeric" type="number" value="100" min="0" />
+        </div>
+        <div>
+          <label for="comfortable">Комфортно</label>
+          <input id="comfortable" inputmode="numeric" type="number" value="400" min="0" />
+        </div>
+        <div>
+          <label for="max">Максимум</label>
+          <input id="max" inputmode="numeric" type="number" value="800" min="0" />
+        </div>
+      </div>
+
+      <label for="participants">Для демо: скільки людей уже внесли приватні commitments?</label>
+      <input id="participants" inputmode="numeric" type="number" value="18" min="1" />
+
+      <label for="average">Для демо: середній комфортний внесок інших, грн</label>
+      <input id="average" inputmode="numeric" type="number" value="520" min="0" />
+
+      <div class="btn-row">
+        <button onclick="submitRound()">Перевірити equilibrium</button>
+        <button class="ghost" onclick="nextRound()">Почати ще раунд</button>
+      </div>
+    </section>
+
+    <section class="card" id="status">
+      <div class="title-row">
+        <div>
+          <h2>3. Статус раунду</h2>
+          <p class="caption">Публічний результат без розкриття індивідуальних внесків.</p>
+        </div>
+        <div class="step-num">3</div>
+      </div>
+
+      <div class="status-box">
+        <div class="status-label"><span class="dot" id="dot"></span><span id="statusLabel">Очікуємо перевірку</span></div>
+        <div class="status-main" id="statusMain">Раунд ще не завершено</div>
+        <p class="status-text" id="statusText">Натисніть “Перевірити equilibrium”, щоб побачити, чи можливо профінансувати рішення.</p>
+        <div class="meter"><div class="bar" id="bar"></div></div>
+        <div class="stats">
+          <div class="stat"><strong id="collected">0 грн</strong><span>анонімно закомічено</span></div>
+          <div class="stat"><strong id="gap">—</strong><span>залишок до цілі</span></div>
+          <div class="stat"><strong id="roundNo">1</strong><span>поточний раунд</span></div>
+          <div class="stat"><strong id="peopleCount">0</strong><span>учасників у розрахунку</span></div>
+        </div>
+      </div>
+
+      <div class="privacy" style="margin-top:12px;">
+        <b>Принцип:</b> платформа не показує, хто скільки готовий внести. Вона показує тільки: “достатньо / недостатньо” і загальний gap.
+      </div>
+    </section>
+
+    <section class="card compact">
+      <h2>Як пояснювати на інтервʼю</h2>
+      <div class="list" style="margin-top:12px;">
+        <div class="li"><div class="icon">1</div><p>Не ділимо бюджет порівну, бо можливості й мотивація різні.</p></div>
+        <div class="li"><div class="icon">2</div><p>Кожен вводить приватний діапазон внеску: мінімум, комфортно, максимум.</p></div>
+        <div class="li"><div class="icon">3</div><p>Система проводить раунди, доки група не досягне funding threshold або не побачить, що рішення поки неможливе.</p></div>
+      </div>
+    </section>
+
+    <section class="card compact">
+      <h2>Історія раундів</h2>
+      <div class="rounds" id="rounds"></div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <a class="button mini" href="#contribution">Внести суму</a>
+      <button class="secondary mini" onclick="submitRound()">Статус</button>
+    </div>
+  </nav>
+
+  <div class="toast" id="toast">Оновлено</div>
+
+  <script>
+    let round = 1;
+    let history = [];
+
+    function num(id) { return Number(document.getElementById(id).value || 0); }
+    function money(n) { return Math.round(n).toLocaleString('uk-UA') + ' грн'; }
+    function showToast(text) {
+      const t = document.getElementById('toast');
+      t.textContent = text;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 1800);
+    }
+    function saveProblem() {
+      submitRound(false);
+      showToast('Проблему оновлено');
+    }
+    function loadOsvbbDemo() {
+      document.getElementById('community').value = 'ОСББ';
+      document.getElementById('title').value = 'Ремонт дверей у підʼїзді';
+      document.getElementById('description').value = 'Потрібно замінити старі двері. Частина сусідів готова платити більше, частина — менше.';
+      document.getElementById('target').value = 28000;
+      document.getElementById('participants').value = 42;
+      document.getElementById('average').value = 520;
+      document.getElementById('min').value = 100;
+      document.getElementById('comfortable').value = 600;
+      document.getElementById('max').value = 1200;
+      submitRound(false);
+      showToast('Завантажено сценарій ОСББ');
+    }
+    function compute() {
+      const target = Math.max(1, num('target'));
+      const participants = Math.max(1, num('participants'));
+      const avg = num('average');
+      const mine = num('comfortable');
+      const collected = Math.max(0, ((participants - 1) * avg) + mine);
+      const gap = Math.max(0, target - collected);
+      const pct = Math.min(100, collected / target * 100);
+      const ok = collected >= target;
+      return { target, participants, avg, mine, collected, gap, pct, ok };
+    }
+    function submitRound(addToHistory = true) {
+      const r = compute();
+      document.getElementById('bar').style.width = r.pct + '%';
+      document.getElementById('collected').textContent = money(r.collected);
+      document.getElementById('gap').textContent = r.gap ? money(r.gap) : '0 грн';
+      document.getElementById('roundNo').textContent = round;
+      document.getElementById('peopleCount').textContent = r.participants;
+      document.getElementById('dot').className = 'dot' + (r.ok ? ' ok' : '');
+
+      if (r.ok) {
+        document.getElementById('statusLabel').textContent = 'Equilibrium досягнуто';
+        document.getElementById('statusMain').textContent = 'Рішення можна фінансувати';
+        document.getElementById('statusText').textContent = 'Поріг фінансування досягнуто без публічного розкриття внесків.';
+      } else {
+        document.getElementById('statusLabel').textContent = 'Equilibrium ще не досягнуто';
+        document.getElementById('statusMain').textContent = 'Потрібен ще один раунд';
+        document.getElementById('statusText').textContent = 'Не вистачає ' + money(r.gap) + '. Учасники можуть переглянути свої приватні commitments.';
+      }
+      if (addToHistory) {
+        history.unshift({ round, ok: r.ok, collected: r.collected, gap: r.gap, pct: r.pct });
+        renderHistory();
+      }
+    }
+    function nextRound() {
+      round += 1;
+      const currentAvg = num('average');
+      if (currentAvg > 0) document.getElementById('average').value = Math.round(currentAvg * 1.08);
+      submitRound(true);
+      showToast('Новий раунд запущено');
+      document.getElementById('status').scrollIntoView({behavior:'smooth'});
+    }
+    function renderHistory() {
+      const box = document.getElementById('rounds');
+      if (!history.length) {
+        box.innerHTML = '<div class="round"><div><b>Поки немає завершених раундів</b><small>Натисніть “Перевірити equilibrium”.</small></div><span class="tag">draft</span></div>';
+        return;
+      }
+      box.innerHTML = history.map(item => `
+        <div class="round">
+          <div><b>Раунд ${item.round}</b><small>${money(item.collected)} зібрано анонімно · ${Math.round(item.pct)}%</small></div>
+          <span class="tag ${item.ok ? 'ok' : ''}">${item.ok ? 'досягнуто' : 'gap ' + money(item.gap)}</span>
+        </div>
+      `).join('');
+    }
+    renderHistory();
+  </script>
 </body>
 </html>
