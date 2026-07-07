@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#245447" />
-  <title>Equilibrium — мобільний прототип</title>
+  <title>Equilibrium — PoC v0.2</title>
   <style>
     :root {
       --bg: #f7f3ec;
@@ -29,10 +29,10 @@
       color: var(--ink);
       min-height: 100svh;
     }
-    .app { max-width: 560px; margin: 0 auto; padding: 12px 14px 110px; }
+    .app { max-width: 560px; margin: 0 auto; padding: 12px 14px 40px; }
     .topbar {
       position: sticky; top: 0; z-index: 30;
-      margin: 0 -14px 10px; padding: calc(env(safe-area-inset-top) + 10px) 14px 10px;
+      margin: 0; padding: calc(env(safe-area-inset-top) + 10px) 14px 10px;
       backdrop-filter: blur(18px); background: rgba(247,243,236,.82); border-bottom: 1px solid rgba(229,222,210,.8);
     }
     .topbar-inner { max-width: 560px; margin: 0 auto; display:flex; align-items:center; justify-content:space-between; gap: 10px; }
@@ -54,19 +54,19 @@
       width: 100%; border: 1px solid var(--line); border-radius: 16px; padding: 14px 14px;
       font: inherit; font-size: 16px; background: white; color: var(--ink); outline: none;
     }
-    textarea { min-height: 74px; resize: vertical; }
+    textarea { min-height: 92px; resize: vertical; }
     input:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
-    .money-row { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-    .money-row label { margin-top: 0; }
-    .money-row input { padding-left: 10px; padding-right: 10px; text-align:center; }
+    .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .btn-row { display:grid; grid-template-columns: 1fr; gap: 10px; margin-top: 14px; }
     button, .button {
       width: 100%; min-height: 50px; border: 0; border-radius: 999px; padding: 13px 16px;
       background: var(--accent); color: white; font-weight: 900; font-size: 15px; cursor: pointer;
       display:flex; align-items:center; justify-content:center; text-decoration:none;
     }
-    button.secondary { background: white; color: var(--accent); border: 1px solid var(--line); }
-    button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent-soft); }
+    button.secondary, .button.secondary { background: white; color: var(--accent); border: 1px solid var(--line); }
+    button.ghost, .button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent-soft); }
+    button.danger { background: var(--warn); color: white; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
     .status-box { border-radius: 22px; border: 1px solid var(--line); background: #fbfaf7; padding: 16px; }
     .status-label { display:flex; align-items:center; gap: 8px; font-size: 13px; color: var(--muted); font-weight: 800; margin-bottom: 8px; }
     .dot { width: 10px; height: 10px; border-radius: 99px; background: var(--warn); }
@@ -81,34 +81,30 @@
     .stat span { color: var(--muted); font-size: 12px; line-height: 1.25; display:block; margin-top: 3px; }
     .privacy { background: var(--accent-soft); color: #244536; border-radius: 20px; padding: 14px; line-height: 1.45; font-size: 14px; }
     .privacy b { color: #17382d; }
-    .rounds { display:grid; gap: 10px; }
-    .round { display:flex; align-items:center; justify-content:space-between; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 18px; background: white; }
-    .round b { font-size: 14px; }
-    .round small { color: var(--muted); display:block; margin-top: 3px; }
+    .link-box { display:flex; gap: 8px; align-items:center; border: 1px solid var(--line); border-radius: 18px; padding: 10px; background: white; margin: 8px 0 14px; }
+    .link-box input { border: 0; padding: 6px; box-shadow: none; background: transparent; font-size: 13px; }
+    .link-box button { width: auto; min-height: 40px; padding: 9px 13px; }
+    .table { display:grid; gap: 8px; }
+    .row { display:grid; grid-template-columns: 1.2fr .7fr .7fr .9fr; gap: 8px; align-items:center; padding: 10px; border: 1px solid var(--line); border-radius: 16px; background: white; font-size: 13px; }
+    .row.header { background: transparent; border: 0; color: var(--muted); font-weight: 900; padding: 0 10px; }
+    .row strong { overflow-wrap:anywhere; }
     .tag { font-size: 12px; border-radius: 999px; padding: 6px 9px; font-weight: 900; background: #f2e9df; color: var(--warn); white-space: nowrap; }
     .tag.ok { background: #e0f0e5; color: var(--ok); }
-    .bottom-nav {
-      position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
-      padding: 10px 14px calc(env(safe-area-inset-bottom) + 10px);
-      background: rgba(255,253,249,.92); border-top: 1px solid var(--line); backdrop-filter: blur(18px);
-    }
-    .bottom-nav-inner { max-width: 560px; margin:0 auto; display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .mini { min-height: 46px; font-size: 14px; }
-    .list { display:grid; gap: 10px; }
-    .li { display:flex; gap: 12px; align-items:flex-start; padding: 12px; border: 1px solid var(--line); border-radius: 18px; background: white; }
-    .li .icon { width: 30px; height:30px; border-radius: 11px; display:grid; place-items:center; background:#f3eee6; font-weight:900; flex: 0 0 auto; }
-    .li p { margin: 0; color: var(--muted); line-height: 1.35; font-size: 14px; }
-    .toast { position: fixed; left: 14px; right:14px; bottom: 88px; z-index:60; max-width: 532px; margin: 0 auto; background: #1f211f; color:white; border-radius: 18px; padding: 13px 14px; box-shadow: var(--shadow); opacity:0; transform: translateY(12px); pointer-events:none; transition:.25s; }
+    .toast { position: fixed; left: 14px; right:14px; bottom: 18px; z-index:60; max-width: 532px; margin: 0 auto; background: #1f211f; color:white; border-radius: 18px; padding: 13px 14px; box-shadow: var(--shadow); opacity:0; transform: translateY(12px); pointer-events:none; transition:.25s; }
     .toast.show { opacity:1; transform: translateY(0); }
+    .hidden { display:none !important; }
+    .error { color: var(--warn); font-size: 13px; font-weight: 800; margin-top: 8px; }
+    .muted { color: var(--muted); }
     @media (min-width: 720px) {
       .app { padding-left: 0; padding-right: 0; }
       .btn-row { grid-template-columns: 1fr 1fr; }
       .hero { padding-top: 34px; }
     }
     @media (max-width: 380px) {
-      .money-row { grid-template-columns: 1fr; }
+      .grid-2, .stats { grid-template-columns: 1fr; }
       h1 { font-size: 35px; }
-      .stats { grid-template-columns: 1fr; }
+      .row { grid-template-columns: 1fr 1fr; }
+      .row.header { display:none; }
     }
   </style>
 </head>
@@ -116,209 +112,424 @@
   <div class="topbar">
     <div class="topbar-inner">
       <div class="brand"><div class="logo">E</div> Equilibrium</div>
-      <div class="pill">mobile prototype</div>
+      <div class="pill">site v0.2 · allocation-v0.1</div>
     </div>
   </div>
 
-  <main class="app">
-    <section class="hero">
-      <h1>Анонімний раунд внесків для спільної проблеми.</h1>
-      <p class="lead">Кожен приватно вводить суму, яку готовий внести. Система не показує внески іншим — лише повідомляє, чи вистачає грошей для рішення.</p>
-    </section>
-
-    <section class="card" id="problem">
-      <div class="title-row">
-        <div>
-          <h2>1. Спільна проблема</h2>
-          <p class="caption">Для інтервʼю можна змінити сценарій під ОСББ або батьківську групу.</p>
-        </div>
-        <div class="step-num">1</div>
-      </div>
-
-      <label for="community">Тип спільноти</label>
-      <select id="community">
-        <option>Батьківська група</option>
-        <option>ОСББ</option>
-        <option>Локальна ініціатива</option>
-      </select>
-
-      <label for="title">Що потрібно профінансувати?</label>
-      <input id="title" value="Подарунок та організація свята для дітей" />
-
-      <label for="description">Короткий опис</label>
-      <textarea id="description">Потрібно зібрати бюджет, але не всі можуть або хочуть платити однакову суму.</textarea>
-
-      <label for="target">Необхідна сума, грн</label>
-      <input id="target" inputmode="numeric" type="number" value="12000" min="1" />
-
-      <div class="btn-row">
-        <button onclick="saveProblem()">Оновити проблему</button>
-      </div>
-    </section>
-
-    <section class="card" id="contribution">
-      <div class="title-row">
-        <div>
-          <h2>2. Мій приватний внесок</h2>
-          <p class="caption">У реальному продукті інші учасники не бачать ці суми.</p>
-        </div>
-        <div class="step-num">2</div>
-      </div>
-
-      <div class="money-row">
-        <div>
-          <label for="min">Мінімум</label>
-          <input id="min" inputmode="numeric" type="number" value="100" min="0" />
-        </div>
-        <div>
-          <label for="comfortable">Комфортно</label>
-          <input id="comfortable" inputmode="numeric" type="number" value="400" min="0" />
-        </div>
-        <div>
-          <label for="max">Максимум</label>
-          <input id="max" inputmode="numeric" type="number" value="800" min="0" />
-        </div>
-      </div>
-
-      <label for="participants">Для демо: скільки людей уже внесли приватні commitments?</label>
-      <input id="participants" inputmode="numeric" type="number" value="18" min="1" />
-
-      <label for="average">Для демо: середній комфортний внесок інших, грн</label>
-      <input id="average" inputmode="numeric" type="number" value="520" min="0" />
-
-      <div class="btn-row">
-        <button onclick="submitRound()">Перевірити equilibrium</button>
-        <button class="ghost" onclick="nextRound()">Почати ще раунд</button>
-      </div>
-    </section>
-
-    <section class="card" id="status">
-      <div class="title-row">
-        <div>
-          <h2>3. Статус раунду</h2>
-          <p class="caption">Публічний результат без розкриття індивідуальних внесків.</p>
-        </div>
-        <div class="step-num">3</div>
-      </div>
-
-      <div class="status-box">
-        <div class="status-label"><span class="dot" id="dot"></span><span id="statusLabel">Очікуємо перевірку</span></div>
-        <div class="status-main" id="statusMain">Раунд ще не завершено</div>
-        <p class="status-text" id="statusText">Натисніть “Перевірити equilibrium”, щоб побачити, чи можливо профінансувати рішення.</p>
-        <div class="meter"><div class="bar" id="bar"></div></div>
-        <div class="stats">
-          <div class="stat"><strong id="collected">0 грн</strong><span>анонімно закомічено</span></div>
-          <div class="stat"><strong id="gap">—</strong><span>залишок до цілі</span></div>
-          <div class="stat"><strong id="roundNo">1</strong><span>поточний раунд</span></div>
-          <div class="stat"><strong id="peopleCount">0</strong><span>учасників у розрахунку</span></div>
-        </div>
-      </div>
-
-      <div class="privacy" style="margin-top:12px;">
-        <b>Принцип:</b> платформа не показує, хто скільки готовий внести. Вона показує тільки: “достатньо / недостатньо” і загальний gap.
-      </div>
-    </section>
-
-    <section class="card compact">
-      <h2>Історія раундів</h2>
-      <div class="rounds" id="rounds"></div>
-    </section>
-  </main>
-
-  <nav class="bottom-nav">
-    <div class="bottom-nav-inner">
-      <a class="button mini" href="#contribution">Внести суму</a>
-      <button class="secondary mini" onclick="submitRound()">Статус</button>
-    </div>
-  </nav>
-
+  <main class="app" id="app"></main>
   <div class="toast" id="toast">Оновлено</div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    let round = 1;
-    let history = [];
+    const SITE_VERSION = 'v0.2';
+    const ALGORITHM_VERSION = 'allocation-v0.1';
+    const SUPABASE_URL = 'https://rcnyixakafcpmigojfhe.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_FMXIkx8ruTWSbfK8MdkrTQ_atXVT5Wf';
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    function num(id) { return Number(document.getElementById(id).value || 0); }
-    function money(n) { return Math.round(n).toLocaleString('uk-UA') + ' грн'; }
+    const app = document.getElementById('app');
+
+    function money(n) { return Math.round(Number(n || 0)).toLocaleString('uk-UA') + ' грн'; }
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+    }
     function showToast(text) {
       const t = document.getElementById('toast');
       t.textContent = text;
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 1800);
     }
-    function saveProblem() {
-      submitRound(false);
-      showToast('Проблему оновлено');
+    function getHashParts() {
+      return location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
     }
-    function loadOsvbbDemo() {
-      document.getElementById('community').value = 'ОСББ';
-      document.getElementById('title').value = 'Ремонт дверей у підʼїзді';
-      document.getElementById('description').value = 'Потрібно замінити старі двері. Частина сусідів готова платити більше, частина — менше.';
-      document.getElementById('target').value = 28000;
-      document.getElementById('participants').value = 42;
-      document.getElementById('average').value = 520;
-      document.getElementById('min').value = 100;
-      document.getElementById('comfortable').value = 600;
-      document.getElementById('max').value = 1200;
-      submitRound(false);
-      showToast('Завантажено сценарій ОСББ');
+    function participantUrl(token) {
+      return `${location.origin}${location.pathname}#/r/${token}`;
     }
-    function compute() {
-      const target = Math.max(1, num('target'));
-      const participants = Math.max(1, num('participants'));
-      const avg = num('average');
-      const mine = num('comfortable');
-      const collected = Math.max(0, ((participants - 1) * avg) + mine);
-      const gap = Math.max(0, target - collected);
-      const pct = Math.min(100, collected / target * 100);
-      const ok = collected >= target;
-      return { target, participants, avg, mine, collected, gap, pct, ok };
+    function managerUrl(token) {
+      return `${location.origin}${location.pathname}#/manage/${token}`;
     }
-    function submitRound(addToHistory = true) {
-      const r = compute();
-      document.getElementById('bar').style.width = r.pct + '%';
-      document.getElementById('collected').textContent = money(r.collected);
-      document.getElementById('gap').textContent = r.gap ? money(r.gap) : '0 грн';
-      document.getElementById('roundNo').textContent = round;
-      document.getElementById('peopleCount').textContent = r.participants;
-      document.getElementById('dot').className = 'dot' + (r.ok ? ' ok' : '');
+    function setRoute(route) {
+      location.hash = route;
+    }
+    function formatDate(value) {
+      if (!value) return 'Не задано';
+      try { return new Date(value).toLocaleString('uk-UA'); } catch { return value; }
+    }
+    function loading(title = 'Завантаження') {
+      app.innerHTML = `<section class="card"><h2>${title}</h2><p class="caption">Зачекайте кілька секунд.</p></section>`;
+    }
+    function renderError(message) {
+      app.innerHTML = `<section class="card"><h2>Щось пішло не так</h2><p class="status-text">${escapeHtml(message)}</p><button onclick="setRoute('')">На головну</button></section>`;
+    }
 
-      if (r.ok) {
-        document.getElementById('statusLabel').textContent = 'Equilibrium досягнуто';
-        document.getElementById('statusMain').textContent = 'Рішення можна фінансувати';
-        document.getElementById('statusText').textContent = 'Поріг фінансування досягнуто без публічного розкриття внесків.';
-      } else {
-        document.getElementById('statusLabel').textContent = 'Equilibrium ще не досягнуто';
-        document.getElementById('statusMain').textContent = 'Потрібен ще один раунд';
-        document.getElementById('statusText').textContent = 'Не вистачає ' + money(r.gap) + '. Учасники можуть переглянути свої приватні commitments.';
+    function allocationV01(target, proposals) {
+      const clean = proposals.map(p => ({
+        ...p,
+        min: Number(p.min_amount || 0),
+        max: Number(p.max_amount || 0)
+      }));
+      const sumMin = clean.reduce((s, p) => s + p.min, 0);
+      const sumMax = clean.reduce((s, p) => s + p.max, 0);
+      const t = Number(target || 0);
+
+      if (sumMax < t) {
+        return { feasible: false, reason: 'max_below_target', sumMin, sumMax, gap: t - sumMax, rows: clean.map(p => ({...p, recommended: null})) };
       }
-      if (addToHistory) {
-        history.unshift({ round, ok: r.ok, collected: r.collected, gap: r.gap, pct: r.pct });
-        renderHistory();
+      if (sumMin > t) {
+        return { feasible: false, reason: 'min_above_target', sumMin, sumMax, gap: 0, rows: clean.map(p => ({...p, recommended: p.min})) };
       }
-    }
-    function nextRound() {
-      round += 1;
-      const currentAvg = num('average');
-      if (currentAvg > 0) document.getElementById('average').value = Math.round(currentAvg * 1.08);
-      submitRound(true);
-      showToast('Новий раунд запущено');
-      document.getElementById('status').scrollIntoView({behavior:'smooth'});
-    }
-    function renderHistory() {
-      const box = document.getElementById('rounds');
-      if (!history.length) {
-        box.innerHTML = '<div class="round"><div><b>Поки немає завершених раундів</b><small>Натисніть “Перевірити equilibrium”.</small></div><span class="tag">draft</span></div>';
-        return;
+
+      const remainder = t - sumMin;
+      const totalFlex = clean.reduce((s, p) => s + Math.max(0, p.max - p.min), 0);
+      let rows = clean.map(p => {
+        const flex = Math.max(0, p.max - p.min);
+        const extra = totalFlex > 0 ? remainder * (flex / totalFlex) : 0;
+        return { ...p, recommended: p.min + extra };
+      });
+
+      const roundedSum = rows.reduce((s, p) => s + Math.round(p.recommended), 0);
+      const diff = Math.round(t) - roundedSum;
+      if (rows.length && diff !== 0) {
+        const idx = rows.reduce((best, row, i) => (row.max - row.recommended) > (rows[best].max - rows[best].recommended) ? i : best, 0);
+        rows[idx].recommended = Math.min(rows[idx].max, Math.max(rows[idx].min, rows[idx].recommended + diff));
       }
-      box.innerHTML = history.map(item => `
-        <div class="round">
-          <div><b>Раунд ${item.round}</b><small>${money(item.collected)} зібрано анонімно · ${Math.round(item.pct)}%</small></div>
-          <span class="tag ${item.ok ? 'ok' : ''}">${item.ok ? 'досягнуто' : 'gap ' + money(item.gap)}</span>
-        </div>
-      `).join('');
+
+      return { feasible: true, reason: 'ok', sumMin, sumMax, gap: 0, rows };
     }
-    renderHistory();
+
+    function csvEscape(v) {
+      const s = String(v ?? '');
+      return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    }
+    function downloadCsv(round, proposals, allocation) {
+      const header = ['Ідентифікація','Мінімум','Максимум','Рекомендована сума','Раунд','Алгоритм'];
+      const lines = [header.join(';')];
+      allocation.rows.forEach(row => {
+        lines.push([
+          csvEscape(row.participant_label),
+          Math.round(row.min),
+          Math.round(row.max),
+          row.recommended === null ? '' : Math.round(row.recommended),
+          csvEscape(round.title),
+          ALGORITHM_VERSION
+        ].join(';'));
+      });
+      const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `round-${round.participant_token}-${ALGORITHM_VERSION}.csv`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function renderHome() {
+      app.innerHTML = `
+        <section class="hero">
+          <h1>Створіть раунд для спільного фінансового рішення.</h1>
+          <p class="lead">Менеджер описує мету й суму. Учасники за окремим посиланням приватно подають пропозицію: мінімум і максимум.</p>
+        </section>
+
+        <section class="card">
+          <div class="title-row">
+            <div>
+              <h2>Створити раунд</h2>
+              <p class="caption">Після створення ви отримаєте два різні посилання: для учасників і секретне для менеджера.</p>
+            </div>
+            <div class="step-num">1</div>
+          </div>
+
+          <label for="title">Назва мети</label>
+          <input id="title" value="Подарунок та організація свята для дітей" />
+
+          <label for="description">Опис</label>
+          <textarea id="description">Потрібно зібрати бюджет, але не всі можуть або хочуть платити однакову суму.</textarea>
+
+          <label for="target">Необхідна сума, грн</label>
+          <input id="target" inputmode="numeric" type="number" value="12000" min="1" required />
+
+          <div class="grid-2">
+            <div>
+              <label for="deadline">Дедлайн <span class="muted">необовʼязково</span></label>
+              <input id="deadline" type="datetime-local" />
+            </div>
+            <div>
+              <label for="expected">Кількість учасників <span class="muted">необовʼязково</span></label>
+              <input id="expected" inputmode="numeric" type="number" min="1" placeholder="Напр. 24" />
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button id="createBtn" onclick="createRound()">Створити раунд</button>
+          </div>
+          <div id="createError" class="error hidden"></div>
+        </section>
+      `;
+    }
+
+    async function createRound() {
+      const btn = document.getElementById('createBtn');
+      const error = document.getElementById('createError');
+      error.classList.add('hidden');
+      const title = document.getElementById('title').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const target = Number(document.getElementById('target').value);
+      const deadlineRaw = document.getElementById('deadline').value;
+      const expectedRaw = document.getElementById('expected').value;
+
+      if (!title) return showFormError(error, 'Вкажіть назву мети.');
+      if (!target || target <= 0) return showFormError(error, 'Необхідна сума має бути більшою за 0.');
+
+      btn.disabled = true;
+      btn.textContent = 'Створюємо...';
+      const { data, error: dbError } = await db.rpc('create_round_rpc', {
+        p_title: title,
+        p_description: description || null,
+        p_target_amount: target,
+        p_deadline: deadlineRaw ? new Date(deadlineRaw).toISOString() : null,
+        p_expected_participants: expectedRaw ? Number(expectedRaw) : null
+      });
+      btn.disabled = false;
+      btn.textContent = 'Створити раунд';
+      if (dbError) return showFormError(error, dbError.message);
+      const round = data && data[0];
+      if (!round) return showFormError(error, 'Раунд не створено. Спробуйте ще раз.');
+      renderCreated(round);
+      history.replaceState(null, '', `#/created/${round.participant_token}/${round.manager_token}`);
+    }
+
+    function showFormError(el, text) {
+      el.textContent = text;
+      el.classList.remove('hidden');
+    }
+
+    function renderCreated(round) {
+      const pUrl = participantUrl(round.participant_token);
+      const mUrl = managerUrl(round.manager_token);
+      app.innerHTML = `
+        <section class="card">
+          <div class="title-row">
+            <div>
+              <h2>Раунд створено</h2>
+              <p class="caption">Скопіюйте посилання для учасників у чат. Секретне посилання менеджера не пересилайте.</p>
+            </div>
+            <div class="step-num">✓</div>
+          </div>
+
+          <label>Посилання для учасників</label>
+          <div class="link-box"><input id="participantLink" readonly value="${escapeHtml(pUrl)}"><button onclick="copyInput('participantLink')">Копіювати</button></div>
+
+          <label>Секретне посилання менеджера</label>
+          <div class="link-box"><input id="managerLink" readonly value="${escapeHtml(mUrl)}"><button onclick="copyInput('managerLink')">Копіювати</button></div>
+
+          <div class="privacy"><b>Важливо:</b> manager-посилання містить окремий невгадуваний token. Його не можна отримати з посилання учасника.</div>
+
+          <div class="btn-row">
+            <a class="button" href="#/manage/${escapeHtml(round.manager_token)}">Перейти до керування</a>
+            <a class="button secondary" href="#/r/${escapeHtml(round.participant_token)}">Відкрити як учасник</a>
+          </div>
+        </section>
+      `;
+    }
+
+    function copyInput(id) {
+      const input = document.getElementById(id);
+      input.select();
+      navigator.clipboard.writeText(input.value).then(() => showToast('Посилання скопійовано'));
+    }
+
+    async function renderParticipant(token) {
+      loading('Завантажуємо раунд');
+      const { data, error } = await db.rpc('get_round_for_participant_rpc', { p_participant_token: token });
+      if (error) return renderError(error.message);
+      const round = data && data[0];
+      if (!round) return renderError('Раунд не знайдено. Перевірте посилання.');
+      const isClosed = round.status !== 'open';
+      app.innerHTML = `
+        <section class="hero">
+          <h1>${escapeHtml(round.title)}</h1>
+          <p class="lead">${escapeHtml(round.description || 'Менеджер створив раунд для спільної фінансової мети.')}</p>
+        </section>
+
+        <section class="card compact">
+          <div class="stats">
+            <div class="stat"><strong>${money(round.target_amount)}</strong><span>необхідна сума</span></div>
+            <div class="stat"><strong>${round.deadline ? formatDate(round.deadline) : '—'}</strong><span>дедлайн</span></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="title-row">
+            <div>
+              <h2>Ваша пропозиція</h2>
+              <p class="caption">Інші учасники не бачать вашу пропозицію. Менеджер побачить результати раунду.</p>
+            </div>
+            <div class="step-num">2</div>
+          </div>
+
+          ${isClosed ? `<div class="privacy"><b>Раунд завершено.</b> Нові пропозиції вже не приймаються.</div>` : `
+            <label for="label">Як вас ідентифікувати?</label>
+            <input id="label" placeholder="Наприклад: кв. 24, Іваненко або Олена" required />
+
+            <div class="grid-2">
+              <div>
+                <label for="minAmount">Мінімальна сума, грн</label>
+                <input id="minAmount" inputmode="numeric" type="number" min="0" required />
+              </div>
+              <div>
+                <label for="maxAmount">Максимальна сума, грн</label>
+                <input id="maxAmount" inputmode="numeric" type="number" min="0" required />
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button id="submitBtn" onclick="submitProposal('${escapeHtml(token)}')">Надіслати пропозицію</button>
+            </div>
+            <div id="submitError" class="error hidden"></div>
+          `}
+        </section>
+      `;
+    }
+
+    async function submitProposal(token) {
+      const error = document.getElementById('submitError');
+      error.classList.add('hidden');
+      const label = document.getElementById('label').value.trim();
+      const min = Number(document.getElementById('minAmount').value);
+      const max = Number(document.getElementById('maxAmount').value);
+      if (!label) return showFormError(error, 'Вкажіть, як вас ідентифікувати.');
+      if (document.getElementById('minAmount').value === '' || document.getElementById('maxAmount').value === '') return showFormError(error, 'Мінімальна і максимальна суми обовʼязкові.');
+      if (min < 0 || max < 0) return showFormError(error, 'Суми не можуть бути відʼємними.');
+      if (min > max) return showFormError(error, 'Мінімальна сума не може бути більшою за максимальну.');
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Зберігаємо...';
+      const { error: dbError } = await db.rpc('submit_proposal_rpc', {
+        p_participant_token: token,
+        p_participant_label: label,
+        p_min_amount: min,
+        p_max_amount: max
+      });
+      btn.disabled = false;
+      btn.textContent = 'Надіслати пропозицію';
+      if (dbError) return showFormError(error, dbError.message);
+      setRoute(`/thanks`);
+    }
+
+    function renderThanks() {
+      app.innerHTML = `
+        <section class="card">
+          <div class="title-row">
+            <div>
+              <h2>Дякуємо!</h2>
+              <p class="caption">Ваша пропозиція збережена.</p>
+            </div>
+            <div class="step-num">✓</div>
+          </div>
+          <div class="status-box">
+            <div class="status-main">Раунд триває</div>
+            <p class="status-text">Після завершення раунду ви дізнаєтесь результат.</p>
+          </div>
+        </section>
+      `;
+    }
+
+    async function renderManager(token) {
+      loading('Завантажуємо керування раундом');
+      const [{ data: roundData, error: roundError }, { data: proposals, error: propError }] = await Promise.all([
+        db.rpc('get_manager_round_rpc', { p_manager_token: token }),
+        db.rpc('get_manager_proposals_rpc', { p_manager_token: token })
+      ]);
+      if (roundError) return renderError(roundError.message);
+      if (propError) return renderError(propError.message);
+      const round = roundData && roundData[0];
+      if (!round) return renderError('Раунд не знайдено або manager token неправильний.');
+      const allocation = allocationV01(round.target_amount, proposals || []);
+      const maxPct = Math.min(100, allocation.sumMax / Number(round.target_amount || 1) * 100);
+      const answered = proposals ? proposals.length : 0;
+      const expectedText = round.expected_participants ? `${answered} із ${round.expected_participants}` : String(answered);
+      const canAutoCloseByCount = round.expected_participants && answered >= round.expected_participants;
+      const deadlinePassed = round.deadline && new Date(round.deadline).getTime() <= Date.now();
+      const isClosed = round.status !== 'open';
+      const statusText = isClosed ? 'Раунд завершено' : (canAutoCloseByCount ? 'Усі подали пропозиції' : (deadlinePassed ? 'Дедлайн пройшов' : 'Раунд відкритий'));
+
+      app.innerHTML = `
+        <section class="hero">
+          <h1>Керування раундом</h1>
+          <p class="lead">${escapeHtml(round.title)}</p>
+        </section>
+
+        <section class="card">
+          <div class="title-row">
+            <div>
+              <h2>Статус</h2>
+              <p class="caption">${escapeHtml(round.description || '')}</p>
+            </div>
+            <span class="tag ${isClosed ? 'ok' : ''}">${escapeHtml(statusText)}</span>
+          </div>
+
+          <div class="status-box">
+            <div class="status-label"><span class="dot ${allocation.feasible ? 'ok' : ''}"></span><span>${allocation.feasible ? 'Мета потенційно досяжна' : 'Поки недостатньо діапазонів'}</span></div>
+            <div class="status-main">${allocation.feasible ? 'Можна розрахувати пропозиції' : `Не вистачає ${money(allocation.gap)}`}</div>
+            <p class="status-text">Алгоритм: ${ALGORITHM_VERSION}. Раунд не закривається автоматично лише через досягнення цілі.</p>
+            <div class="meter"><div class="bar" style="width:${maxPct}%"></div></div>
+            <div class="stats">
+              <div class="stat"><strong>${money(round.target_amount)}</strong><span>ціль</span></div>
+              <div class="stat"><strong>${money(allocation.sumMax)}</strong><span>сума максимумів</span></div>
+              <div class="stat"><strong>${expectedText}</strong><span>подали пропозиції</span></div>
+              <div class="stat"><strong>${formatDate(round.deadline)}</strong><span>дедлайн</span></div>
+            </div>
+          </div>
+
+          <label>Посилання для учасників</label>
+          <div class="link-box"><input id="participantLink" readonly value="${escapeHtml(participantUrl(round.participant_token))}"><button onclick="copyInput('participantLink')">Копіювати</button></div>
+
+          <div class="btn-row">
+            ${isClosed ? `<button class="secondary" onclick="downloadCsv(window.currentRound, window.currentProposals, window.currentAllocation)">Завантажити CSV</button>` : `<button class="danger" onclick="closeRound('${escapeHtml(token)}')">Завершити раунд</button>`}
+            <button class="ghost" onclick="renderManager('${escapeHtml(token)}')">Оновити</button>
+          </div>
+        </section>
+
+        <section class="card compact">
+          <h2>Пропозиції</h2>
+          <p class="caption">Цей список бачить тільки менеджер за секретним посиланням.</p>
+          <div class="table" style="margin-top:12px;">
+            <div class="row header"><span>Учасник</span><span>Мін</span><span>Макс</span><span>Рекоменд.</span></div>
+            ${allocation.rows.length ? allocation.rows.map(row => `
+              <div class="row">
+                <strong>${escapeHtml(row.participant_label)}</strong>
+                <span>${money(row.min)}</span>
+                <span>${money(row.max)}</span>
+                <span>${row.recommended === null ? '—' : money(row.recommended)}</span>
+              </div>
+            `).join('') : `<div class="round"><div><b>Поки немає пропозицій</b><small>Надішліть participant link у чат.</small></div><span class="tag">draft</span></div>`}
+          </div>
+        </section>
+      `;
+      window.currentRound = round;
+      window.currentProposals = proposals || [];
+      window.currentAllocation = allocation;
+    }
+
+    async function closeRound(token) {
+      if (!confirm('Завершити раунд? Після цього нові пропозиції не прийматимуться.')) return;
+      const { error } = await db.rpc('close_round_rpc', { p_manager_token: token });
+      if (error) return showToast(error.message);
+      showToast('Раунд завершено');
+      renderManager(token);
+    }
+
+    function router() {
+      const [kind, token, token2] = getHashParts();
+      if (!kind) return renderHome();
+      if (kind === 'created' && token && token2) return renderCreated({ participant_token: token, manager_token: token2 });
+      if (kind === 'r' && token) return renderParticipant(token);
+      if (kind === 'manage' && token) return renderManager(token);
+      if (kind === 'thanks') return renderThanks();
+      return renderError('Невідоме посилання.');
+    }
+
+    window.addEventListener('hashchange', router);
+    router();
   </script>
 </body>
 </html>
