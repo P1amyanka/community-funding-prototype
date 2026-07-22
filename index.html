@@ -1,11 +1,177 @@
 <!doctype html>
-<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#245447"><title>Equilibrium — Prototype v0.3</title><style>:root{--bg:#f7f3ec;--card:#fffdf9;--ink:#1f211f;--muted:#706b62;--line:#e5ded2;--accent:#245447;--soft:#e0eee6;--ok:#267044;--warn:#a14c32;--shadow:0 16px 40px rgba(31,33,31,.08);--radius:24px}*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(circle at 30% 0%,#fff 0%,var(--bg) 42%,#efe8dc 100%);color:var(--ink);min-height:100svh}.app,.topbar-inner{max-width:560px;margin:auto}.app{padding:12px 14px 40px}.topbar{position:sticky;top:0;z-index:30;padding:10px 14px;backdrop-filter:blur(18px);background:rgba(247,243,236,.82);border-bottom:1px solid var(--line)}.topbar-inner,.brand,.title-row,.status-label,.link-box{display:flex;align-items:center}.topbar-inner,.title-row{justify-content:space-between;gap:12px}.brand{gap:10px;font-weight:900;font-size:20px}.logo{width:34px;height:34px;border-radius:12px;background:var(--accent);color:#fff;display:grid;place-items:center}.pill{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:999px;padding:8px 10px;font-size:12px;font-weight:700}.hero{padding:26px 4px 18px}h1{margin:0 0 12px;font-size:clamp(34px,10vw,54px);line-height:.94;letter-spacing:-.075em}.lead,.caption,.status-text{color:var(--muted);line-height:1.45}.lead{font-size:17px;margin:0}.card{background:rgba(255,253,249,.95);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin:14px 0}.compact{padding:14px}.title-row{align-items:flex-start;margin-bottom:14px}h2{font-size:22px;letter-spacing:-.045em;margin:0}.caption{font-size:14px;margin:0}.step{min-width:32px;height:32px;border-radius:12px;display:grid;place-items:center;background:var(--soft);color:var(--accent);font-weight:900}label{display:block;font-size:13px;font-weight:850;margin:14px 0 7px}input,textarea{width:100%;border:1px solid var(--line);border-radius:16px;padding:14px;font:inherit;font-size:16px;background:#fff;color:var(--ink);outline:none}textarea{min-height:92px;resize:vertical}.grid,.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.buttons{display:grid;grid-template-columns:1fr;gap:10px;margin-top:14px}button{width:100%;min-height:50px;border:0;border-radius:999px;padding:13px 16px;background:var(--accent);color:#fff;font-weight:900;font-size:15px;cursor:pointer}button.secondary{background:#fff;color:var(--accent);border:1px solid var(--line)}button.ghost{background:transparent;color:var(--accent);border:1px solid var(--soft)}button.danger{background:var(--warn)}.status{border-radius:22px;border:1px solid var(--line);background:#fbfaf7;padding:16px}.status-label{gap:8px;font-size:13px;color:var(--muted);font-weight:800;margin-bottom:8px}.dot{width:10px;height:10px;border-radius:99px;background:var(--warn)}.dot.ok{background:var(--ok)}.status-main{font-size:24px;font-weight:950;margin-bottom:6px}.meter{height:16px;border-radius:999px;background:#e9e2d6;border:1px solid var(--line);overflow:hidden}.bar{height:100%;background:var(--accent)}.stats{margin-top:12px}.stat{border:1px solid var(--line);background:#fff;border-radius:18px;padding:13px}.stat strong{display:block;font-size:22px}.stat span{color:var(--muted);font-size:12px}.privacy{background:var(--soft);color:#244536;border-radius:20px;padding:14px;line-height:1.45;font-size:14px}.link-box{gap:8px;border:1px solid var(--line);border-radius:18px;padding:10px;background:#fff;margin:8px 0 14px}.link-box input{border:0;padding:6px;box-shadow:none;background:transparent;font-size:13px}.link-box button{width:auto;min-height:40px;padding:9px 13px}.table{display:grid;gap:8px}.row{display:grid;grid-template-columns:1.4fr .9fr .9fr;gap:8px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:16px;background:#fff;font-size:13px}.header{background:transparent;border:0;color:var(--muted);font-weight:900}.tag{font-size:12px;border-radius:999px;padding:6px 9px;font-weight:900;background:#f2e9df;color:var(--warn)}.tag.ok{background:#e0f0e5;color:var(--ok)}.toast{position:fixed;left:14px;right:14px;bottom:18px;max-width:532px;margin:auto;background:#1f211f;color:#fff;border-radius:18px;padding:13px 14px;opacity:0;transform:translateY(12px);transition:.25s}.toast.show{opacity:1;transform:none}.hidden{display:none}.error{color:var(--warn);font-size:13px;font-weight:800;margin-top:8px}.muted{color:var(--muted)}@media(min-width:720px){.buttons{grid-template-columns:1fr 1fr}}@media(max-width:380px){.grid,.stats{grid-template-columns:1fr}.row{grid-template-columns:1fr}.header{display:none}}</style></head><body><div class="topbar"><div class="topbar-inner"><div class="brand"><div class="logo">E</div>Equilibrium</div><div class="pill">prototype v0.3 · allocation-v0.2</div></div></div><main class="app" id="app"></main><div class="toast" id="toast">Оновлено</div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
-const V='v0.3',A='allocation-v0.2',U='https://rcnyixakafcpmigojfhe.supabase.co',K=['sb','publishable','FMXIkx8ruTWSbfK8MdkrTQ','atXVT5Wf'].join('_'),db=window.supabase.createClient(U,K),app=document.getElementById('app');const money=n=>Math.round(Number(n||0)).toLocaleString('uk-UA')+' грн',esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));function toast(x){const t=document.getElementById('toast');t.textContent=x;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}function parts(){return location.hash.replace(/^#\/?/,'').split('/').filter(Boolean)}function route(x){location.hash=x}function purl(t){return `${location.origin}${location.pathname}#/r/${t}`}function date(v){return new Date(v).toLocaleString('uk-UA')}function loading(x){app.innerHTML=`<section class="card"><h2>${x}</h2><p class="caption">Зачекайте кілька секунд.</p></section>`}function fail(x){app.innerHTML=`<section class="card"><h2>Щось пішло не так</h2><p class="status-text">${esc(x)}</p><button onclick="route('')">На головну</button></section>`}function ferr(el,x){el.textContent=x;el.classList.remove('hidden')}
-function allocationV02(target,proposals){const t=Math.max(0,Math.round(Number(target||0)*100)),clean=proposals.map((p,index)=>({...p,index,maxCents:Math.max(0,Math.round(Number(p.max_amount||0)*100))})),sum=clean.reduce((s,p)=>s+p.maxCents,0);if(sum<t)return{feasible:false,sumMax:sum/100,gap:(t-sum)/100,rows:clean.map(p=>({...p,max:p.maxCents/100,recommended:p.maxCents/100}))};let remaining=t,active=[...clean].sort((a,b)=>a.maxCents-b.maxCents||a.index-b.index),assigned=new Map;while(active.length){const share=Math.floor(remaining/active.length),capped=active.filter(p=>p.maxCents<=share);if(!capped.length)break;capped.forEach(p=>{assigned.set(p.index,p.maxCents);remaining-=p.maxCents});active=active.filter(p=>!assigned.has(p.index))}if(active.length){const base=Math.floor(remaining/active.length);let rest=remaining-base*active.length;active.forEach(p=>{assigned.set(p.index,Math.min(p.maxCents,base+(rest>0?1:0)));if(rest>0)rest--})}return{feasible:true,sumMax:sum/100,gap:0,rows:clean.map(p=>({...p,max:p.maxCents/100,recommended:(assigned.get(p.index)||0)/100}))}}
-function csvEscape(v){const s=String(v??'');return/[",\n;]/.test(s)?`"${s.replace(/"/g,'""')}"`:s}function downloadCsv(r,a){const lines=[['Ідентифікація','Максимальна сума внеску','Розрахований внесок','Ініціатива','Алгоритм'].join(';')];a.rows.forEach(x=>lines.push([csvEscape(x.participant_label),x.max.toFixed(2),x.recommended.toFixed(2),csvEscape(r.title),A].join(';')));const blob=new Blob(['\ufeff'+lines.join('\n')],{type:'text/csv;charset=utf-8;'}),l=document.createElement('a');l.href=URL.createObjectURL(blob);l.download=`initiative-${r.participant_token}-${A}.csv`;l.click();URL.revokeObjectURL(l.href)}
-function home(){app.innerHTML=`<section class="hero"><h1>Створіть ініціативу.</h1><p class="lead">Опишіть ініціативу та надішліть учасникам посилання. Кожен приватно зазначить максимальну суму внеску.</p></section><section class="card"><div class="title-row"><div><h2>Створити ініціативу</h2><p class="caption">Після створення відкриється кабінет менеджера з посиланням для учасників.</p></div><div class="step">1</div></div><label>Назва ініціативи</label><input id="title" placeholder="Наприклад: зона барбекю у дворі"><label>Опис</label><textarea id="description" placeholder="Опишіть, що саме планується зробити"></textarea><label>Бюджет, грн</label><input id="target" type="number" min="1" placeholder="Наприклад: 12000"><div class="grid"><div><label>Дедлайн <span class="muted">необовʼязково</span></label><input id="deadline" type="datetime-local"></div><div><label>Кількість учасників <span class="muted">необовʼязково</span></label><input id="expected" type="number" min="1" placeholder="Напр. 24"></div></div><div class="buttons"><button id="createBtn" onclick="createRound()">Створити ініціативу</button></div><div id="createError" class="error hidden"></div></section>`}
-async function createRound(){const b=document.getElementById('createBtn'),e=document.getElementById('createError'),title=document.getElementById('title').value.trim(),description=document.getElementById('description').value.trim(),target=Number(document.getElementById('target').value),d=document.getElementById('deadline').value,n=document.getElementById('expected').value;e.classList.add('hidden');if(!title)return ferr(e,'Вкажіть назву ініціативи.');if(!target||target<=0)return ferr(e,'Бюджет має бути більшим за 0.');b.disabled=true;b.textContent='Створюємо...';const{data,error}=await db.rpc('create_round_rpc',{p_title:title,p_description:description||null,p_target_amount:target,p_deadline:d?new Date(d).toISOString():null,p_expected_participants:n?Number(n):null});b.disabled=false;b.textContent='Створити ініціативу';if(error)return ferr(e,error.message);const r=data&&data[0];if(!r)return ferr(e,'Ініціативу не створено.');route(`/manage/${r.manager_token}`)}function copyInput(id){const x=document.getElementById(id);x.select();navigator.clipboard.writeText(x.value).then(()=>toast('Посилання скопійовано'))}
-async function participant(token){loading('Завантажуємо ініціативу');const{data,error}=await db.rpc('get_round_for_participant_rpc',{p_participant_token:token});if(error)return fail(error.message);const r=data&&data[0];if(!r)return fail('Ініціативу не знайдено.');const closed=r.status!=='open';app.innerHTML=`<section class="hero"><h1>${esc(r.title)}</h1><p class="lead">${esc(r.description||'Спільна фінансова ініціатива.')}</p></section><section class="card compact"><div class="stats"><div class="stat"><strong>${money(r.target_amount)}</strong><span>необхідна сума</span></div>${r.deadline?`<div class="stat"><strong>${date(r.deadline)}</strong><span>дедлайн</span></div>`:''}</div></section><section class="card"><div class="title-row"><div><h2>Ваша пропозиція</h2><p class="caption">Інші учасники не бачать вашу пропозицію.</p></div><div class="step">2</div></div>${closed?'<div class="privacy"><b>Ініціативу завершено.</b> Нові пропозиції не приймаються.</div>':`<label>Як вас ідентифікувати?</label><input id="label" placeholder="Наприклад: кв. 24, Іваненко або Олена"><label>Максимальна сума внеску</label><input id="maxAmount" type="number" min="0"><div class="buttons"><button id="submitBtn" onclick="submitProposal('${esc(token)}')">Надіслати пропозицію</button></div><div id="submitError" class="error hidden"></div>`}</section>`}
-async function submitProposal(token){const e=document.getElementById('submitError'),label=document.getElementById('label').value.trim(),i=document.getElementById('maxAmount'),max=Number(i.value);e.classList.add('hidden');if(!label)return ferr(e,'Вкажіть, як вас ідентифікувати.');if(i.value==='')return ferr(e,'Максимальна сума внеску обовʼязкова.');if(max<0)return ferr(e,'Сума не може бути відʼємною.');const b=document.getElementById('submitBtn');b.disabled=true;b.textContent='Зберігаємо...';const{error}=await db.rpc('submit_proposal_rpc',{p_participant_token:token,p_participant_label:label,p_min_amount:0,p_max_amount:max});b.disabled=false;b.textContent='Надіслати пропозицію';if(error)return ferr(e,error.message);route('/thanks')}function thanks(){app.innerHTML='<section class="card"><div class="title-row"><div><h2>Дякуємо!</h2><p class="caption">Ваша пропозиція збережена.</p></div><div class="step">✓</div></div><div class="status"><div class="status-main">Ініціатива триває</div><p class="status-text">Після завершення ви дізнаєтесь результат.</p></div></section>'}
-async function manager(token){loading('Завантажуємо кабінет менеджера');const[{data:rd,error:re},{data:p,error:pe}]=await Promise.all([db.rpc('get_manager_round_rpc',{p_manager_token:token}),db.rpc('get_manager_proposals_rpc',{p_manager_token:token})]);if(re)return fail(re.message);if(pe)return fail(pe.message);const r=rd&&rd[0];if(!r)return fail('Ініціативу не знайдено.');const a=allocationV02(r.target_amount,p||[]),pct=Math.min(100,a.sumMax/Number(r.target_amount||1)*100),answered=p?p.length:0,expected=r.expected_participants?`${answered} із ${r.expected_participants}`:String(answered),closed=r.status!=='open';app.innerHTML=`<section class="hero"><h1>Кабінет менеджера</h1><p class="lead">${esc(r.title)}</p></section><section class="card"><div class="title-row"><div><h2>Поточний стан</h2><p class="caption">${esc(r.description||'')}</p></div><span class="tag ${closed?'ok':''}">${closed?'Ініціативу завершено':'Збір пропозицій триває'}</span></div><div class="status"><div class="status-label"><span class="dot ${a.feasible?'ok':''}"></span><span>${a.feasible?'Необхідну суму можна зібрати':'Поки що суми недостатньо'}</span></div><div class="status-main">${a.feasible?'Мета досяжна':`Не вистачає ${money(a.gap)}`}</div><div class="meter"><div class="bar" style="width:${pct}%"></div></div><div class="stats"><div class="stat"><strong>${money(r.target_amount)}</strong><span>ціль</span></div><div class="stat"><strong>${money(a.sumMax)}</strong><span>сума максимумів</span></div><div class="stat"><strong>${expected}</strong><span>подали пропозиції</span></div>${r.deadline?`<div class="stat"><strong>${date(r.deadline)}</strong><span>дедлайн</span></div>`:''}</div></div><label>Посилання для учасників</label><div class="link-box"><input id="participantLink" readonly value="${esc(purl(r.participant_token))}"><button onclick="copyInput('participantLink')">Копіювати</button></div><div class="buttons">${closed?'<button class="secondary" onclick="downloadCsv(window.currentRound,window.currentAllocation)">Завантажити CSV</button>':`<button class="danger" onclick="closeRound('${esc(token)}')">Завершити ініціативу</button>`}<button class="ghost" onclick="manager('${esc(token)}')">Оновити</button></div></section><section class="card compact"><h2>Пропозиції</h2><p class="caption">Цей список бачить тільки менеджер.</p><div class="table" style="margin-top:12px"><div class="row header"><span>Учасник</span><span>Максимум</span><span>Внесок</span></div>${a.rows.length?a.rows.map(x=>`<div class="row"><strong>${esc(x.participant_label)}</strong><span>${money(x.max)}</span><span>${a.feasible?money(x.recommended):'—'}</span></div>`).join(''):'<div class="privacy">Поки немає пропозицій. Надішліть учасникам посилання.</div>'}</div></section>`;window.currentRound=r;window.currentAllocation=a}async function closeRound(token){if(!confirm('Завершити ініціативу? Після цього нові пропозиції не прийматимуться.'))return;const{error}=await db.rpc('close_round_rpc',{p_manager_token:token});if(error)return toast(error.message);toast('Ініціативу завершено');manager(token)}function router(){const[k,t]=parts();if(!k)return home();if(k==='r'&&t)return participant(t);if(k==='manage'&&t)return manager(t);if(k==='thanks')return thanks();fail('Невідоме посилання.')}window.addEventListener('hashchange',router);router();
-</script></body></html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#245447">
+  <title>Equilibrium — Prototype v0.3</title>
+  <style>
+    :root{--bg:#f7f3ec;--card:#fffdf9;--ink:#1f211f;--muted:#706b62;--line:#e5ded2;--accent:#245447;--soft:#e0eee6;--ok:#267044;--warn:#a14c32;--shadow:0 16px 40px rgba(31,33,31,.08);--radius:24px}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(circle at 30% 0%,#fff 0%,var(--bg) 42%,#efe8dc 100%);color:var(--ink);min-height:100svh}
+    .app,.topbar-inner{max-width:560px;margin:auto}.app{padding:12px 14px 40px}
+    .topbar{position:sticky;top:0;z-index:30;padding:10px 14px;backdrop-filter:blur(18px);background:rgba(247,243,236,.82);border-bottom:1px solid var(--line)}
+    .topbar-inner,.brand,.title-row,.status-label,.link-box{display:flex;align-items:center}.topbar-inner,.title-row{justify-content:space-between;gap:12px}
+    .brand{gap:10px;font-weight:900;font-size:20px}.logo{width:34px;height:34px;border-radius:12px;background:var(--accent);color:#fff;display:grid;place-items:center}
+    .pill{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:999px;padding:8px 10px;font-size:12px;font-weight:700}
+    .hero{padding:26px 4px 18px}h1{margin:0 0 12px;font-size:clamp(34px,10vw,54px);line-height:.94;letter-spacing:-.075em}
+    .lead,.caption,.status-text{color:var(--muted);line-height:1.45}.lead{font-size:17px;margin:0}
+    .card{background:rgba(255,253,249,.95);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin:14px 0}.compact{padding:14px}
+    .title-row{align-items:flex-start;margin-bottom:14px}h2{font-size:22px;letter-spacing:-.045em;margin:0}.caption{font-size:14px;margin:0}
+    .step{min-width:32px;height:32px;border-radius:12px;display:grid;place-items:center;background:var(--soft);color:var(--accent);font-weight:900}
+    label{display:block;font-size:13px;font-weight:850;margin:14px 0 7px}
+    input,textarea{width:100%;border:1px solid var(--line);border-radius:16px;padding:14px;font:inherit;font-size:16px;background:#fff;color:var(--ink);outline:none}
+    textarea{min-height:92px;resize:vertical}.grid,.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .buttons{display:grid;grid-template-columns:1fr;gap:10px;margin-top:14px}
+    button{width:100%;min-height:50px;border:0;border-radius:999px;padding:13px 16px;background:var(--accent);color:#fff;font-weight:900;font-size:15px;cursor:pointer}
+    button.secondary{background:#fff;color:var(--accent);border:1px solid var(--line)}button.ghost{background:transparent;color:var(--accent);border:1px solid var(--soft)}button.danger{background:var(--warn)}
+    button:disabled{opacity:.55;cursor:not-allowed}
+    .status{border-radius:22px;border:1px solid var(--line);background:#fbfaf7;padding:16px}.status-label{gap:8px;font-size:13px;color:var(--muted);font-weight:800;margin-bottom:8px}
+    .dot{width:10px;height:10px;border-radius:99px;background:var(--warn)}.dot.ok{background:var(--ok)}.dot.neutral{background:var(--muted)}
+    .status-main{font-size:24px;font-weight:950;margin-bottom:6px}.meter{height:16px;border-radius:999px;background:#e9e2d6;border:1px solid var(--line);overflow:hidden}.bar{height:100%;background:var(--accent)}
+    .stats{margin-top:12px}.stat{border:1px solid var(--line);background:#fff;border-radius:18px;padding:13px}.stat strong{display:block;font-size:22px}.stat span{color:var(--muted);font-size:12px}
+    .privacy{background:var(--soft);color:#244536;border-radius:20px;padding:14px;line-height:1.45;font-size:14px}
+    .link-box{gap:8px;border:1px solid var(--line);border-radius:18px;padding:10px;background:#fff;margin:8px 0 14px}.link-box input{border:0;padding:6px;box-shadow:none;background:transparent;font-size:13px}.link-box button{width:auto;min-height:40px;padding:9px 13px}
+    .table{display:grid;gap:8px}.row{display:grid;grid-template-columns:1.4fr .9fr .9fr;gap:8px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:16px;background:#fff;font-size:13px}.header{background:transparent;border:0;color:var(--muted);font-weight:900}
+    .tag{font-size:12px;border-radius:999px;padding:6px 9px;font-weight:900;background:#f2e9df;color:var(--warn)}.tag.ok{background:#e0f0e5;color:var(--ok)}
+    .toast{position:fixed;left:14px;right:14px;bottom:18px;max-width:532px;margin:auto;background:#1f211f;color:#fff;border-radius:18px;padding:13px 14px;opacity:0;transform:translateY(12px);transition:.25s}.toast.show{opacity:1;transform:none}
+    .hidden{display:none}.error{color:var(--warn);font-size:13px;font-weight:800;margin-top:8px}.muted{color:var(--muted)}
+    @media(min-width:720px){.buttons{grid-template-columns:1fr 1fr}}@media(max-width:380px){.grid,.stats{grid-template-columns:1fr}.row{grid-template-columns:1fr}.header{display:none}}
+  </style>
+</head>
+<body>
+  <div class="topbar"><div class="topbar-inner"><div class="brand"><div class="logo">E</div>Equilibrium</div><div class="pill">prototype v0.3 · allocation-v0.2</div></div></div>
+  <main class="app" id="app"></main>
+  <div class="toast" id="toast">Оновлено</div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const V='v0.3',A='allocation-v0.2',U='https://rcnyixakafcpmigojfhe.supabase.co',K=['sb','publishable','FMXIkx8ruTWSbfK8MdkrTQ','atXVT5Wf'].join('_');
+    const db=window.supabase.createClient(U,K),app=document.getElementById('app');
+    const money=n=>Math.round(Number(n||0)).toLocaleString('uk-UA')+' грн';
+    const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    function toast(x){const t=document.getElementById('toast');t.textContent=x;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+    function parts(){return location.hash.replace(/^#\/?/,'').split('/').filter(Boolean)}
+    function route(x){location.hash=x}
+    function purl(t){return `${location.origin}${location.pathname}#/r/${t}`}
+    function date(v){return new Date(v).toLocaleString('uk-UA')}
+    function loading(x){app.innerHTML=`<section class="card"><h2>${x}</h2><p class="caption">Зачекайте кілька секунд.</p></section>`}
+    function fail(x){app.innerHTML=`<section class="card"><h2>Щось пішло не так</h2><p class="status-text">${esc(x)}</p><button onclick="route('')">На головну</button></section>`}
+    function ferr(el,x){el.textContent=x;el.classList.remove('hidden')}
+
+    function allocationV02(target,proposals){
+      const t=Math.max(0,Math.round(Number(target||0)*100));
+      const clean=proposals.map((p,index)=>({...p,index,maxCents:Math.max(0,Math.round(Number(p.max_amount||0)*100))}));
+      const sum=clean.reduce((s,p)=>s+p.maxCents,0);
+      if(sum<t)return{feasible:false,sumMax:sum/100,gap:(t-sum)/100,rows:clean.map(p=>({...p,max:p.maxCents/100,recommended:p.maxCents/100}))};
+      let remaining=t,active=[...clean].sort((a,b)=>a.maxCents-b.maxCents||a.index-b.index),assigned=new Map;
+      while(active.length){
+        const share=Math.floor(remaining/active.length),capped=active.filter(p=>p.maxCents<=share);
+        if(!capped.length)break;
+        capped.forEach(p=>{assigned.set(p.index,p.maxCents);remaining-=p.maxCents});
+        active=active.filter(p=>!assigned.has(p.index));
+      }
+      if(active.length){
+        const base=Math.floor(remaining/active.length);let rest=remaining-base*active.length;
+        active.forEach(p=>{assigned.set(p.index,Math.min(p.maxCents,base+(rest>0?1:0)));if(rest>0)rest--});
+      }
+      return{feasible:true,sumMax:sum/100,gap:0,rows:clean.map(p=>({...p,max:p.maxCents/100,recommended:(assigned.get(p.index)||0)/100}))};
+    }
+
+    function proposalsWithoutTarget(proposals){
+      const rows=proposals.map(p=>({...p,max:Number(p.max_amount||0),recommended:null}));
+      const sumMax=rows.reduce((s,p)=>s+p.max,0);
+      return{feasible:null,sumMax,averageMax:rows.length?sumMax/rows.length:0,gap:null,rows};
+    }
+
+    function csvEscape(v){const s=String(v??'');return/[",\n;]/.test(s)?`"${s.replace(/"/g,'""')}"`:s}
+    function downloadCsv(r,a){
+      const hasTarget=r.target_amount!==null&&r.target_amount!==undefined;
+      const lines=[hasTarget
+        ?['Ідентифікація','Максимальна сума внеску','Розрахований внесок','Ініціатива','Алгоритм'].join(';')
+        :['Ідентифікація','Максимальна сума внеску','Ініціатива','Режим'].join(';')];
+      a.rows.forEach(x=>lines.push(hasTarget
+        ?[csvEscape(x.participant_label),x.max.toFixed(2),x.recommended!==null?x.recommended.toFixed(2):'',csvEscape(r.title),A].join(';')
+        :[csvEscape(x.participant_label),x.max.toFixed(2),csvEscape(r.title),'average-without-budget'].join(';')));
+      const blob=new Blob(['\ufeff'+lines.join('\n')],{type:'text/csv;charset=utf-8;'}),l=document.createElement('a');
+      l.href=URL.createObjectURL(blob);l.download=`initiative-${r.participant_token}-${hasTarget?A:'average'}.csv`;l.click();URL.revokeObjectURL(l.href);
+    }
+
+    function home(){
+      app.innerHTML=`<section class="hero"><h1>Створіть ініціативу.</h1><p class="lead">Опишіть ініціативу та надішліть учасникам посилання. Кожен приватно зазначить максимальну суму внеску.</p></section>
+      <section class="card"><div class="title-row"><div><h2>Створити ініціативу</h2><p class="caption">Після створення відкриється кабінет менеджера з посиланням для учасників.</p></div><div class="step">1</div></div>
+      <label>Назва ініціативи</label><input id="title" placeholder="Наприклад: зона барбекю у дворі">
+      <label>Опис</label><textarea id="description" placeholder="Опишіть, що саме планується зробити"></textarea>
+      <label>Бюджет, грн <span class="muted">необовʼязково</span></label><input id="target" type="number" min="1" placeholder="Наприклад: 12000">
+      <div class="grid"><div><label>Дедлайн <span class="muted">необовʼязково</span></label><input id="deadline" type="datetime-local"></div>
+      <div><label>Кількість учасників <span class="muted">необовʼязково</span></label><input id="expected" type="number" min="1" placeholder="Напр. 24"></div></div>
+      <div class="buttons"><button id="createBtn" onclick="createRound()">Створити ініціативу</button></div><div id="createError" class="error hidden"></div></section>`;
+    }
+
+    async function createRound(){
+      const b=document.getElementById('createBtn'),e=document.getElementById('createError'),title=document.getElementById('title').value.trim(),
+        description=document.getElementById('description').value.trim(),targetInput=document.getElementById('target'),targetRaw=targetInput.value.trim(),
+        target=targetRaw===''?null:Number(targetRaw),d=document.getElementById('deadline').value,n=document.getElementById('expected').value;
+      e.classList.add('hidden');
+      if(!title)return ferr(e,'Вкажіть назву ініціативи.');
+      if(target!==null&&(!Number.isFinite(target)||target<=0))return ferr(e,'Бюджет має бути більшим за 0.');
+      b.disabled=true;b.textContent='Створюємо...';
+      const{data,error}=await db.rpc('create_round_rpc',{p_title:title,p_description:description||null,p_target_amount:target,p_deadline:d?new Date(d).toISOString():null,p_expected_participants:n?Number(n):null});
+      b.disabled=false;b.textContent='Створити ініціативу';
+      if(error)return ferr(e,error.message);
+      const r=data&&data[0];if(!r)return ferr(e,'Ініціативу не створено.');
+      route(`/manage/${r.manager_token}`);
+    }
+
+    function copyInput(id){const x=document.getElementById(id);x.select();navigator.clipboard.writeText(x.value).then(()=>toast('Посилання скопійовано'))}
+
+    async function participant(token){
+      loading('Завантажуємо ініціативу');
+      const{data,error}=await db.rpc('get_round_for_participant_rpc',{p_participant_token:token});
+      if(error)return fail(error.message);const r=data&&data[0];if(!r)return fail('Ініціативу не знайдено.');
+      const closed=r.status!=='open',hasTarget=r.target_amount!==null&&r.target_amount!==undefined;
+      const details=hasTarget||r.deadline?`<section class="card compact"><div class="stats">${hasTarget?`<div class="stat"><strong>${money(r.target_amount)}</strong><span>необхідна сума</span></div>`:''}${r.deadline?`<div class="stat"><strong>${date(r.deadline)}</strong><span>дедлайн</span></div>`:''}</div></section>`:'';
+      app.innerHTML=`<section class="hero"><h1>${esc(r.title)}</h1><p class="lead">${esc(r.description||'Спільна фінансова ініціатива.')}</p></section>${details}
+      <section class="card"><div class="title-row"><div><h2>Ваша пропозиція</h2><p class="caption">Інші учасники не бачать вашу пропозицію.</p></div><div class="step">2</div></div>
+      ${closed?'<div class="privacy"><b>Ініціативу завершено.</b> Нові пропозиції не приймаються.</div>':`<label>Як вас ідентифікувати?</label><input id="label" placeholder="Наприклад: кв. 24, Іваненко або Олена"><label>Максимальна сума внеску</label><input id="maxAmount" type="number" min="0"><div class="buttons"><button id="submitBtn" onclick="submitProposal('${esc(token)}')">Надіслати пропозицію</button></div><div id="submitError" class="error hidden"></div>`}</section>`;
+    }
+
+    async function submitProposal(token){
+      const e=document.getElementById('submitError'),label=document.getElementById('label').value.trim(),i=document.getElementById('maxAmount'),max=Number(i.value);
+      e.classList.add('hidden');if(!label)return ferr(e,'Вкажіть, як вас ідентифікувати.');if(i.value==='')return ferr(e,'Максимальна сума внеску обовʼязкова.');if(max<0)return ferr(e,'Сума не може бути відʼємною.');
+      const b=document.getElementById('submitBtn');b.disabled=true;b.textContent='Зберігаємо...';
+      const{error}=await db.rpc('submit_proposal_rpc',{p_participant_token:token,p_participant_label:label,p_min_amount:0,p_max_amount:max});
+      b.disabled=false;b.textContent='Надіслати пропозицію';if(error)return ferr(e,error.message);route('/thanks');
+    }
+
+    function thanks(){app.innerHTML='<section class="card"><div class="title-row"><div><h2>Дякуємо!</h2><p class="caption">Ваша пропозиція збережена.</p></div><div class="step">✓</div></div><div class="status"><div class="status-main">Ініціатива триває</div><p class="status-text">Після завершення ви дізнаєтесь результат.</p></div></section>'}
+
+    async function manager(token){
+      loading('Завантажуємо кабінет менеджера');
+      const[{data:rd,error:re},{data:p,error:pe}]=await Promise.all([db.rpc('get_manager_round_rpc',{p_manager_token:token}),db.rpc('get_manager_proposals_rpc',{p_manager_token:token})]);
+      if(re)return fail(re.message);if(pe)return fail(pe.message);const r=rd&&rd[0];if(!r)return fail('Ініціативу не знайдено.');
+      const proposals=p||[],hasTarget=r.target_amount!==null&&r.target_amount!==undefined,a=hasTarget?allocationV02(r.target_amount,proposals):proposalsWithoutTarget(proposals),
+        pct=hasTarget?Math.min(100,a.sumMax/Number(r.target_amount||1)*100):0,answered=proposals.length,
+        expected=r.expected_participants?`${answered} із ${r.expected_participants}`:String(answered),closed=r.status!=='open';
+      const statusContent=hasTarget
+        ?`<div class="status-label"><span class="dot ${a.feasible?'ok':''}"></span><span>${a.feasible?'Необхідну суму можна зібрати':'Поки що суми недостатньо'}</span></div><div class="status-main">${a.feasible?'Мета досяжна':`Не вистачає ${money(a.gap)}`}</div><div class="meter"><div class="bar" style="width:${pct}%"></div></div>`
+        :`<div class="status-label"><span class="dot neutral"></span><span>Попередня оцінка без бюджету</span></div><div class="status-main">${answered?`Середня пропозиція — ${money(a.averageMax)}`:'Ще немає пропозицій'}</div><p class="status-text">Оскільки бюджет не заданий, алгоритм розподілу не застосовується. Система показує середню максимальну суму, яку готові внести учасники.</p>`;
+      app.innerHTML=`<section class="hero"><h1>Кабінет менеджера</h1><p class="lead">${esc(r.title)}</p></section>
+      <section class="card"><div class="title-row"><div><h2>Поточний стан</h2><p class="caption">${esc(r.description||'')}</p></div><span class="tag ${closed?'ok':''}">${closed?'Ініціативу завершено':'Збір пропозицій триває'}</span></div>
+      <div class="status">${statusContent}<div class="stats">${hasTarget
+        ?`<div class="stat"><strong>${money(r.target_amount)}</strong><span>ціль</span></div><div class="stat"><strong>${money(a.sumMax)}</strong><span>сума максимумів</span></div>`
+        :`<div class="stat"><strong>${money(a.averageMax)}</strong><span>середня пропозиція</span></div><div class="stat"><strong>${money(a.sumMax)}</strong><span>сума пропозицій</span></div>`}
+      <div class="stat"><strong>${expected}</strong><span>подали пропозиції</span></div>${r.deadline?`<div class="stat"><strong>${date(r.deadline)}</strong><span>дедлайн</span></div>`:''}</div></div>
+      <label>Посилання для учасників</label><div class="link-box"><input id="participantLink" readonly value="${esc(purl(r.participant_token))}"><button onclick="copyInput('participantLink')">Копіювати</button></div>
+      <div class="buttons">${closed?'<button class="secondary" onclick="downloadCsv(window.currentRound,window.currentAllocation)">Завантажити CSV</button>':`<button class="danger" onclick="closeRound('${esc(token)}')">Завершити ініціативу</button>`}<button class="ghost" onclick="manager('${esc(token)}')">Оновити</button></div></section>
+      <section class="card compact"><h2>Пропозиції</h2><p class="caption">${hasTarget?'Цей список бачить тільки менеджер.':'Для ініціативи без бюджету показані фактичні пропозиції учасників без розрахованого внеску.'}</p><div class="table" style="margin-top:12px">
+      <div class="row header" style="${hasTarget?'':'grid-template-columns:1.4fr .9fr'}"><span>Учасник</span><span>Максимум</span>${hasTarget?'<span>Внесок</span>':''}</div>
+      ${a.rows.length?a.rows.map(x=>`<div class="row" style="${hasTarget?'':'grid-template-columns:1.4fr .9fr'}"><strong>${esc(x.participant_label)}</strong><span>${money(x.max)}</span>${hasTarget?`<span>${a.feasible?money(x.recommended):'—'}</span>`:''}</div>`).join(''):'<div class="privacy">Поки немає пропозицій. Надішліть учасникам посилання.</div>'}</div></section>`;
+      window.currentRound=r;window.currentAllocation=a;
+    }
+
+    async function closeRound(token){if(!confirm('Завершити ініціативу? Після цього нові пропозиції не прийматимуться.'))return;const{error}=await db.rpc('close_round_rpc',{p_manager_token:token});if(error)return toast(error.message);toast('Ініціативу завершено');manager(token)}
+    function router(){const[k,t]=parts();if(!k)return home();if(k==='r'&&t)return participant(t);if(k==='manage'&&t)return manager(t);if(k==='thanks')return thanks();fail('Невідоме посилання.')}
+    window.addEventListener('hashchange',router);router();
+  </script>
+</body>
+</html>
