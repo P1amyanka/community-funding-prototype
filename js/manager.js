@@ -1,7 +1,7 @@
 import { db } from './supabase.js';
 import { state } from './state.js';
 import { allocationV02, downloadCsv, proposalsWithoutTarget } from './equilibrium.js';
-import { app, copyInput, date, esc, fail, loading, money, purl, toast } from './utils.js';
+import { app, copyInput, date, esc, fail, ferr, loading, money, purl, toast } from './utils.js';
 
 export async function manager(token) {
   loading('Завантажуємо кабінет менеджера');
@@ -20,7 +20,7 @@ export async function manager(token) {
         : `<div class="stat"><strong>${money(a.averageMax)}</strong><span>середня пропозиція</span></div><div class="stat"><strong>${money(a.sumMax)}</strong><span>сума пропозицій</span></div>`}
       <div class="stat"><strong>${expected}</strong><span>подали пропозиції</span></div>${r.deadline ? `<div class="stat"><strong>${date(r.deadline)}</strong><span>дедлайн</span></div>` : ''}</div></div>
       <label>Посилання для учасників</label><div class="link-box"><input id="participantLink" readonly value="${esc(purl(r.participant_token))}"><button onclick="copyInput('participantLink')">Копіювати</button></div>
-      <div class="buttons">${closed ? '<button class="secondary" onclick="downloadCsv(state.currentRound,state.currentAllocation)">Завантажити CSV</button>' : `<button class="danger" onclick="closeRound('${esc(token)}')">Завершити ініціативу</button>`}<button class="ghost" onclick="manager('${esc(token)}')">Оновити</button></div></section>
+      <div class="buttons">${closed ? '<button class="secondary" onclick="downloadCsv(state.currentRound,state.currentAllocation)">Завантажити CSV</button>' : `<button class="danger" onclick="closeRound('${esc(token)}')">Завершити ініціативу</button>`}<button class="ghost" onclick="manager('${esc(token)}')">Оновити</button></div>${state.closeError ? `<div id="closeError" class="error">${esc(state.closeError)}</div>` : '<div id="closeError" class="error hidden"></div>'}</section>
       <section class="card compact"><h2>Пропозиції</h2><p class="caption">${hasTarget ? 'Цей список бачить тільки менеджер.' : 'Для ініціативи без бюджету показані фактичні пропозиції учасників без розрахованого внеску.'}</p><div class="table" style="margin-top:12px">
       <div class="row header" style="${hasTarget ? '' : 'grid-template-columns:1.4fr .9fr'}"><span>Учасник</span><span>Максимум</span>${hasTarget ? '<span>Внесок</span>' : ''}</div>
       ${a.rows.length ? a.rows.map(x => `<div class="row" style="${hasTarget ? '' : 'grid-template-columns:1.4fr .9fr'}"><strong>${esc(x.participant_label)}</strong><span>${money(x.max)}</span>${hasTarget ? `<span>${a.feasible ? money(x.recommended) : '—'}</span>` : ''}</div>`).join('') : '<div class="privacy">Поки немає пропозицій. Надішліть учасникам посилання.</div>'}</div></section>`;
@@ -30,7 +30,15 @@ export async function manager(token) {
 export async function closeRound(token) {
   if (!confirm('Завершити ініціативу? Після цього нові пропозиції не прийматимуться.')) return;
   const { error } = await db.rpc('close_round_rpc', { p_manager_token: token });
-  if (error) return toast(error.message); toast('Ініціативу завершено'); manager(token);
+  if (error) {
+    console.error('close_round_rpc failed', error);
+    state.closeError = JSON.stringify(error);
+    const errorBlock = document.getElementById('closeError');
+    if (errorBlock) ferr(errorBlock, state.closeError);
+    return;
+  }
+  state.closeError = null;
+  toast('Ініціативу завершено'); manager(token);
 }
 
 export { copyInput, downloadCsv };
