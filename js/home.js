@@ -8,7 +8,7 @@ export function home() {
       <label>Назва ініціативи</label><input id="title" placeholder="Наприклад: зона барбекю у дворі">
       <label>Опис</label><textarea id="description" placeholder="Опишіть, що саме планується зробити"></textarea>
       <label>Бюджет, грн <span class="muted">необовʼязково</span></label><input id="target" type="number" min="1" placeholder="Наприклад: 12000">
-      <label>Посилання на Банку, Конверт або номер картки <span class="muted">необовʼязково</span></label><input id="paymentDetails" type="text" inputmode="text" placeholder="https://send.monobank.ua/... або 4441 1111 2222 3333">
+      <label>Платіжні реквізити <span class="muted">необовʼязково</span></label><input id="paymentDetails" type="text" inputmode="text" placeholder="Посилання або номер картки">
       <div class="grid"><div><label>Дедлайн <span class="muted">необовʼязково</span></label><input id="deadline" type="datetime-local"></div>
       <div><label>Кількість учасників <span class="muted">необовʼязково</span></label><input id="expected" type="number" min="1" placeholder="Напр. 24"></div></div>
       <div class="buttons"><button id="createBtn" onclick="createRound()">Створити ініціативу</button></div><div id="createError" class="error hidden"></div></section>`;
