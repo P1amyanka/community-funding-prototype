@@ -24,6 +24,8 @@ export async function participant(token, silent = false) {
   const { data, error } = await db.rpc('get_participant_state_v04_rpc', { p_participant_token: token, p_participant_key: participantKey });
   if (error) return fail(error.message); const r = data && data[0]; if (!r) return fail('Ініціативу не знайдено.');
   const closed = r.status !== 'open', hasTarget = r.target_amount !== null && r.target_amount !== undefined, hasProposal = r.own_max_amount !== null && r.own_max_amount !== undefined;
+  const confirmed = closed && r.feasible === true;
+  const notFunded = closed && r.feasible === false;
   const details = hasTarget || r.deadline ? `<section class="card compact"><div class="stats">${hasTarget ? `<div class="stat"><strong>${money(r.target_amount)}</strong><span>необхідна сума</span></div>` : ''}${r.deadline ? `<div class="stat"><strong>${date(r.deadline)}</strong><span>дедлайн</span></div>` : ''}</div></section>` : '';
   let content;
   if (!closed) {
@@ -31,9 +33,9 @@ export async function participant(token, silent = false) {
       <label>Як вас ідентифікувати?</label><input id="label" value="${esc(r.own_label || '')}" placeholder="Наприклад: кв. 24, Іваненко або Олена">
       <label>Максимальна сума внеску</label><input id="maxAmount" type="number" min="0" value="${hasProposal ? esc(r.own_max_amount) : ''}">
       <div class="buttons"><button id="submitBtn" onclick="submitProposal('${esc(token)}')">${hasProposal ? 'Зберегти зміни' : 'Надіслати пропозицію'}</button></div><div id="submitError" class="error hidden"></div>`;
-  } else if (r.feasible === true) {
+  } else if (confirmed) {
     content = `<div class="status"><div class="status-main">Ініціатива підтверджена</div>${hasProposal ? `<p class="status-text">Ваш внесок — <strong>${money(r.own_recommended_amount)}</strong>.</p>` : '<p class="status-text">Раунд завершено успішно.</p>'}${paymentBlock(r.payment_details)}</div>`;
-  } else if (r.feasible === false) {
+  } else if (notFunded) {
     content = `<div class="status"><div class="status-main">Мету не досягнуто</div><p class="status-text">Не вистачає: <strong>${money(r.gap)}</strong>. Менеджер може відкрити новий раунд.</p></div>`;
   } else {
     content = '<div class="privacy"><b>Раунд завершено.</b> Очікуйте подальших дій менеджера.</div>';
