@@ -29,7 +29,10 @@ export async function participant(token, silent = false) {
   const details = hasTarget || r.deadline ? `<section class="card compact"><div class="stats">${hasTarget ? `<div class="stat"><strong>${money(r.target_amount)}</strong><span>необхідна сума</span></div>` : ''}${r.deadline ? `<div class="stat"><strong>${date(r.deadline)}</strong><span>дедлайн</span></div>` : ''}</div></section>` : '';
   let content;
   if (!closed) {
-    content = `<div class="title-row"><div><h2>${hasProposal ? 'Ваша пропозиція' : 'Додайте пропозицію'}</h2><p class="caption">Інші учасники не бачать вашу пропозицію.</p></div><div class="step">${r.round_number}</div></div>
+    const accepted = hasProposal
+      ? `<div class="privacy"><b>Пропозицію прийнято.</b><br>Ви вказали максимальний внесок <strong>${money(r.own_max_amount)}</strong>. До завершення раунду пропозицію можна змінити.</div>`
+      : '';
+    content = `${accepted}<div class="title-row"><div><h2>${hasProposal ? 'Змінити пропозицію' : 'Додайте пропозицію'}</h2><p class="caption">Інші учасники не бачать вашу пропозицію.</p></div><div class="step">${r.round_number}</div></div>
       <label>Як вас ідентифікувати?</label><input id="label" value="${esc(r.own_label || '')}" placeholder="Наприклад: кв. 24, Іваненко або Олена">
       <label>Максимальна сума внеску</label><input id="maxAmount" type="number" min="0" value="${hasProposal ? esc(r.own_max_amount) : ''}">
       <div class="buttons"><button id="submitBtn" onclick="submitProposal('${esc(token)}')">${hasProposal ? 'Зберегти зміни' : 'Надіслати пропозицію'}</button></div><div id="submitError" class="error hidden"></div>`;
@@ -54,7 +57,7 @@ export async function submitProposal(token) {
   const b = document.getElementById('submitBtn'); b.disabled = true; b.textContent = 'Зберігаємо...';
   const { error } = await db.rpc('upsert_proposal_v04_rpc', { p_participant_token: token, p_participant_key: getParticipantKey(token), p_participant_label: label, p_max_amount: max });
   b.disabled = false; b.textContent = 'Зберегти зміни'; if (error) return ferr(e, error.message);
-  toast('Пропозицію збережено'); participant(token, true);
+  toast('Пропозицію прийнято'); participant(token, true);
 }
 
 export function copyPaymentValue() {
