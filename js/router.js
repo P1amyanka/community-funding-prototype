@@ -1,5 +1,5 @@
 import { home } from './home.js';
-import { participant, thanks } from './participant.js';
+import { participant } from './participant.js';
 import { manager } from './manager.js';
 import { fail } from './utils.js';
 
@@ -16,6 +16,5 @@ export function router() {
   if (!k) return home();
   if (k === 'r' && t) return participant(t);
   if (k === 'manage' && t) return manager(t);
-  if (k === 'thanks') return thanks();
   fail('Невідоме посилання.');
 }
