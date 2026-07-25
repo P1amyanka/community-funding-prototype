@@ -63,7 +63,7 @@ export async function manager(token, silent = false) {
     : `<div class="status-main">${proposals.length ? 'Фінансова готовність спільноти' : 'Ще немає пропозицій'}</div>`;
 
   const proposalStats = proposals.length
-    ? `<div class="stats"><div class="stat"><strong>${expected}</strong><span>подали пропозиції</span></div><div class="stat"><strong>${money(allocation.minimumMax)}</strong><span>мінімум</span></div><div class="stat"><strong>${money(allocation.medianMax)}</strong><span>медіана</span></div><div class="stat"><strong>${money(allocation.averageMax)}</strong><span>середнє</span></div></div>`
+    ? `<div class="stats"><div class="stat"><strong>${expected}</strong><span>подали пропозиції</span></div><div class="stat"><strong>${money(allocation.minimumMax)}</strong><span>мінімум</span></div><div class="stat"><strong>${money(allocation.maximumMax)}</strong><span>максимум</span></div><div class="stat"><strong>${money(allocation.medianMax)}</strong><span>медіана</span></div><div class="stat"><strong>${money(allocation.averageMax)}</strong><span>середнє</span></div></div>`
     : `<div class="stats"><div class="stat"><strong>${expected}</strong><span>подали пропозиції</span></div></div>`;
 
   const historyHtml = history.length
