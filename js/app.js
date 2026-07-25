@@ -1,11 +1,11 @@
-import { state } from './state.js';
-import { createRound } from './home.js';
-import { copyPaymentValue, submitProposal } from './participant.js';
-import { closeRound, copyInput, downloadCsv, downloadHistoryCsv, manager, showNextRoundForm, startNextRound } from './manager.js';
-import { route, router } from './router.js';
+import { state } from './state.js?v=0.4.2';
+import { createRound } from './home.js?v=0.4.2';
+import { copyPaymentValue, refreshParticipant, submitProposal } from './participant.js?v=0.4.2';
+import { closeRound, copyInput, downloadCsv, downloadHistoryCsv, manager, showNextRoundForm, startNextRound } from './manager.js?v=0.4.2';
+import { route, router } from './router.js?v=0.4.2';
 
 Object.assign(window, {
-  state, createRound, submitProposal, copyPaymentValue, closeRound, copyInput,
+  state, createRound, submitProposal, refreshParticipant, copyPaymentValue, closeRound, copyInput,
   downloadCsv, downloadHistoryCsv, manager, showNextRoundForm, startNextRound, route,
 });
 window.addEventListener('hashchange', router);
