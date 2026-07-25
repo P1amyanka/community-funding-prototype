@@ -53,8 +53,7 @@ begin
       expected_participants = p_expected_participants,
       payment_details = nullif(trim(coalesce(p_payment_details, '')), ''),
       status = 'open',
-      closed_at = null,
-      updated_at = now()
+      closed_at = null
   where i.id = v_initiative.id
   returning i.round_number, i.participant_token
   into round_number, participant_token;
