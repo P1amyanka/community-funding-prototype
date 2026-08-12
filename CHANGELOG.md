@@ -1,5 +1,13 @@
 # Changelog
 
+## Infrastructure reliability — 2026-08-12
+
+### Supabase availability
+- Додано окремий `healthcheck_v04_rpc`, який повертає статус доступності без читання бізнес-даних.
+- Додано щоденний GitHub Actions health check для зовнішньої перевірки Supabase API.
+- Workflow падає з помилкою, якщо Supabase недоступний або RPC не повертає `status = ok`.
+- Health check також створює регулярну API-активність для пілотного середовища на Supabase Free plan.
+
 ## Prototype v0.4 / allocation-v0.2 — 2026-07-24
 
 ### Раунди та сторінка учасника

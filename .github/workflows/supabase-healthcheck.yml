@@ -1,0 +1,28 @@
+name: Supabase health check
+
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  healthcheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call Supabase healthcheck RPC
+        env:
+          SUPABASE_URL: https://rcnyixakafcpmigojfhe.supabase.co
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_FMXIkx8ruTWSbfK8MdkrTQ_atXVT5Wf
+        run: |
+          set -euo pipefail
+          response=$(curl --silent --show-error --fail \
+            --request POST \
+            --header "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
+            --header "Authorization: Bearer ${SUPABASE_PUBLISHABLE_KEY}" \
+            --header "Content-Type: application/json" \
+            --data '{}' \
+            "${SUPABASE_URL}/rest/v1/rpc/healthcheck_v04_rpc")
+
+          echo "Supabase response: ${response}"
+          echo "${response}" | grep -q '"status":"ok"'
