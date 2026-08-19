@@ -1,7 +1,7 @@
 import { db } from './supabase.js';
 import { state } from './state.js';
 import { allocationV02, downloadCsv, proposalsWithoutTarget } from './equilibrium.js';
-import { app, copyInput, date, esc, fail, ferr, loading, money, purl, toast } from './utils.js';
+import { app, copyInput, date, esc, fail, ferr, getRichText, loading, money, purl, richEditor, richText, toast } from './utils.js';
 
 let managerPoll = null;
 
@@ -71,7 +71,7 @@ export async function manager(token, silent = false) {
     : '<div class="privacy">Завершених раундів ще немає.</div>';
 
   app.innerHTML = `<section class="hero"><h1>Кабінет менеджера</h1><p class="lead">${esc(r.title)}</p></section>
-    <section class="card"><div class="title-row"><div><h2>Раунд ${r.round_number}</h2><p class="caption">${esc(r.description || '')}</p></div><span class="tag ${closed ? 'ok' : ''}">${closed ? 'Раунд завершено' : 'Збір триває'}</span></div>
+    <section class="card"><div class="title-row"><div><h2>Раунд ${r.round_number}</h2><div class="caption rich-content">${richText(r.description)}</div></div><span class="tag ${closed ? 'ok' : ''}">${closed ? 'Раунд завершено' : 'Збір триває'}</span></div>
     <div class="status">${statusContent}${proposalStats}${hasTarget ? `<div class="stats"><div class="stat"><strong>${money(r.target_amount)}</strong><span>ціль</span></div>${r.deadline ? `<div class="stat"><strong>${date(r.deadline)}</strong><span>дедлайн</span></div>` : ''}</div>` : r.deadline ? `<div class="stats"><div class="stat"><strong>${date(r.deadline)}</strong><span>дедлайн</span></div></div>` : ''}</div>
     <label>Посилання для учасників</label><div class="link-box"><input id="participantLink" readonly value="${esc(purl(r.participant_token))}"><button onclick="copyInput('participantLink')">Копіювати</button></div>
     <div class="buttons">${closed ? `<button onclick="showNextRoundForm('${esc(token)}')">Новий раунд</button><button class="secondary" onclick="downloadCsv(state.currentRound,state.currentAllocation)">Завантажити CSV</button>` : `<button id="closeRoundBtn" class="danger" onclick="closeRound('${esc(token)}')">Завершити раунд</button>`}<button class="ghost" onclick="manager('${esc(token)}')">Оновити</button></div>
@@ -92,11 +92,11 @@ export function showNextRoundForm(token) {
   app.innerHTML = `<section class="hero"><h1>Ви створюєте новий раунд</h1><p class="lead">Підтвердьте дані ініціативи або змініть їх перед відкриттям нового раунду.</p></section>
     <section class="card"><div class="title-row"><div><h2>Новий раунд</h2><p class="caption">Посилання для учасників і менеджера залишаться незмінними.</p></div><div class="step">${r.round_number + 1}</div></div>
     <label>Назва ініціативи</label><input id="nextTitle" value="${esc(r.title)}">
-    <label>Опис</label><textarea id="nextDescription">${esc(r.description || '')}</textarea>
+    <label>Опис</label>${richEditor('nextDescription', r.description || '', 'Опишіть, що саме планується зробити')}
     <label>Бюджет, грн <span class="muted">необовʼязково</span></label><input id="nextTarget" type="number" min="1" value="${r.target_amount ?? ''}">
     <label>Платіжні реквізити <span class="muted">необовʼязково</span></label><input id="nextPaymentDetails" type="text" value="${esc(r.payment_details || '')}" placeholder="Посилання або номер картки">
-    <div class="grid"><div><label>Дедлайн <span class="muted">необовʼязково</span></label><input id="nextDeadline" type="datetime-local" value="${datetimeLocalValue(r.deadline)}"></div>
-    <div><label>Кількість учасників <span class="muted">необовʼязково</span></label><input id="nextExpected" type="number" min="1" value="${r.expected_participants ?? ''}"></div></div>
+    <label>Дедлайн <span class="muted">необовʼязково</span></label><input id="nextDeadline" type="datetime-local" value="${datetimeLocalValue(r.deadline)}">
+    <label>Кількість учасників <span class="muted">необовʼязково</span></label><input id="nextExpected" type="number" min="1" value="${r.expected_participants ?? ''}">
     <div class="buttons"><button id="confirmNextRoundBtn" onclick="startNextRound('${esc(token)}')">Підтвердити</button></div>
     <div id="managerError" class="error hidden"></div></section>`;
 }
@@ -122,7 +122,7 @@ export async function startNextRound(token) {
   const errorBox = document.getElementById('managerError');
   const button = document.getElementById('confirmNextRoundBtn');
   const title = document.getElementById('nextTitle').value.trim();
-  const description = document.getElementById('nextDescription').value.trim();
+  const description = getRichText('nextDescription');
   const targetRaw = document.getElementById('nextTarget').value.trim();
   const target = targetRaw === '' ? null : Number(targetRaw);
   const paymentDetails = document.getElementById('nextPaymentDetails').value.trim();
