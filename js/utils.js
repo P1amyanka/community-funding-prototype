@@ -33,7 +33,7 @@ export function richText(value, fallback = '') {
 }
 
 export function richEditor(id, value = '', placeholder = '') {
-  return `<div class="rich-editor"><div id="${id}" class="rich-input" contenteditable="true" data-placeholder="${esc(placeholder)}">${richText(value)}</div></div>`;
+  return `<div id="${id}" class="rich-input" contenteditable="true" data-placeholder="${esc(placeholder)}">${richText(value)}</div>`;
 }
 
 export function getRichText(id) {
