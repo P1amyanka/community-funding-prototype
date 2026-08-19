@@ -1,5 +1,5 @@
 import { db } from './supabase.js';
-import { app, date, esc, fail, ferr, loading, money, toast } from './utils.js';
+import { app, date, esc, fail, ferr, loading, money, richText, toast } from './utils.js';
 
 const keyName = token => `equilibrium-participant-${token}`;
 const getParticipantKey = token => {
@@ -56,7 +56,7 @@ export async function participant(token, silent = false) {
     content = `<div class="privacy"><b>Раунд завершено.</b> Очікуйте подальших дій менеджера.</div><div class="buttons">${refreshButton(token)}</div>`;
   }
 
-  app.innerHTML = `<section class="hero"><h1>${esc(r.title)}</h1><p class="lead">${esc(r.description || 'Спільна фінансова ініціатива.')}</p></section>${details}<section class="card">${content}</section>`;
+  app.innerHTML = `<section class="hero"><h1>${esc(r.title)}</h1><div class="lead rich-content">${richText(r.description, 'Спільна фінансова ініціатива.')}</div></section>${details}<section class="card">${content}</section>`;
 }
 
 export function refreshParticipant(token) {
