@@ -33,14 +33,7 @@ export function richText(value, fallback = '') {
 }
 
 export function richEditor(id, value = '', placeholder = '') {
-  return `<div class="rich-editor"><div class="rich-toolbar" role="toolbar" aria-label="Форматування опису"><button type="button" class="format-button" onclick="formatRichText('${id}','bold')" aria-label="Жирний"><strong>B</strong></button><button type="button" class="format-button" onclick="formatRichText('${id}','insertUnorderedList')" aria-label="Маркований список">• Список</button><button type="button" class="format-button" onclick="formatRichText('${id}','insertOrderedList')" aria-label="Нумерований список">1. Список</button></div><div id="${id}" class="rich-input" contenteditable="true" data-placeholder="${esc(placeholder)}">${richText(value)}</div></div>`;
-}
-
-export function formatRichText(id, command) {
-  const editor = document.getElementById(id);
-  if (!editor) return;
-  editor.focus();
-  document.execCommand(command, false, null);
+  return `<div class="rich-editor"><div id="${id}" class="rich-input" contenteditable="true" data-placeholder="${esc(placeholder)}">${richText(value)}</div></div>`;
 }
 
 export function getRichText(id) {

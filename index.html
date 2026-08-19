@@ -18,13 +18,13 @@
   </div>
   <main class="app" id="app"></main>
   <footer class="footer">
-    <div class="footer-inner">
-      <a href="#/">Головна</a>
+    <nav class="footer-inner" aria-label="Навігація">
+      <button type="button" class="footer-link" onclick="route('')">Головна</button>
       <span class="footer-separator">|</span>
-      <a href="#/about">Про платформу</a>
+      <button type="button" class="footer-link" onclick="route('/about')">Про платформу</button>
       <span class="footer-separator">|</span>
-      <a href="#/feedback">Зворотний зв'язок</a>
-    </div>
+      <button type="button" class="footer-link" onclick="route('/feedback')">Зворотний зв'язок</button>
+    </nav>
   </footer>
   <div class="toast" id="toast">Оновлено</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
