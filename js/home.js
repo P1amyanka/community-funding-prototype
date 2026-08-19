@@ -3,8 +3,7 @@ import { app, ferr, getRichText, richEditor } from './utils.js';
 import { route } from './router.js';
 
 export function home() {
-  app.innerHTML = `<section class="hero"><h1>Створіть ініціативу</h1><p class="lead">Опишіть ініціативу та надішліть учасникам посилання. Кожен приватно зазначить максимальну суму внеску.</p></section>
-      <section class="card"><div class="title-row"><div><h2>Створити ініціативу</h2><p class="caption">Опишіть, що хочете зробити, та додайте відомі параметри. Після створення відкриється кабінет менеджера з посиланням для учасників.</p></div><div class="step">1</div></div>
+  app.innerHTML = `<section class="card"><div class="title-row"><div><h2>Створити ініціативу</h2><p class="caption">Опишіть ініціативу та надішліть учасникам посилання. Кожен приватно зазначить максимальну суму внеску.</p></div><div class="step">1</div></div>
       <label>Назва ініціативи</label><input id="title" placeholder="Наприклад: зона барбекю у дворі">
       <label>Опис</label>${richEditor('description', '', 'Опишіть, що саме планується зробити')}
       <label>Бюджет, грн <span class="muted">необовʼязково</span></label><input id="target" type="number" min="1" placeholder="Наприклад: 12000">
