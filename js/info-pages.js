@@ -83,6 +83,6 @@ export function feedback() {
     </section>
     <section class="card info-card contact-card">
       <h2>Яна Осипова</h2>
-      <a class="contact-phone" href="tel:+380638433429">+38 063 843 34 29</a>
+      <a class="contact-phone" href="mailto:osyyana@gmail.com">osyyana@gmail.com</a>
     </section>`;
 }
