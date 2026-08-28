@@ -107,7 +107,7 @@ export function showProposalComment(index) {
   const overlay = document.createElement('div');
   overlay.id = 'commentDrawer';
   overlay.className = 'drawer-overlay';
-  overlay.innerHTML = `<button class="drawer-backdrop" aria-label="Закрити" onclick="closeProposalComment()"></button><aside class="comment-drawer" role="dialog" aria-modal="true" aria-labelledby="commentDrawerTitle"><div class="drawer-head"><div><h2 id="commentDrawerTitle">Коментар до внеску</h2><p class="caption">${esc(row.participant_label)} · Максимальна сума: ${money(row.max)}</p></div><button class="drawer-close" aria-label="Закрити" onclick="closeProposalComment()">×</button></div><div class="comment-text">${esc(row.comment)}</div></aside>`;
+  overlay.innerHTML = `<button class="drawer-backdrop" aria-label="Закрити" onclick="closeProposalComment()"></button><aside class="comment-drawer" role="dialog" aria-modal="true" aria-labelledby="commentDrawerTitle"><div class="drawer-head"><div><h2 id="commentDrawerTitle">Коментар до внеску</h2><p class="caption">${esc(row.participant_label)} · Максимальна сума: ${money(row.max)}</p></div><button class="drawer-close" aria-label="Закрити" onclick="closeProposalComment()">×</button></div><div class="comment-text rich-content">${richText(row.comment)}</div></aside>`;
   document.body.appendChild(overlay);
 }
 
