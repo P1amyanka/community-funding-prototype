@@ -10,6 +10,7 @@ export function home() {
       <label>Платіжні реквізити <span class="muted">необовʼязково</span></label><input id="paymentDetails" type="text" inputmode="text" placeholder="Посилання або номер картки">
       <label>Дедлайн <span class="muted">необовʼязково</span></label><input id="deadline" type="datetime-local">
       <label>Кількість учасників <span class="muted">необовʼязково</span></label><input id="expected" type="number" min="1" placeholder="Напр. 24">
+      <label class="check-row"><input id="commentsEnabled" type="checkbox" checked><span>Дозволити коментарі учасникам</span></label>
       <div class="buttons"><button id="createBtn" onclick="createRound()">Створити ініціативу</button></div><div id="createError" class="error hidden"></div></section>`;
 }
 
@@ -17,7 +18,8 @@ export async function createRound() {
   const b = document.getElementById('createBtn'), e = document.getElementById('createError'), title = document.getElementById('title').value.trim(),
     description = getRichText('description'), targetRaw = document.getElementById('target').value.trim(),
     target = targetRaw === '' ? null : Number(targetRaw), paymentDetails = document.getElementById('paymentDetails').value.trim(),
-    d = document.getElementById('deadline').value, n = document.getElementById('expected').value;
+    d = document.getElementById('deadline').value, n = document.getElementById('expected').value,
+    commentsEnabled = document.getElementById('commentsEnabled').checked;
   e.classList.add('hidden');
   if (!title) return ferr(e, 'Вкажіть назву ініціативи.');
   if (target !== null && (!Number.isFinite(target) || target <= 0)) return ferr(e, 'Бюджет має бути більшим за 0.');
@@ -29,6 +31,7 @@ export async function createRound() {
     p_deadline: d ? new Date(d).toISOString() : null,
     p_expected_participants: n ? Number(n) : null,
     p_payment_details: paymentDetails || null,
+    p_comments_enabled: commentsEnabled,
   });
   b.disabled = false; b.textContent = 'Створити ініціативу';
   if (error) return ferr(e, error.message);

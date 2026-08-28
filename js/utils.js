@@ -41,6 +41,25 @@ export function getRichText(id) {
   return editor ? sanitizeRichText(editor.innerHTML) : '';
 }
 
+export function richTextToPlainText(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  if (!/<\/?[a-z][\s\S]*>/i.test(raw)) return raw;
+  const doc = new DOMParser().parseFromString(`<div>${sanitizeRichText(raw)}</div>`, 'text/html');
+  const root = doc.body.firstElementChild;
+  const read = node => {
+    if (node.nodeType === Node.TEXT_NODE) return node.textContent || '';
+    if (node.nodeType !== Node.ELEMENT_NODE) return '';
+    const body = [...node.childNodes].map(read).join('');
+    if (node.tagName === 'BR') return '\n';
+    if (node.tagName === 'LI') return `• ${body.trim()}\n`;
+    if (node.tagName === 'P') return `${body.trim()}\n`;
+    if (node.tagName === 'UL' || node.tagName === 'OL') return `${body.trimEnd()}\n`;
+    return body;
+  };
+  return [...root.childNodes].map(read).join('').replace(/\n{3,}/g, '\n\n').trim();
+}
+
 export function toast(x) {
   const t = document.getElementById('toast');
   t.textContent = x;
