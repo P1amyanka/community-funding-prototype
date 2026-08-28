@@ -1,5 +1,5 @@
 import { db } from './supabase.js';
-import { app, date, esc, fail, ferr, loading, money, richText, toast } from './utils.js';
+import { app, date, esc, fail, ferr, getRichText, loading, money, richEditor, richText, toast } from './utils.js';
 
 const keyName = token => `equilibrium-participant-${token}`;
 const getParticipantKey = token => {
@@ -43,7 +43,7 @@ export async function participant(token, silent = false) {
       ? `<div class="privacy"><b>Пропозицію прийнято.</b><br>Ви вказали максимальний внесок <strong>${money(r.own_max_amount)}</strong>. До завершення раунду пропозицію можна змінити.</div>`
       : '';
     const commentField = r.comments_enabled
-      ? `<label>Коментар <span class="muted">необовʼязково</span></label><textarea id="comment" placeholder="Напишіть коментар для організатора">${esc(r.own_comment || '')}</textarea><p class="field-note">Коментар бачить лише організатор.</p>`
+      ? `<label>Коментар <span class="muted">необовʼязково</span></label>${richEditor('comment', r.own_comment || '', 'Напишіть коментар для організатора')}<p class="field-note">Коментар бачить лише організатор.</p>`
       : '';
     content = `${accepted}<div class="title-row"><div><h2>${hasProposal ? 'Змінити пропозицію' : 'Додайте пропозицію'}</h2><p class="caption">Інші учасники не бачать вашу пропозицію.</p></div><div class="step">${r.round_number}</div></div>
       <label>Як вас ідентифікувати?</label><input id="label" value="${esc(r.own_label || '')}" placeholder="Наприклад: кв. 24, Іваненко або Олена">
@@ -71,7 +71,7 @@ export async function submitProposal(token) {
   const e = document.getElementById('submitError');
   const label = document.getElementById('label').value.trim();
   const i = document.getElementById('maxAmount');
-  const comment = document.getElementById('comment');
+  const commentEditor = document.getElementById('comment');
   const max = Number(i.value);
   e.classList.add('hidden');
   if (!label) return ferr(e, 'Вкажіть, як вас ідентифікувати.');
@@ -86,7 +86,7 @@ export async function submitProposal(token) {
     p_participant_key: getParticipantKey(token),
     p_participant_label: label,
     p_max_amount: max,
-    p_comment: comment ? comment.value : null,
+    p_comment: commentEditor ? (getRichText('comment') || null) : null,
   });
   b.disabled = false;
   b.textContent = 'Зберегти зміни';
