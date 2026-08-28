@@ -1,14 +1,14 @@
 import { db } from './supabase.js';
 import { state } from './state.js';
 import { allocationV02, downloadCsv, proposalsWithoutTarget } from './equilibrium.js';
-import { app, copyInput, date, esc, fail, ferr, getRichText, loading, money, purl, richEditor, richText, toast } from './utils.js';
+import { app, copyInput, date, esc, fail, ferr, getRichText, loading, money, purl, richEditor, richText, richTextToPlainText, toast } from './utils.js';
 
 let managerPoll = null;
 
 const historyCsv = item => {
   const rows = Array.isArray(item.proposals) ? item.proposals : [];
   const lines = [['Учасник', 'Максимум', 'Розрахований внесок', 'Коментар', 'Раунд'].join(';')];
-  rows.forEach(x => lines.push([x.participant_label, x.max, x.recommended ?? '', csvValue(x.comment), item.round_number].join(';')));
+  rows.forEach(x => lines.push([x.participant_label, x.max, x.recommended ?? '', csvValue(richTextToPlainText(x.comment)), item.round_number].join(';')));
   const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
