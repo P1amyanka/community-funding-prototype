@@ -1,4 +1,5 @@
 import { CONFIG } from './config.js';
+import { richTextToPlainText } from './utils.js';
 
 function proposalStats(rows) {
   const values = rows.map(x => Number(x.max || 0)).sort((a, b) => a - b);
@@ -74,7 +75,7 @@ export function downloadCsv(r, a) {
     const row = hasTarget
       ? [csvEscape(x.participant_label), x.max.toFixed(2), x.recommended !== null ? x.recommended.toFixed(2) : '']
       : [csvEscape(x.participant_label), x.max.toFixed(2)];
-    if (hasComments) row.push(csvEscape(x.comment));
+    if (hasComments) row.push(csvEscape(richTextToPlainText(x.comment)));
     row.push(csvEscape(r.title), hasTarget ? CONFIG.ALLOCATION_VERSION : 'statistics-without-budget');
     lines.push(row.join(';'));
   });
