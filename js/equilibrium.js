@@ -12,6 +12,7 @@ function proposalStats(rows) {
     count,
     sumMax,
     minimumMax: count ? values[0] : null,
+    maximumMax: count ? values[count - 1] : null,
     medianMax: count ? medianMax : null,
     averageMax: count ? sumMax / count : null,
   };
@@ -61,12 +62,23 @@ function csvEscape(v) {
 
 export function downloadCsv(r, a) {
   const hasTarget = r.target_amount !== null && r.target_amount !== undefined;
-  const lines = [hasTarget
-    ? ['Ідентифікація', 'Максимальна сума внеску', 'Розрахований внесок', 'Ініціатива', 'Алгоритм'].join(';')
-    : ['Ідентифікація', 'Максимальна сума внеску', 'Ініціатива', 'Режим'].join(';')];
-  a.rows.forEach(x => lines.push(hasTarget
-    ? [csvEscape(x.participant_label), x.max.toFixed(2), x.recommended !== null ? x.recommended.toFixed(2) : '', csvEscape(r.title), CONFIG.ALLOCATION_VERSION].join(';')
-    : [csvEscape(x.participant_label), x.max.toFixed(2), csvEscape(r.title), 'statistics-without-budget'].join(';')));
+  const hasComments = Boolean(r.comments_enabled);
+  const header = hasTarget
+    ? ['Ідентифікація', 'Максимальна сума внеску', 'Розрахований внесок']
+    : ['Ідентифікація', 'Максимальна сума внеску'];
+  if (hasComments) header.push('Коментар');
+  header.push('Ініціатива', hasTarget ? 'Алгоритм' : 'Режим');
+  const lines = [header.join(';')];
+
+  a.rows.forEach(x => {
+    const row = hasTarget
+      ? [csvEscape(x.participant_label), x.max.toFixed(2), x.recommended !== null ? x.recommended.toFixed(2) : '']
+      : [csvEscape(x.participant_label), x.max.toFixed(2)];
+    if (hasComments) row.push(csvEscape(x.comment));
+    row.push(csvEscape(r.title), hasTarget ? CONFIG.ALLOCATION_VERSION : 'statistics-without-budget');
+    lines.push(row.join(';'));
+  });
+
   const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
   const l = document.createElement('a');
   l.href = URL.createObjectURL(blob);
