@@ -42,9 +42,13 @@ export async function participant(token, silent = false) {
     const accepted = hasProposal
       ? `<div class="privacy"><b>Пропозицію прийнято.</b><br>Ви вказали максимальний внесок <strong>${money(r.own_max_amount)}</strong>. До завершення раунду пропозицію можна змінити.</div>`
       : '';
+    const commentField = r.comments_enabled
+      ? `<label>Коментар <span class="muted">необовʼязково</span></label><textarea id="comment" placeholder="Напишіть коментар для організатора">${esc(r.own_comment || '')}</textarea><p class="field-note">Коментар бачить лише організатор.</p>`
+      : '';
     content = `${accepted}<div class="title-row"><div><h2>${hasProposal ? 'Змінити пропозицію' : 'Додайте пропозицію'}</h2><p class="caption">Інші учасники не бачать вашу пропозицію.</p></div><div class="step">${r.round_number}</div></div>
       <label>Як вас ідентифікувати?</label><input id="label" value="${esc(r.own_label || '')}" placeholder="Наприклад: кв. 24, Іваненко або Олена">
       <label>Максимальна сума внеску</label><input id="maxAmount" type="number" min="0" value="${hasProposal ? esc(r.own_max_amount) : ''}">
+      ${commentField}
       <div class="buttons"><button id="submitBtn" onclick="submitProposal('${esc(token)}')">${hasProposal ? 'Зберегти зміни' : 'Надіслати пропозицію'}</button>${refreshButton(token)}</div><div id="submitError" class="error hidden"></div>`;
   } else if (confirmed) {
     content = `<div class="status"><div class="status-main">Ініціатива підтверджена</div>${hasProposal ? `<p class="status-text">Ваш внесок — <strong>${money(r.own_recommended_amount)}</strong>.</p>` : '<p class="status-text">Раунд завершено успішно.</p>'}${paymentBlock(r.payment_details)}</div><div class="buttons">${refreshButton(token)}</div>`;
@@ -67,6 +71,7 @@ export async function submitProposal(token) {
   const e = document.getElementById('submitError');
   const label = document.getElementById('label').value.trim();
   const i = document.getElementById('maxAmount');
+  const comment = document.getElementById('comment');
   const max = Number(i.value);
   e.classList.add('hidden');
   if (!label) return ferr(e, 'Вкажіть, як вас ідентифікувати.');
@@ -81,6 +86,7 @@ export async function submitProposal(token) {
     p_participant_key: getParticipantKey(token),
     p_participant_label: label,
     p_max_amount: max,
+    p_comment: comment ? comment.value : null,
   });
   b.disabled = false;
   b.textContent = 'Зберегти зміни';
