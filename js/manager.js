@@ -130,6 +130,7 @@ export function showNextRoundForm(token) {
     <label>Платіжні реквізити <span class="muted">необовʼязково</span></label><input id="nextPaymentDetails" type="text" value="${esc(r.payment_details || '')}" placeholder="Посилання або номер картки">
     <label>Дедлайн <span class="muted">необовʼязково</span></label><input id="nextDeadline" type="datetime-local" value="${datetimeLocalValue(r.deadline)}">
     <label>Кількість учасників <span class="muted">необовʼязково</span></label><input id="nextExpected" type="number" min="1" value="${r.expected_participants ?? ''}">
+    <label class="check-row"><input id="nextCommentsEnabled" type="checkbox" ${r.comments_enabled ? 'checked' : ''}><span>Дозволити коментарі учасникам</span></label>
     <div class="buttons"><button id="confirmNextRoundBtn" onclick="startNextRound('${esc(token)}')">Підтвердити</button></div>
     <div id="managerError" class="error hidden"></div></section>`;
 }
@@ -162,6 +163,7 @@ export async function startNextRound(token) {
   const deadline = document.getElementById('nextDeadline').value;
   const expectedRaw = document.getElementById('nextExpected').value.trim();
   const expected = expectedRaw === '' ? null : Number(expectedRaw);
+  const commentsEnabled = document.getElementById('nextCommentsEnabled').checked;
 
   errorBox.classList.add('hidden');
   if (!title) return ferr(errorBox, 'Вкажіть назву ініціативи.');
@@ -178,6 +180,7 @@ export async function startNextRound(token) {
     p_deadline: deadline ? new Date(deadline).toISOString() : null,
     p_expected_participants: expected,
     p_payment_details: paymentDetails || null,
+    p_comments_enabled: commentsEnabled,
   });
   button.disabled = false;
   button.textContent = 'Підтвердити';
