@@ -145,7 +145,7 @@ as $$
   select i.title, i.description, i.target_amount, i.deadline,
          i.expected_participants,
          case
-           when i.status = 'closed' and (h.feasible is true or i.target_amount is null) then i.payment_details
+           when i.status = 'closed' and h.feasible is true then i.payment_details
            else null
          end as payment_details,
          i.comments_enabled,
