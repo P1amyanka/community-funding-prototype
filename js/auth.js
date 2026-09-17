@@ -3,6 +3,14 @@ import { app, date, esc, ferr, money } from './utils.js';
 
 const redirectUrl = `${window.location.origin}${window.location.pathname}`;
 
+export async function updateAccountNav() {
+  const link = document.getElementById('accountNavLink');
+  if (!link) return;
+  const { data } = await db.auth.getSession();
+  link.textContent = data?.session ? 'Мої ініціативи' : 'Увійти';
+  link.href = '#/login';
+}
+
 const initiativeCard = (item, closed = false) => {
   const finance = item.target_amount !== null && item.target_amount !== undefined
     ? `<div class="initiative-finance"><strong>${money(item.sum_max)}</strong><span>із ${money(item.target_amount)} цілі</span></div>`
@@ -66,6 +74,7 @@ export async function login() {
   }
 
   const session = data?.session;
+  await updateAccountNav();
   if (session) return renderAccount(session);
 
   app.innerHTML = `<section class="hero"><h1>Увійти</h1><p class="lead">Отримайте одноразове посилання для входу на email.</p></section>
@@ -109,5 +118,6 @@ export async function signOutManager() {
   const errorBox = document.getElementById('authError');
   const { error } = await db.auth.signOut();
   if (error && errorBox) return ferr(errorBox, error.message);
+  await updateAccountNav();
   login();
 }
