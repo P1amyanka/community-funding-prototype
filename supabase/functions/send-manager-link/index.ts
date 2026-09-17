@@ -71,15 +71,16 @@ Deno.serve(async (req) => {
     }
 
     const managerUrl = `https://comfundy.com/#/manage/${managerToken}`;
+    const accountRedirectUrl = `https://comfundy.com/?claim=${managerToken}`;
     const safeTitle = escapeHtml(initiative.title || "Ініціатива");
     const safeManagerUrl = escapeHtml(managerUrl);
 
-    // Generate a one-time Supabase magic link for the stored manager email.
-    // If generation fails, the manager-link email still goes out without the account CTA.
+    // The redirect carries this initiative's manager token. After the email is
+    // verified, the frontend claims only this initiative for the authenticated user.
     const { data: accountLinkData, error: accountLinkError } = await admin.auth.admin.generateLink({
       type: "magiclink",
       email: initiative.manager_email,
-      options: { redirectTo: "https://comfundy.com/" },
+      options: { redirectTo: accountRedirectUrl },
     });
 
     if (accountLinkError) {
@@ -91,11 +92,11 @@ Deno.serve(async (req) => {
       ? `
           <div style="margin-top:32px;padding-top:24px;border-top:1px solid #e5ded2">
             <h3 style="margin:0 0 10px">Усі ініціативи в одному місці</h3>
-            <p style="margin:0 0 16px">Підтвердьте email, щоб користуватися розділом <strong>«Мої ініціативи»</strong>. Там будуть зібрані всі ініціативи, створені з цією адресою.</p>
+            <p style="margin:0 0 16px">Підтвердьте email, щоб користуватися розділом <strong>«Мої ініціативи»</strong>. Там будуть зібрані ваші ініціативи.</p>
             <p style="margin:20px 0">
               <a href="${escapeHtml(accountUrl)}" style="display:inline-block;padding:12px 20px;background:#fff;color:#245447;text-decoration:none;border:1px solid #245447;border-radius:999px;font-weight:700">Підтвердити email</a>
             </p>
-            <p style="font-size:13px;color:#667085;margin-bottom:0">Після підтвердження ви одразу потрапите до своїх ініціатив.</p>
+            <p style="font-size:13px;color:#667085;margin-bottom:0">Після підтвердження ця ініціатива буде додана до вашого акаунта.</p>
           </div>
         `
       : "";

@@ -16,10 +16,19 @@ export function route(x) {
 
 async function finishAuthRedirect() {
   app.innerHTML = '<section class="card"><h2>Входимо…</h2><p class="caption" style="margin-top:10px">Перевіряємо посилання з листа.</p></section>';
+  const claimToken = new URLSearchParams(location.search).get('claim');
   const { data, error } = await db.auth.getSession();
   if (error) return fail(error.message);
   if (!data?.session) return fail('Не вдалося завершити вхід. Спробуйте запросити нове посилання.');
-  history.replaceState(null, '', `${location.pathname}${location.search}#/login`);
+
+  if (claimToken) {
+    const { error: claimError } = await db.rpc('claim_initiative_v04_rpc', {
+      p_manager_token: claimToken,
+    });
+    if (claimError) return fail(claimError.message);
+  }
+
+  history.replaceState(null, '', `${location.pathname}#/login`);
   login();
 }
 
