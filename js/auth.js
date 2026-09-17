@@ -33,14 +33,6 @@ async function renderAccount(session) {
   app.innerHTML = `<section class="hero"><h1>Мої ініціативи</h1><p class="lead">${esc(session.user.email || '')}</p></section>
     <section class="card"><div class="privacy">Завантажуємо ваші ініціативи...</div></section>`;
 
-  const { error: claimError } = await db.rpc('claim_my_email_initiatives_v04_rpc');
-  if (claimError) {
-    app.innerHTML = `<section class="hero"><h1>Мої ініціативи</h1><p class="lead">${esc(session.user.email || '')}</p></section>
-      <section class="card"><div class="error">${esc(claimError.message)}</div>
-      <div class="buttons"><button class="secondary" onclick="signOutManager()">Вийти</button></div></section>`;
-    return;
-  }
-
   const { data: initiatives, error } = await db.rpc('get_my_initiatives_v04_rpc');
   if (error) {
     app.innerHTML = `<section class="hero"><h1>Мої ініціативи</h1><p class="lead">${esc(session.user.email || '')}</p></section>
