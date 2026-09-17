@@ -1,7 +1,62 @@
 import { db } from './supabase.js';
-import { app, esc, ferr } from './utils.js';
+import { app, date, esc, ferr, money } from './utils.js';
 
 const redirectUrl = `${window.location.origin}${window.location.pathname}`;
+
+const initiativeCard = (item, closed = false) => {
+  const finance = item.target_amount !== null && item.target_amount !== undefined
+    ? `<div class="initiative-finance"><strong>${money(item.sum_max)}</strong><span>із ${money(item.target_amount)} цілі</span></div>`
+    : `<div class="initiative-finance"><strong>${money(item.sum_max)}</strong><span>сума максимумів</span></div>`;
+  const meta = closed
+    ? `Раунд ${item.round_number} · Завершено ${date(item.closed_at)}`
+    : `Раунд ${item.round_number} · Учасників: ${item.proposals_count}`;
+
+  return `<article class="initiative-card">
+    <div class="initiative-card-head">
+      <div><h3>${esc(item.title)}</h3><p class="caption">${meta}</p></div>
+      <span class="tag ${closed ? 'ok' : ''}">${closed ? 'Завершена' : 'Активна'}</span>
+    </div>
+    ${finance}
+    <a class="initiative-open" href="#/manage/${esc(item.manager_token)}">Відкрити →</a>
+  </article>`;
+};
+
+async function renderAccount(session) {
+  app.innerHTML = `<section class="hero"><h1>Мої ініціативи</h1><p class="lead">${esc(session.user.email || '')}</p></section>
+    <section class="card"><div class="privacy">Завантажуємо ваші ініціативи...</div></section>`;
+
+  const { error: claimError } = await db.rpc('claim_my_email_initiatives_v04_rpc');
+  if (claimError) {
+    app.innerHTML = `<section class="hero"><h1>Мої ініціативи</h1><p class="lead">${esc(session.user.email || '')}</p></section>
+      <section class="card"><div class="error">${esc(claimError.message)}</div>
+      <div class="buttons"><button class="secondary" onclick="signOutManager()">Вийти</button></div></section>`;
+    return;
+  }
+
+  const { data: initiatives, error } = await db.rpc('get_my_initiatives_v04_rpc');
+  if (error) {
+    app.innerHTML = `<section class="hero"><h1>Мої ініціативи</h1><p class="lead">${esc(session.user.email || '')}</p></section>
+      <section class="card"><div class="error">${esc(error.message)}</div>
+      <div class="buttons"><button class="secondary" onclick="signOutManager()">Вийти</button></div></section>`;
+    return;
+  }
+
+  const items = initiatives || [];
+  const active = items.filter(x => x.status === 'open');
+  const closed = items.filter(x => x.status !== 'open');
+  const activeHtml = active.length
+    ? active.map(x => initiativeCard(x, false)).join('')
+    : '<div class="privacy">Активних ініціатив немає.</div>';
+  const closedHtml = closed.length
+    ? closed.map(x => initiativeCard(x, true)).join('')
+    : '<div class="privacy">Завершених ініціатив немає.</div>';
+
+  app.innerHTML = `<section class="hero account-hero"><div><h1>Мої ініціативи</h1><p class="lead">${esc(session.user.email || '')}</p></div></section>
+    <div class="account-create"><a class="button" href="#/">+ Створити ініціативу</a></div>
+    <section class="account-section"><h2>Активні</h2><div class="initiative-list">${activeHtml}</div></section>
+    <section class="account-section"><h2>Завершені</h2><div class="initiative-list">${closedHtml}</div></section>
+    <section class="account-actions"><button class="secondary" onclick="signOutManager()">Вийти</button><div id="authError" class="error hidden"></div></section>`;
+}
 
 export async function login() {
   const { data, error } = await db.auth.getSession();
@@ -11,14 +66,7 @@ export async function login() {
   }
 
   const session = data?.session;
-  if (session) {
-    app.innerHTML = `<section class="hero"><h1>Акаунт</h1><p class="lead">Ви увійшли в Comfundy.</p></section>
-      <section class="card"><h2>${esc(session.user.email || 'Менеджер')}</h2>
-      <p class="caption" style="margin-top:10px">Наступним кроком тут зʼявиться список ваших ініціатив.</p>
-      <div class="buttons"><button class="secondary" onclick="signOutManager()">Вийти</button></div>
-      <div id="authError" class="error hidden"></div></section>`;
-    return;
-  }
+  if (session) return renderAccount(session);
 
   app.innerHTML = `<section class="hero"><h1>Увійти</h1><p class="lead">Отримайте одноразове посилання для входу на email.</p></section>
     <section class="card">
