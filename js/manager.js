@@ -70,8 +70,8 @@ export async function manager(token, silent = false) {
     : `<div class="status-main">${proposals.length ? 'Фінансова готовність спільноти' : 'Ще немає пропозицій'}</div>`;
 
   const proposalStats = proposals.length
-    ? `<div class="stats"><div class="stat"><strong>${expected}</strong><span>подали пропозиції</span></div><div class="stat"><strong>${money(allocation.minimumMax)}</strong><span>мінімум</span></div><div class="stat"><strong>${money(allocation.maximumMax)}</strong><span>максимум</span></div><div class="stat"><strong>${money(allocation.medianMax)}</strong><span>медіана</span></div><div class="stat"><strong>${money(allocation.averageMax)}</strong><span>середнє</span></div></div>`
-    : `<div class="stats"><div class="stat"><strong>${expected}</strong><span>подали пропозиції</span></div></div>`;
+    ? `<div class="simple-stats-meta"><strong>${expected}</strong> подали пропозиції · медіана <strong>${money(allocation.medianMax)}</strong> · середнє <strong>${money(allocation.averageMax)}</strong><div class="simple-stats-detail">мін ${money(allocation.minimumMax)} · макс ${money(allocation.maximumMax)}</div></div>`
+    : `<div class="simple-stats-meta"><strong>${expected}</strong> подали пропозиції</div>`;
 
   const historyHtml = history.length
     ? history.map((x, i) => `<div class="history-item"><div><strong>Раунд ${x.round_number}</strong><small>${x.feasible === true ? 'Мету досягнуто' : x.feasible === false ? `Не вистачило ${money(x.gap)}` : 'Без бюджету'} · ${date(x.closed_at)}</small></div><button class="secondary small" onclick="downloadHistoryCsv(${i})">CSV</button></div>`).join('')
@@ -89,7 +89,7 @@ export async function manager(token, silent = false) {
 
   app.innerHTML = `<section class="hero"><h1>Кабінет менеджера</h1><p class="lead">${esc(r.title)}</p></section>
     <section class="card"><div class="title-row"><div><h2>Раунд ${r.round_number}</h2><div class="caption rich-content">${richText(r.description)}</div></div><span class="tag ${closed ? 'ok' : ''}">${closed ? 'Раунд завершено' : 'Збір триває'}</span></div>
-    <div class="status">${statusContent}${proposalStats}${hasTarget ? `<div class="stats"><div class="stat"><strong>${money(r.target_amount)}</strong><span>ціль</span></div>${r.deadline ? `<div class="stat"><strong>${date(r.deadline)}</strong><span>дедлайн</span></div>` : ''}</div>` : r.deadline ? `<div class="stats"><div class="stat"><strong>${date(r.deadline)}</strong><span>дедлайн</span></div></div>` : ''}</div>
+    <div class="status simple-status">${statusContent}${hasTarget ? `<div class="simple-stats-primary"><strong>${money(allocation.sumMax)}</strong><span>із ${money(r.target_amount)} цілі</span></div>` : proposals.length ? `<div class="simple-stats-primary"><strong>${money(allocation.sumMax)}</strong><span>сума максимумів</span></div>` : ''}${proposalStats}${r.deadline ? `<div class="simple-stats-detail">Дедлайн: ${date(r.deadline)}</div>` : ''}</div>
     <label>Посилання для учасників</label><div class="link-box"><input id="participantLink" readonly value="${esc(purl(r.participant_token))}"><button onclick="copyInput('participantLink')">Копіювати</button></div>
     <div class="buttons">${closed ? `<button onclick="showNextRoundForm('${esc(token)}')">Новий раунд</button><button class="secondary" onclick="downloadCsv(state.currentRound,state.currentAllocation)">Завантажити CSV</button>` : `<button id="closeRoundBtn" class="danger" onclick="closeRound('${esc(token)}')">Завершити раунд</button>`}<button class="ghost" onclick="manager('${esc(token)}')">Оновити</button></div>
     <div id="managerError" class="error hidden"></div></section>
