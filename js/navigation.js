@@ -29,6 +29,12 @@ export async function syncManagerNavigation(active = null, forceVisible = false)
     : '<a class="manager-menu-login" href="#/login" onclick="closeManagerMenu()">Увійти</a>';
 }
 
+export function hideManagerNavigation() {
+  closeManagerMenu();
+  const button = document.getElementById('managerMenuButton');
+  if (button) button.classList.add('hidden');
+}
+
 export function openManagerMenu() {
   const drawer = document.getElementById('managerMenuDrawer');
   if (!drawer) return;
@@ -45,8 +51,13 @@ export function closeManagerMenu() {
   document.body.classList.remove('menu-open');
 }
 
-export function collections() {
-  syncManagerNavigation('collections');
+export async function collections() {
+  const { data } = await db.auth.getSession();
+  if (!data?.session) {
+    location.hash = '#/login';
+    return;
+  }
+  await syncManagerNavigation('collections');
   const app = document.getElementById('app');
   app.innerHTML = `<section class="hero account-hero"><h1>Збори</h1><p class="lead">Тут будуть регулярні та разові збори спільнот.</p></section>
     <div class="account-create"><button disabled>+ Створити збір</button></div>
