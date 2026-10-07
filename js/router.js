@@ -4,8 +4,9 @@ import { participant } from './participant.js';
 import { manager } from './manager.js';
 import { about, feedback } from './info-pages.js';
 import { login } from './auth.js';
-import { communities, community, members, newCommunity, newMember } from './communities.js';
+import { communities, community, editCommunity, members, newCommunity, newMember } from './communities.js';
 import { collection, collections, newCollection, statistics } from './collections.js';
+import { announcements, myAnnouncements, newAnnouncement } from './announcements.js';
 import { myCollection, myCollections, myStatistics } from './participant-account.js';
 import { closeManagerMenu, hideManagerNavigation } from './navigation.js';
 import { app, fail } from './utils.js';
@@ -47,6 +48,9 @@ export function router() {
   if (k === 'about') { hideManagerNavigation(); return about(); }
   if (k === 'feedback') { hideManagerNavigation(); return feedback(); }
   if (k === 'login') return login();
+  if (k === 'announcements' && t === 'new') return newAnnouncement();
+  if (k === 'announcements') return announcements();
+  if (k === 'me' && t === 'announcements') return myAnnouncements();
   if (k === 'me' && t === 'collections' && section) return myCollection(section);
   if (k === 'me' && t === 'collections') return myCollections();
   if (k === 'me' && t === 'statistics') return myStatistics();
@@ -56,6 +60,7 @@ export function router() {
   if (k === 'statistics') return statistics();
   if (k === 'members' && t === 'new') return newMember();
   if (k === 'members') return members();
+  if (k === 'community' && t === 'edit') return editCommunity();
   if (k === 'communities' && t === 'new') return newCommunity();
   if (k === 'communities') return communities();
   if (k === 'community' && t && section === 'new-initiative') return home(t);
