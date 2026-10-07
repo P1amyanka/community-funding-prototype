@@ -8,7 +8,7 @@ export async function updateAccountNav() {
   const link = document.getElementById('accountNavLink');
   if (!link) return;
   const { data } = await db.auth.getSession();
-  link.textContent = data?.session ? 'Мої ініціативи' : 'Увійти';
+  link.textContent = data?.session ? 'Кабінет' : 'Увійти';
   link.href = '#/login';
 }
 
