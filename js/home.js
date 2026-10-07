@@ -1,21 +1,19 @@
 import { db } from './supabase.js';
 import { app, esc, ferr, getRichText, richEditor, toast } from './utils.js';
 import { route } from './router.js';
-import { hideManagerNavigation, syncManagerNavigation } from './navigation.js';
+import { getActiveManagerCommunity, hideManagerNavigation, syncManagerNavigation } from './navigation.js';
 
 export async function home(communityId = null) {
   const { data } = await db.auth.getSession();
   const session = data?.session || null;
   if (session) await syncManagerNavigation('initiatives');
   else hideManagerNavigation();
-  let community = null;
 
-  if (communityId) {
-    if (!session) return route('/login');
-    const { data: rows, error } = await db.rpc('get_my_community_v06_rpc', { p_community_id: communityId });
-    if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
-    community = rows?.[0] || null;
-    if (!community) return app.innerHTML = '<section class="card"><div class="error">Спільноту не знайдено.</div></section>';
+  let community = null;
+  if (session) {
+    community = await getActiveManagerCommunity();
+  } else if (communityId) {
+    return route('/login');
   }
 
   const managerEmailBlock = session
@@ -25,13 +23,15 @@ export async function home(communityId = null) {
         <input id="managerEmail" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com">
       </div>`;
 
-  const communityContext = community
-    ? `<div class="privacy community-context">Спільнота: <strong>${esc(community.name)}</strong></div><input id="communityId" type="hidden" value="${esc(community.id)}">`
+  const communityContext = session
+    ? community
+      ? `<div class="privacy community-context">Спільнота: <strong>${esc(community.name)}</strong></div><input id="communityId" type="hidden" value="${esc(community.id)}">`
+      : '<div class="privacy community-context">Буде автоматично створена спільнота <strong>«Моя спільнота»</strong>.</div>'
     : '';
 
   app.innerHTML = `<section class="card"><h2>Створити ініціативу</h2><p class="lead form-intro">Опишіть ініціативу та надішліть учасникам посилання. Кожен приватно зазначить максимальну суму внеску.</p>
       ${communityContext}
-      <label>Назва ініціативи</label><input id="title" placeholder="Наприклад: зона барбекю у дворі">
+      <label>Назва ініціативи</label><input id="title" placeholder="Наприклад: новий принтер для класу">
       <label>Опис</label>${richEditor('description', '', 'Опишіть, що саме планується зробити')}
       <label>Бюджет, грн <span class="muted">необовʼязково</span></label><input id="target" type="number" min="1" placeholder="Наприклад: 12000">
       <label>Платіжні реквізити <span class="muted">необовʼязково</span></label><input id="paymentDetails" type="text" inputmode="text" placeholder="Посилання або номер картки">
@@ -54,7 +54,7 @@ export async function createRound() {
   const { data: sessionData } = await db.auth.getSession();
   const session = sessionData?.session || null;
   const managerEmail = session?.user?.email || managerEmailInput?.value.trim() || '';
-  const shouldSendManagerLink = !communityId && !session && Boolean(managerEmail);
+  const shouldSendManagerLink = !session && Boolean(managerEmail);
 
   e.classList.add('hidden');
   if (!title) return ferr(e, 'Вкажіть назву ініціативи.');
@@ -64,8 +64,8 @@ export async function createRound() {
 
   b.disabled = true; b.textContent = 'Створюємо...';
 
-  const rpc = communityId ? 'create_community_initiative_v06_rpc' : 'create_initiative_v04_rpc';
-  const payload = communityId ? {
+  const rpc = session ? 'create_manager_initiative_v12_rpc' : 'create_initiative_v04_rpc';
+  const payload = session ? {
     p_community_id: communityId,
     p_title: title,
     p_description: description || null,
@@ -96,6 +96,8 @@ export async function createRound() {
     b.disabled = false; b.textContent = 'Створити ініціативу';
     return ferr(e, 'Ініціативу не створено.');
   }
+
+  if (session && r.community_id) localStorage.setItem('comfundy:managerCommunityId', r.community_id);
 
   let emailError = null;
   if (shouldSendManagerLink) {
