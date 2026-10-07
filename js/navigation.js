@@ -6,6 +6,7 @@ const items = [
   ['initiatives', '#/login', 'Ініціативи'],
   ['members', '#/members', 'Учасники'],
   ['communities', '#/communities', 'Спільноти'],
+  ['statistics', '#/statistics', 'Статистика'],
 ];
 
 export async function syncManagerNavigation(active = null, forceVisible = false) {
@@ -49,17 +50,4 @@ export function closeManagerMenu() {
   drawer.classList.remove('open');
   drawer.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('menu-open');
-}
-
-export async function collections() {
-  const { data } = await db.auth.getSession();
-  if (!data?.session) {
-    location.hash = '#/login';
-    return;
-  }
-  await syncManagerNavigation('collections');
-  const app = document.getElementById('app');
-  app.innerHTML = `<section class="hero account-hero"><h1>Збори</h1><p class="lead">Тут будуть регулярні та разові збори спільнот.</p></section>
-    <div class="account-create"><button disabled>+ Створити збір</button></div>
-    <section class="card"><div class="privacy">Функціонал зборів буде додано в наступному етапі.</div></section>`;
 }

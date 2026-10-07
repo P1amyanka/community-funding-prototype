@@ -5,7 +5,8 @@ import { manager } from './manager.js';
 import { about, feedback } from './info-pages.js';
 import { login } from './auth.js';
 import { communities, community, members, newCommunity, newMember } from './communities.js';
-import { collections, closeManagerMenu, hideManagerNavigation } from './navigation.js';
+import { collection, collections, newCollection, statistics } from './collections.js';
+import { closeManagerMenu, hideManagerNavigation } from './navigation.js';
 import { app, fail } from './utils.js';
 
 export function parts() {
@@ -45,7 +46,10 @@ export function router() {
   if (k === 'about') { hideManagerNavigation(); return about(); }
   if (k === 'feedback') { hideManagerNavigation(); return feedback(); }
   if (k === 'login') return login();
+  if (k === 'collections' && t === 'new') return newCollection();
+  if (k === 'collections' && t) return collection(t);
   if (k === 'collections') return collections();
+  if (k === 'statistics') return statistics();
   if (k === 'members' && t === 'new') return newMember();
   if (k === 'members') return members();
   if (k === 'communities' && t === 'new') return newCommunity();
