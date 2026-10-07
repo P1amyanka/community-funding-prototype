@@ -1,12 +1,13 @@
 import { db } from './supabase.js';
 import { app, esc, ferr, getRichText, richEditor, toast } from './utils.js';
 import { route } from './router.js';
-import { syncManagerNavigation } from './navigation.js';
+import { hideManagerNavigation, syncManagerNavigation } from './navigation.js';
 
 export async function home(communityId = null) {
   const { data } = await db.auth.getSession();
   const session = data?.session || null;
   if (session) await syncManagerNavigation('initiatives');
+  else hideManagerNavigation();
   let community = null;
 
   if (communityId) {
