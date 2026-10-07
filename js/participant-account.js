@@ -63,6 +63,7 @@ export async function myCollections() {
 export async function myCollection(collectionId) {
   const session = await requireParticipant('my-collections');
   if (!session) return;
+  const activeCommunity = await getActiveParticipantCommunity();
 
   const [{ data: rows, error }, { data: contributions, error: contributionsError }] = await Promise.all([
     db.rpc('get_my_participant_collection_v11_rpc', { p_collection_id: collectionId }),
@@ -75,6 +76,9 @@ export async function myCollection(collectionId) {
 
   const item = rows?.[0];
   if (!item) return app.innerHTML = '<section class="card"><div class="error">Збір не знайдено.</div></section>';
+  if (activeCommunity && item.community_id !== activeCommunity.id) {
+    return app.innerHTML = '<section class="card"><div class="privacy">Цей збір належить іншій спільноті. Перемкніть активну спільноту в меню.</div></section>';
+  }
 
   const history = (contributions || []).length ? contributions.map(c => `
     <article class="contribution-card participant-contribution-card">
