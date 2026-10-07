@@ -19,16 +19,11 @@ const initiativeCard = (item, closed = false) => {
   const meta = closed
     ? `Раунд ${item.round_number} · Завершено ${date(item.closed_at)}`
     : `Раунд ${item.round_number} · Учасників: ${item.proposals_count}`;
-  const community = item.community_name
-    ? `<a class="community-chip" href="#/community/${esc(item.community_id)}">${esc(item.community_name)}</a>`
-    : '<span class="community-chip muted-chip">Без спільноти</span>';
-
   return `<article class="initiative-card">
     <div class="initiative-card-head">
       <div><h3>${esc(item.title)}</h3><p class="caption">${meta}</p></div>
       <span class="tag ${closed ? 'ok' : ''}">${closed ? 'Завершена' : 'Активна'}</span>
     </div>
-    <div class="initiative-community">${community}</div>
     ${finance}
     <a class="initiative-open" href="#/manage/${esc(item.manager_token)}">Відкрити →</a>
   </article>`;
