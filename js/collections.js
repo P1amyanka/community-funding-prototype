@@ -118,6 +118,7 @@ export async function createCollection() {
 export async function collection(collectionId) {
   const session = await requireSession('collections');
   if (!session) return;
+  const activeCommunity = await getActiveManagerCommunity();
 
   const [{ data: collectionRows, error: collectionError }, { data: contributions, error: contributionsError }] = await Promise.all([
     db.rpc('get_collection_v10_rpc', { p_collection_id: collectionId }),
@@ -128,6 +129,9 @@ export async function collection(collectionId) {
 
   const item = collectionRows?.[0];
   if (!item) return app.innerHTML = '<section class="card"><div class="error">Збір не знайдено.</div></section>';
+  if (activeCommunity && item.community_id !== activeCommunity.id) {
+    return app.innerHTML = '<section class="card"><div class="privacy">Цей збір належить іншій спільноті. Перемкніть активну спільноту в меню.</div></section>';
+  }
 
   const history = (contributions || []).length ? contributions.map(c => `
     <article class="contribution-card">
