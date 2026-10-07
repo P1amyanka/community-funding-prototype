@@ -74,6 +74,7 @@ export async function login() {
   const session = data?.session;
   await updateAccountNav();
   if (session) return renderAccount(session);
+  await syncManagerNavigation(null);
 
   app.innerHTML = `<section class="hero"><h1>Увійти</h1><p class="lead">Отримайте одноразове посилання для входу на email.</p></section>
     <section class="card">
