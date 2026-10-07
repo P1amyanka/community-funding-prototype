@@ -73,7 +73,17 @@ export async function login() {
 
   const session = data?.session;
   await updateAccountNav();
-  if (session) return renderAccount(session);
+  if (session) {
+    await db.rpc('claim_my_memberships_v11_rpc');
+    const { data: roles } = await db.rpc('get_my_account_roles_v11_rpc');
+    const role = roles?.[0];
+    if (role?.is_manager) return renderAccount(session);
+    if (role?.is_participant) {
+      location.hash = '#/me/collections';
+      return;
+    }
+    return renderAccount(session);
+  }
   await syncManagerNavigation(null);
 
   app.innerHTML = `<section class="hero"><h1>Увійти</h1><p class="lead">Отримайте одноразове посилання для входу на email.</p></section>
