@@ -247,7 +247,7 @@ export async function sendMemberAccess(memberId, email) {
     button.disabled = true;
     button.textContent = 'Надсилаємо...';
   }
-  const redirectUrl = `${window.location.origin}${window.location.pathname}#/login`;
+  const redirectUrl = `${window.location.origin}${window.location.pathname}`;
   const { error } = await db.auth.signInWithOtp({
     email,
     options: { emailRedirectTo: redirectUrl },
