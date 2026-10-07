@@ -13,6 +13,11 @@ const card = a => `<article class="announcement-card">
 </article>`;
 
 export async function announcements() {
+  const { data: sessionData } = await db.auth.getSession();
+  if (!sessionData?.session) {
+    location.hash = '#/login';
+    return;
+  }
   await syncManagerNavigation('announcements');
   const community = await getActiveManagerCommunity();
   if (!community) {
@@ -28,6 +33,11 @@ export async function announcements() {
 }
 
 export async function newAnnouncement() {
+  const { data: sessionData } = await db.auth.getSession();
+  if (!sessionData?.session) {
+    location.hash = '#/login';
+    return;
+  }
   await syncManagerNavigation('announcements');
   const community = await getActiveManagerCommunity();
   if (!community) return announcements();
