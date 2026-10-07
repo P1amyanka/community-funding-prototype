@@ -178,39 +178,13 @@ export async function newMember(communityId = null) {
 export async function community(communityId, section = 'members') {
   const session = await requireSession('communities');
   if (!session) return;
-  const active = section === 'initiatives' ? 'initiatives' : 'members';
-
-  const { data: communityRows, error: communityError } = await db.rpc('get_my_community_v06_rpc', {
-    p_community_id: communityId,
-  });
-  if (communityError) return app.innerHTML = `<section class="card"><div class="error">${esc(communityError.message)}</div></section>`;
-
-  const item = communityRows?.[0];
-  if (!item) return app.innerHTML = '<section class="card"><div class="error">Спільноту не знайдено.</div></section>';
-
-  const header = `<section class="hero community-hero"><p class="eyebrow">Спільнота</p><h1>${esc(item.name)}</h1>${item.description ? `<p class="lead">${esc(item.description)}</p>` : ''}</section>
-    ${communityTabs(communityId, active)}`;
-
-  if (active === 'members') {
-    const { data, error } = await db.rpc('get_my_members_v06_rpc', { p_community_id: communityId });
-    if (error) return app.innerHTML = header + `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
-    const rows = (data || []).length ? data.map(m => memberCard(m, false)).join('') : '<div class="privacy">У цій спільноті ще немає учасників.</div>';
-
-    app.innerHTML = header + `
-      <div class="account-create"><a class="button" href="#/community/${esc(communityId)}/new-member">+ Додати учасника</a></div>
-      <div class="member-search"><span aria-hidden="true">⌕</span><input id="memberSearch" type="search" placeholder="Пошук за імʼям або email" oninput="filterMembers()"></div>
-      <section class="account-section"><h2>Учасники · ${item.members_count}</h2><div class="member-list">${rows}</div><div id="memberSearchEmpty" class="privacy hidden">Нічого не знайдено.</div></section>`;
+  const { data: rows, error } = await db.rpc('get_my_community_v06_rpc', { p_community_id: communityId });
+  if (error || !rows?.[0]) {
+    app.innerHTML = `<section class="card"><div class="error">${esc(error?.message || 'Спільноту не знайдено.')}</div></section>`;
     return;
   }
-
-  const { data, error } = await db.rpc('get_my_initiatives_v06_rpc', { p_community_id: communityId });
-  if (error) return app.innerHTML = header + `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
-  const initiatives = data || [];
-  const cards = initiatives.length ? initiatives.map(initiativeCard).join('') : '<div class="privacy">У цій спільноті ще немає ініціатив.</div>';
-
-  app.innerHTML = header + `
-    <div class="account-create"><a class="button" href="#/community/${esc(communityId)}/new-initiative">+ Створити ініціативу</a></div>
-    <section class="account-section"><h2>Ініціативи · ${item.initiatives_count}</h2><div class="initiative-list">${cards}</div></section>`;
+  localStorage.setItem('comfundy:managerCommunityId', communityId);
+  location.hash = section === 'initiatives' ? '#/login' : '#/members';
 }
 
 export async function addCommunityMember() {
