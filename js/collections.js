@@ -156,10 +156,9 @@ export async function collection(collectionId) {
       <span class="tag ok">${frequencyLabel(item.frequency)}</span>
     </section>
     <div class="account-create"><button onclick="openContributionDrawer('${esc(item.id)}','${esc(item.community_id)}')">+ Додати внесок</button></div>
-    <section class="collection-stats compact-stats" aria-label="Статистика збору">
-      <div><strong>${money(item.total_amount)}</strong><span>зібрано</span></div>
-      <div><strong>${item.contributors_count}</strong><span>учасників</span></div>
-      <div><strong>${item.contributions_count}</strong><span>внесків</span></div>
+    <section class="simple-stats" aria-label="Статистика збору">
+      <div class="simple-stats-primary"><strong>${money(item.total_amount)}</strong><span>зібрано</span></div>
+      <div class="simple-stats-meta"><strong>${item.contributors_count}</strong> учасників · <strong>${item.contributions_count}</strong> внесків</div>
     </section>
     <section class="account-section"><h2>Історія внесків</h2><div class="contribution-list">${history}</div></section>`;
 }
