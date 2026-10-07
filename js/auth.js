@@ -33,23 +33,27 @@ async function renderAccount(session) {
   await syncManagerNavigation('initiatives');
   const community = await getActiveManagerCommunity();
 
-  if (!community) {
-    app.innerHTML = `<section class="hero account-hero"><h1>Мої ініціативи</h1></section>
-      <section class="card"><div class="privacy">Поки немає спільноти. Створіть першу ініціативу — спільнота «Моя спільнота» буде створена автоматично.</div>
-      <div class="buttons"><a class="button" href="#/new-initiative">+ Створити ініціативу</a></div></section>`;
-    return;
-  }
-
-  app.innerHTML = `<section class="hero account-hero"><h1>Мої ініціативи</h1><p class="lead">${esc(community.name)}</p></section>
-    <section class="card"><div class="privacy">Завантажуємо ваші ініціативи...</div></section>`;
-
-  const { data: initiatives, error } = await db.rpc('get_my_initiatives_v06_rpc', { p_community_id: community.id });
+  const { data: allInitiatives, error } = await db.rpc('get_my_initiatives_v06_rpc', { p_community_id: null });
   if (error) {
     app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
     return;
   }
 
-  const items = initiatives || [];
+  const all = allInitiatives || [];
+  const legacy = all.filter(x => !x.community_id);
+  const legacyHtml = legacy.length
+    ? `<section class="account-section"><h2>Старі ініціативи</h2><div class="privacy" style="margin-bottom:12px">Ці ініціативи були створені до появи спільнот.</div><div class="initiative-list">${legacy.map(x => initiativeCard(x, x.status !== 'open')).join('')}</div></section>`
+    : '';
+
+  if (!community) {
+    app.innerHTML = `<section class="hero account-hero"><h1>Мої ініціативи</h1></section>
+      <section class="card"><div class="privacy">Створіть нову ініціативу — спільнота <strong>«Моя спільнота»</strong> буде створена автоматично.</div>
+      <div class="buttons"><a class="button" href="#/new-initiative">+ Створити ініціативу</a></div></section>
+      ${legacyHtml}`;
+    return;
+  }
+
+  const items = all.filter(x => x.community_id === community.id);
   const active = items.filter(x => x.status === 'open');
   const closed = items.filter(x => x.status !== 'open');
   const activeHtml = active.length
@@ -62,7 +66,8 @@ async function renderAccount(session) {
   app.innerHTML = `<section class="hero account-hero"><h1>Мої ініціативи</h1><p class="lead">${esc(community.name)}</p></section>
     <div class="account-create"><a class="button" href="#/new-initiative">+ Створити ініціативу</a></div>
     <section class="account-section"><h2>Активні</h2><div class="initiative-list">${activeHtml}</div></section>
-    <section class="account-section"><h2>Завершені</h2><div class="initiative-list">${closedHtml}</div></section>`;
+    <section class="account-section"><h2>Завершені</h2><div class="initiative-list">${closedHtml}</div></section>
+    ${legacyHtml}`;
 }
 
 export async function login() {
