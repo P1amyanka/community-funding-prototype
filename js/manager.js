@@ -2,6 +2,7 @@ import { db } from './supabase.js';
 import { state } from './state.js';
 import { allocationV02, downloadCsv, proposalsWithoutTarget } from './equilibrium.js';
 import { app, copyInput, date, esc, fail, ferr, getRichText, loading, money, purl, richEditor, richText, richTextToPlainText, toast } from './utils.js';
+import { syncManagerNavigation } from './navigation.js';
 
 let managerPoll = null;
 
@@ -42,6 +43,7 @@ function startManagerPolling(token) {
 }
 
 export async function manager(token, silent = false) {
+  await syncManagerNavigation('initiatives', true);
   if (!silent) loading('Завантажуємо кабінет менеджера');
   const [{ data: rd, error: re }, { data: p, error: pe }, { data: h, error: he }] = await Promise.all([
     db.rpc('get_manager_state_v04_rpc', { p_manager_token: token }),
@@ -119,6 +121,7 @@ export function closeProposalComment() {
 }
 
 export function showNextRoundForm(token) {
+  syncManagerNavigation('initiatives', true);
   clearInterval(managerPoll);
   const r = state.currentRound;
   if (!r) return;
