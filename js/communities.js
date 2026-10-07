@@ -40,8 +40,13 @@ const initiativeCard = item => {
 
 const memberCard = (m, showCommunity = true) => {
   const search = [m.full_name, m.email || '', m.community_name || ''].join(' ').toLocaleLowerCase('uk-UA');
+  const access = m.email
+    ? m.user_id
+      ? '<span class="member-access-status">Доступ активний</span>'
+      : `<button class="secondary small member-access-button" onclick="sendMemberAccess('${esc(m.id)}','${esc(m.email)}')">Надіслати доступ</button>`
+    : '';
   return `<article class="member-card" data-member-search="${esc(search)}">
-    <div><h3>${esc(m.full_name)}</h3><p class="caption">${m.email ? esc(m.email) : 'Email не вказано'}</p></div>
+    <div class="member-card-main"><h3>${esc(m.full_name)}</h3><p class="caption">${m.email ? esc(m.email) : 'Email не вказано'}</p>${access}</div>
     ${showCommunity ? `<a class="community-chip" href="#/community/${esc(m.community_id)}/members">${esc(m.community_name)}</a>` : `<span class="tag ok">${m.status === 'active' ? 'Активний' : 'Неактивний'}</span>`}
   </article>`;
 };
@@ -232,4 +237,24 @@ export async function addCommunityMember() {
   button.textContent = 'Додати учасника';
   if (error) return ferr(errorBox, error.message);
   location.hash = `#/community/${communityId}/members`;
+}
+
+
+export async function sendMemberAccess(memberId, email) {
+  if (!email) return;
+  const button = [...document.querySelectorAll('.member-access-button')].find(x => x.getAttribute('onclick')?.includes(memberId));
+  if (button) {
+    button.disabled = true;
+    button.textContent = 'Надсилаємо...';
+  }
+  const redirectUrl = `${window.location.origin}${window.location.pathname}`;
+  const { error } = await db.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: redirectUrl },
+  });
+  if (button) {
+    button.disabled = false;
+    button.textContent = error ? 'Спробувати ще раз' : 'Посилання надіслано';
+  }
+  if (error) alert(error.message);
 }
