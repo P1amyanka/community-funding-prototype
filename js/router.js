@@ -4,6 +4,7 @@ import { participant } from './participant.js';
 import { manager } from './manager.js';
 import { about, feedback } from './info-pages.js';
 import { login } from './auth.js';
+import { communities, community, members } from './communities.js';
 import { app, fail } from './utils.js';
 
 export function parts() {
@@ -36,11 +37,15 @@ export function router() {
   const rawHash = location.hash;
   if (rawHash.includes('access_token=') || rawHash.includes('refresh_token=')) return finishAuthRedirect();
 
-  const [k, t] = parts();
+  const [k, t, section] = parts();
   if (!k) return home();
   if (k === 'about') return about();
   if (k === 'feedback') return feedback();
   if (k === 'login') return login();
+  if (k === 'members') return members();
+  if (k === 'communities') return communities();
+  if (k === 'community' && t && section === 'new-initiative') return home(t);
+  if (k === 'community' && t) return community(t, section || 'members');
   if (k === 'r' && t) return participant(t);
   if (k === 'manage' && t) return manager(t);
   fail('Невідоме посилання.');
