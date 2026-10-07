@@ -80,9 +80,10 @@ export async function newCollection() {
     return;
   }
 
+  const lastCommunityId = localStorage.getItem('comfundy:lastCommunityId') || '';
   const communityField = communities.length === 1
     ? `<div class="privacy">Спільнота: <strong>${esc(communities[0].name)}</strong></div><input id="collectionCommunity" type="hidden" value="${esc(communities[0].id)}">`
-    : `<label>Спільнота</label><select id="collectionCommunity">${communities.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('')}</select>`;
+    : `<label>Спільнота</label><select id="collectionCommunity">${communities.map(c => `<option value="${esc(c.id)}" ${c.id === lastCommunityId ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select>`;
 
   app.innerHTML = `<section class="hero account-hero"><h1>Новий збір</h1><p class="lead">Створіть разовий або щомісячний збір для спільноти.</p></section>
     <section class="card">
@@ -108,6 +109,7 @@ export async function createCollection() {
   errorBox.classList.add('hidden');
   if (!communityId) return ferr(errorBox, 'Оберіть спільноту.');
   if (!name) return ferr(errorBox, 'Вкажіть назву збору.');
+  localStorage.setItem('comfundy:lastCommunityId', communityId);
 
   button.disabled = true;
   button.textContent = 'Створюємо...';
