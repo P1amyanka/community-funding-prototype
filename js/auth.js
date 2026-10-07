@@ -1,6 +1,6 @@
 import { db } from './supabase.js';
 import { app, date, esc, ferr, money } from './utils.js';
-import { syncManagerNavigation, closeManagerMenu } from './navigation.js';
+import { getActiveManagerCommunity, syncManagerNavigation, closeManagerMenu } from './navigation.js';
 
 const redirectUrl = `${window.location.origin}${window.location.pathname}`;
 
@@ -36,14 +36,21 @@ const initiativeCard = (item, closed = false) => {
 
 async function renderAccount(session) {
   await syncManagerNavigation('initiatives');
-  app.innerHTML = `<section class="hero"><h1>Мої ініціативи</h1><p class="lead">${esc(session.user.email || '')}</p></section>
+  const community = await getActiveManagerCommunity();
+
+  if (!community) {
+    app.innerHTML = `<section class="hero account-hero"><h1>Мої ініціативи</h1></section>
+      <section class="card"><div class="privacy">Поки немає спільноти. Створіть першу ініціативу — спільнота «Моя спільнота» буде створена автоматично.</div>
+      <div class="buttons"><a class="button" href="#/new-initiative">+ Створити ініціативу</a></div></section>`;
+    return;
+  }
+
+  app.innerHTML = `<section class="hero account-hero"><h1>Мої ініціативи</h1><p class="lead">${esc(community.name)}</p></section>
     <section class="card"><div class="privacy">Завантажуємо ваші ініціативи...</div></section>`;
 
-  const { data: initiatives, error } = await db.rpc('get_my_initiatives_v06_rpc', { p_community_id: null });
+  const { data: initiatives, error } = await db.rpc('get_my_initiatives_v06_rpc', { p_community_id: community.id });
   if (error) {
-    app.innerHTML = `<section class="hero"><h1>Мої ініціативи</h1><p class="lead">${esc(session.user.email || '')}</p></section>
-      <section class="card"><div class="error">${esc(error.message)}</div>
-      <div class="buttons"><button class="secondary" onclick="signOutManager()">Вийти</button></div></section>`;
+    app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
     return;
   }
 
@@ -57,11 +64,10 @@ async function renderAccount(session) {
     ? closed.map(x => initiativeCard(x, true)).join('')
     : '<div class="privacy">Завершених ініціатив немає.</div>';
 
-  app.innerHTML = `<section class="hero account-hero"><div><h1>Мої ініціативи</h1><p class="lead">${esc(session.user.email || '')}</p></div></section>
+  app.innerHTML = `<section class="hero account-hero"><h1>Мої ініціативи</h1><p class="lead">${esc(community.name)}</p></section>
     <div class="account-create"><a class="button" href="#/new-initiative">+ Створити ініціативу</a></div>
     <section class="account-section"><h2>Активні</h2><div class="initiative-list">${activeHtml}</div></section>
-    <section class="account-section"><h2>Завершені</h2><div class="initiative-list">${closedHtml}</div></section>
-    <section class="account-actions"><button class="secondary" onclick="signOutManager()">Вийти</button><div id="authError" class="error hidden"></div></section>`;
+    <section class="account-section"><h2>Завершені</h2><div class="initiative-list">${closedHtml}</div></section>`;
 }
 
 export async function login() {
