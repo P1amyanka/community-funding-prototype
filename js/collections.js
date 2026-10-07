@@ -1,5 +1,5 @@
 import { db } from './supabase.js';
-import { syncManagerNavigation } from './navigation.js';
+import { getActiveManagerCommunity, syncManagerNavigation } from './navigation.js';
 import { app, date, esc, ferr, money } from './utils.js';
 
 const months = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
@@ -37,19 +37,19 @@ const createdLabel = value => {
 export async function collections() {
   const session = await requireSession('collections');
   if (!session) return;
-
-  app.innerHTML = `<section class="hero account-hero"><h1>Збори</h1><p class="lead">${esc(session.user.email || '')}</p></section>
-    <div class="account-create"><a class="button" href="#/collections/new">+ Створити збір</a></div>
-    <section class="card"><div class="privacy">Завантажуємо збори...</div></section>`;
+  const community = await getActiveManagerCommunity();
+  if (!community) {
+    app.innerHTML = '<section class="hero account-hero"><h1>Збори</h1></section><section class="card"><div class="privacy">Спочатку створіть спільноту.</div><div class="buttons"><a class="button" href="#/communities/new">+ Створити спільноту</a></div></section>';
+    return;
+  }
 
   const { data, error } = await db.rpc('get_my_collections_v10_rpc');
-  if (error) return app.innerHTML = `<section class="hero account-hero"><h1>Збори</h1></section><section class="card"><div class="error">${esc(error.message)}</div></section>`;
-
-  const rows = data || [];
+  if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
+  const rows = (data || []).filter(x => x.community_id === community.id);
   const cards = rows.length ? rows.map(c => `
     <article class="collection-card">
       <div class="collection-card-head">
-        <div><h3>${esc(c.name)}</h3><p class="caption">${esc(c.community_name)}</p></div>
+        <div><h3>${esc(c.name)}</h3></div>
         <span class="tag ok">${frequencyLabel(c.frequency)}</span>
       </div>
       <div class="collection-summary">
@@ -58,9 +58,9 @@ export async function collections() {
         <span><strong>${c.contributions_count}</strong><small>внесків</small></span>
       </div>
       <a class="initiative-open" href="#/collections/${esc(c.id)}">Відкрити →</a>
-    </article>`).join('') : '<div class="privacy">У вас ще немає зборів.</div>';
+    </article>`).join('') : '<div class="privacy">У цій спільноті ще немає зборів.</div>';
 
-  app.innerHTML = `<section class="hero account-hero"><h1>Збори</h1><p class="lead">${esc(session.user.email || '')}</p></section>
+  app.innerHTML = `<section class="hero account-hero"><h1>Збори</h1><p class="lead">${esc(community.name)}</p></section>
     <div class="account-create"><a class="button" href="#/collections/new">+ Створити збір</a></div>
     <section class="account-section"><div class="collection-list">${cards}</div></section>`;
 }
@@ -68,27 +68,16 @@ export async function collections() {
 export async function newCollection() {
   const session = await requireSession('collections');
   if (!session) return;
-
-  const { data, error } = await db.rpc('get_my_communities_v06_rpc');
-  if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
-  const communities = data || [];
-
-  if (!communities.length) {
-    app.innerHTML = `<section class="hero account-hero"><h1>Новий збір</h1></section>
-      <section class="card"><div class="privacy">Щоб створити збір, спочатку створіть спільноту.</div>
-      <div class="buttons"><a class="button" href="#/communities/new">+ Створити спільноту</a></div></section>`;
+  const community = await getActiveManagerCommunity();
+  if (!community) {
+    app.innerHTML = '<section class="hero account-hero"><h1>Новий збір</h1></section><section class="card"><div class="privacy">Спочатку створіть спільноту.</div><div class="buttons"><a class="button" href="#/communities/new">+ Створити спільноту</a></div></section>';
     return;
   }
 
-  const lastCommunityId = localStorage.getItem('comfundy:lastCommunityId') || '';
-  const communityField = communities.length === 1
-    ? `<div class="privacy">Спільнота: <strong>${esc(communities[0].name)}</strong></div><input id="collectionCommunity" type="hidden" value="${esc(communities[0].id)}">`
-    : `<label>Спільнота</label><select id="collectionCommunity">${communities.map(c => `<option value="${esc(c.id)}" ${c.id === lastCommunityId ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select>`;
-
-  app.innerHTML = `<section class="hero account-hero"><h1>Новий збір</h1><p class="lead">Створіть разовий або щомісячний збір для спільноти.</p></section>
+  app.innerHTML = `<section class="hero account-hero"><h1>Новий збір</h1><p class="lead">${esc(community.name)}</p></section>
     <section class="card">
-      ${communityField}
-      <label>Назва</label><input id="collectionName" placeholder="Наприклад: Обслуговування будинку">
+      <input id="collectionCommunity" type="hidden" value="${esc(community.id)}">
+      <label>Назва</label><input id="collectionName" placeholder="Наприклад: Екскурсія класу">
       <label>Регулярність</label>
       <select id="collectionFrequency">
         <option value="once" selected>Одноразово</option>
@@ -295,26 +284,30 @@ export async function saveContribution(collectionId) {
 export async function statistics() {
   const session = await requireSession('statistics');
   if (!session) return;
-  app.innerHTML = `<section class="hero account-hero"><h1>Статистика</h1><p class="lead">Зведення по зборах та внесках.</p></section>
-    <section class="card"><div class="privacy">Завантажуємо статистику...</div></section>`;
+  const community = await getActiveManagerCommunity();
+  if (!community) {
+    app.innerHTML = '<section class="hero account-hero"><h1>Статистика</h1></section><section class="card"><div class="privacy">Спочатку створіть спільноту.</div></section>';
+    return;
+  }
 
   const [{ data: totals, error: totalsError }, { data: members, error: membersError }, { data: collectionsData, error: collectionsError }] = await Promise.all([
-    db.rpc('get_manager_collection_stats_v10_rpc'),
-    db.rpc('get_manager_collection_member_stats_v10_rpc'),
+    db.rpc('get_manager_community_stats_v12_rpc', { p_community_id: community.id }),
+    db.rpc('get_manager_community_member_stats_v12_rpc', { p_community_id: community.id }),
     db.rpc('get_my_collections_v10_rpc'),
   ]);
   if (totalsError || membersError || collectionsError) {
     const msg = totalsError?.message || membersError?.message || collectionsError?.message || 'Не вдалося завантажити статистику.';
-    return app.innerHTML = `<section class="hero account-hero"><h1>Статистика</h1></section><section class="card"><div class="error">${esc(msg)}</div></section>`;
+    return app.innerHTML = `<section class="card"><div class="error">${esc(msg)}</div></section>`;
   }
 
   const t = totals?.[0] || { total_amount:0, contributions_count:0, contributors_count:0, collections_count:0 };
-  const byCollections = (collectionsData || []).length ? collectionsData.map(c => `
-    <div class="stats-row"><div><strong>${esc(c.name)}</strong><span>${esc(c.community_name)}</span></div><strong>${money(c.total_amount)}</strong></div>`).join('') : '<div class="privacy">Зборів ще немає.</div>';
+  const scopedCollections = (collectionsData || []).filter(x => x.community_id === community.id);
+  const byCollections = scopedCollections.length ? scopedCollections.map(c => `
+    <div class="stats-row"><div><strong>${esc(c.name)}</strong></div><strong>${money(c.total_amount)}</strong></div>`).join('') : '<div class="privacy">Зборів ще немає.</div>';
   const byMembers = (members || []).length ? members.map(m => `
-    <div class="stats-row"><div><strong>${esc(m.member_name)}</strong><span>${esc(m.community_name)} · ${m.contributions_count} внесків</span></div><strong>${money(m.total_amount)}</strong></div>`).join('') : '<div class="privacy">Внесків ще немає.</div>';
+    <div class="stats-row"><div><strong>${esc(m.member_name)}</strong><span>${m.contributions_count} внесків</span></div><strong>${money(m.total_amount)}</strong></div>`).join('') : '<div class="privacy">Внесків ще немає.</div>';
 
-  app.innerHTML = `<section class="hero account-hero"><h1>Статистика</h1><p class="lead">Зведення по зборах та внесках.</p></section>
+  app.innerHTML = `<section class="hero account-hero"><h1>Статистика</h1><p class="lead">${esc(community.name)}</p></section>
     <section class="collection-stats statistics-overview">
       <div><strong>${money(t.total_amount)}</strong><span>всього внесено</span></div>
       <div><strong>${t.contributors_count}</strong><span>учасників</span></div>
