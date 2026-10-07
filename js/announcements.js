@@ -57,8 +57,18 @@ export async function createAnnouncement() {
 }
 
 export async function myAnnouncements() {
+  const { data: sessionData } = await db.auth.getSession();
+  if (!sessionData?.session) {
+    location.hash = '#/login';
+    return;
+  }
   await db.rpc('claim_my_memberships_v11_rpc');
-  await syncParticipantNavigation('my-announcements');
+  const { data: roles } = await db.rpc('get_my_account_roles_v11_rpc');
+  if (!roles?.[0]?.is_participant) {
+    app.innerHTML = '<section class="card"><div class="privacy">Для цього email не знайдено активного профілю учасника.</div></section>';
+    return;
+  }
+  await syncParticipantNavigation('my-announcements', roles[0]);
   const community = await getActiveParticipantCommunity();
   if (!community) {
     app.innerHTML = '<section class="hero account-hero"><h1>Оголошення</h1></section><section class="card"><div class="privacy">Для цього акаунта не знайдено активної спільноти.</div></section>';
