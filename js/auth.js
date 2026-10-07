@@ -1,5 +1,6 @@
 import { db } from './supabase.js';
 import { app, date, esc, ferr, money } from './utils.js';
+import { syncManagerNavigation, closeManagerMenu } from './navigation.js';
 
 const redirectUrl = `${window.location.origin}${window.location.pathname}`;
 
@@ -10,13 +11,6 @@ export async function updateAccountNav() {
   link.textContent = data?.session ? 'Мої ініціативи' : 'Увійти';
   link.href = '#/login';
 }
-
-export const accountNav = (active = 'initiatives') => `
-  <nav class="account-nav" aria-label="Кабінет менеджера">
-    <a class="account-nav-link ${active === 'initiatives' ? 'active' : ''}" href="#/login">Ініціативи</a>
-    <a class="account-nav-link ${active === 'members' ? 'active' : ''}" href="#/members">Учасники</a>
-    <a class="account-nav-link ${active === 'communities' ? 'active' : ''}" href="#/communities">Спільноти</a>
-  </nav>`;
 
 const initiativeCard = (item, closed = false) => {
   const finance = item.target_amount !== null && item.target_amount !== undefined
@@ -41,14 +35,13 @@ const initiativeCard = (item, closed = false) => {
 };
 
 async function renderAccount(session) {
+  await syncManagerNavigation('initiatives');
   app.innerHTML = `<section class="hero"><h1>Мої ініціативи</h1><p class="lead">${esc(session.user.email || '')}</p></section>
-    ${accountNav('initiatives')}
     <section class="card"><div class="privacy">Завантажуємо ваші ініціативи...</div></section>`;
 
   const { data: initiatives, error } = await db.rpc('get_my_initiatives_v06_rpc', { p_community_id: null });
   if (error) {
     app.innerHTML = `<section class="hero"><h1>Мої ініціативи</h1><p class="lead">${esc(session.user.email || '')}</p></section>
-      ${accountNav('initiatives')}
       <section class="card"><div class="error">${esc(error.message)}</div>
       <div class="buttons"><button class="secondary" onclick="signOutManager()">Вийти</button></div></section>`;
     return;
@@ -65,8 +58,7 @@ async function renderAccount(session) {
     : '<div class="privacy">Завершених ініціатив немає.</div>';
 
   app.innerHTML = `<section class="hero account-hero"><div><h1>Мої ініціативи</h1><p class="lead">${esc(session.user.email || '')}</p></div></section>
-    ${accountNav('initiatives')}
-    <div class="account-create"><a class="button" href="#/">+ Створити ініціативу</a></div>
+    <div class="account-create"><a class="button" href="#/new-initiative">+ Створити ініціативу</a></div>
     <section class="account-section"><h2>Активні</h2><div class="initiative-list">${activeHtml}</div></section>
     <section class="account-section"><h2>Завершені</h2><div class="initiative-list">${closedHtml}</div></section>
     <section class="account-actions"><button class="secondary" onclick="signOutManager()">Вийти</button><div id="authError" class="error hidden"></div></section>`;
@@ -122,6 +114,8 @@ export async function signOutManager() {
   const errorBox = document.getElementById('authError');
   const { error } = await db.auth.signOut();
   if (error && errorBox) return ferr(errorBox, error.message);
+  closeManagerMenu();
   await updateAccountNav();
+  await syncManagerNavigation(null);
   login();
 }
