@@ -1,14 +1,15 @@
 import { db } from './supabase.js';
-import { accountNav } from './auth.js';
+import { syncManagerNavigation } from './navigation.js';
 import { app, date, esc, ferr, money } from './utils.js';
 
-async function requireSession() {
+async function requireSession(active) {
   const { data, error } = await db.auth.getSession();
   if (error) throw error;
   if (!data?.session) {
     location.hash = '#/login';
     return null;
   }
+  await syncManagerNavigation(active);
   return data.session;
 }
 
@@ -37,16 +38,36 @@ const initiativeCard = item => {
   </article>`;
 };
 
+const memberCard = (m, showCommunity = true) => {
+  const search = [m.full_name, m.email || '', m.community_name || ''].join(' ').toLocaleLowerCase('uk-UA');
+  return `<article class="member-card" data-member-search="${esc(search)}">
+    <div><h3>${esc(m.full_name)}</h3><p class="caption">${m.email ? esc(m.email) : 'Email не вказано'}</p></div>
+    ${showCommunity ? `<a class="community-chip" href="#/community/${esc(m.community_id)}/members">${esc(m.community_name)}</a>` : `<span class="tag ok">${m.status === 'active' ? 'Активний' : 'Неактивний'}</span>`}
+  </article>`;
+};
+
+export function filterMembers() {
+  const input = document.getElementById('memberSearch');
+  if (!input) return;
+  const q = input.value.trim().toLocaleLowerCase('uk-UA');
+  document.querySelectorAll('[data-member-search]').forEach(card => {
+    card.classList.toggle('hidden', q && !card.dataset.memberSearch.includes(q));
+  });
+  const visible = [...document.querySelectorAll('[data-member-search]')].some(card => !card.classList.contains('hidden'));
+  const empty = document.getElementById('memberSearchEmpty');
+  if (empty) empty.classList.toggle('hidden', visible || !q);
+}
+
 export async function communities() {
-  const session = await requireSession();
+  const session = await requireSession('communities');
   if (!session) return;
 
   app.innerHTML = `<section class="hero account-hero"><h1>Спільноти</h1><p class="lead">${esc(session.user.email || '')}</p></section>
-    ${accountNav('communities')}
+    <div class="account-create"><a class="button" href="#/communities/new">+ Створити спільноту</a></div>
     <section class="card"><div class="privacy">Завантажуємо спільноти...</div></section>`;
 
   const { data, error } = await db.rpc('get_my_communities_v06_rpc');
-  if (error) return app.innerHTML = `<section class="hero account-hero"><h1>Спільноти</h1></section>${accountNav('communities')}<section class="card"><div class="error">${esc(error.message)}</div></section>`;
+  if (error) return app.innerHTML = `<section class="hero account-hero"><h1>Спільноти</h1></section><section class="card"><div class="error">${esc(error.message)}</div></section>`;
 
   const list = data || [];
   const cards = list.length ? list.map(c => `
@@ -60,15 +81,20 @@ export async function communities() {
     </article>`).join('') : '<div class="privacy">У вас ще немає спільнот.</div>';
 
   app.innerHTML = `<section class="hero account-hero"><h1>Спільноти</h1><p class="lead">${esc(session.user.email || '')}</p></section>
-    ${accountNav('communities')}
-    <section class="card community-create-card">
-      <h2>Створити спільноту</h2>
+    <div class="account-create"><a class="button" href="#/communities/new">+ Створити спільноту</a></div>
+    <section class="account-section"><h2>Мої спільноти</h2><div class="community-list">${cards}</div></section>`;
+}
+
+export async function newCommunity() {
+  const session = await requireSession('communities');
+  if (!session) return;
+  app.innerHTML = `<section class="hero account-hero"><h1>Нова спільнота</h1><p class="lead">Створіть постійний простір для учасників та ініціатив.</p></section>
+    <section class="card">
       <label>Назва</label><input id="communityName" placeholder="Наприклад: ОСББ Піонер 2007">
       <label>Опис <span class="muted">необовʼязково</span></label><textarea id="communityDescription" placeholder="Коротко опишіть спільноту"></textarea>
       <div class="buttons"><button id="createCommunityBtn" onclick="createCommunity()">Створити спільноту</button></div>
       <div id="communityError" class="error hidden"></div>
-    </section>
-    <section class="account-section"><h2>Мої спільноти</h2><div class="community-list">${cards}</div></section>`;
+    </section>`;
 }
 
 export async function createCommunity() {
@@ -94,29 +120,57 @@ export async function createCommunity() {
 }
 
 export async function members() {
-  const session = await requireSession();
+  const session = await requireSession('members');
   if (!session) return;
 
   app.innerHTML = `<section class="hero account-hero"><h1>Учасники</h1><p class="lead">${esc(session.user.email || '')}</p></section>
-    ${accountNav('members')}
+    <div class="account-create"><a class="button" href="#/members/new">+ Додати учасника</a></div>
     <section class="card"><div class="privacy">Завантажуємо учасників...</div></section>`;
 
   const { data, error } = await db.rpc('get_my_members_v06_rpc', { p_community_id: null });
-  if (error) return app.innerHTML = `<section class="hero account-hero"><h1>Учасники</h1></section>${accountNav('members')}<section class="card"><div class="error">${esc(error.message)}</div></section>`;
+  if (error) return app.innerHTML = `<section class="hero account-hero"><h1>Учасники</h1></section><section class="card"><div class="error">${esc(error.message)}</div></section>`;
 
-  const rows = (data || []).length ? data.map(m => `
-    <article class="member-card">
-      <div><h3>${esc(m.full_name)}</h3><p class="caption">${m.email ? esc(m.email) : 'Email не вказано'}</p></div>
-      <a class="community-chip" href="#/community/${esc(m.community_id)}/members">${esc(m.community_name)}</a>
-    </article>`).join('') : '<div class="privacy">Учасників ще немає. Додайте їх у конкретній спільноті.</div>';
+  const rows = (data || []).length ? data.map(m => memberCard(m, true)).join('') : '<div class="privacy">Учасників ще немає. Додайте їх у конкретній спільноті.</div>';
 
   app.innerHTML = `<section class="hero account-hero"><h1>Учасники</h1><p class="lead">${esc(session.user.email || '')}</p></section>
-    ${accountNav('members')}
-    <section class="account-section"><div class="member-list">${rows}</div></section>`;
+    <div class="account-create"><a class="button" href="#/members/new">+ Додати учасника</a></div>
+    <div class="member-search"><span aria-hidden="true">⌕</span><input id="memberSearch" type="search" placeholder="Пошук за імʼям, email або спільнотою" oninput="filterMembers()"></div>
+    <section class="account-section"><div class="member-list">${rows}</div><div id="memberSearchEmpty" class="privacy hidden">Нічого не знайдено.</div></section>`;
+}
+
+export async function newMember(communityId = null) {
+  const session = await requireSession('members');
+  if (!session) return;
+
+  const { data: communitiesList, error } = await db.rpc('get_my_communities_v06_rpc');
+  if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
+  const list = communitiesList || [];
+
+  if (!communityId && !list.length) {
+    app.innerHTML = `<section class="hero account-hero"><h1>Новий учасник</h1></section>
+      <section class="card"><div class="privacy">Спочатку створіть спільноту, до якої можна додати учасника.</div><div class="buttons"><a class="button" href="#/communities/new">+ Створити спільноту</a></div></section>`;
+    return;
+  }
+
+  const selected = communityId ? list.find(c => c.id === communityId) : null;
+  if (communityId && !selected) return app.innerHTML = '<section class="card"><div class="error">Спільноту не знайдено.</div></section>';
+
+  const communityField = selected
+    ? `<div class="privacy">Спільнота: <strong>${esc(selected.name)}</strong></div><input id="memberCommunity" type="hidden" value="${esc(selected.id)}">`
+    : `<label>Спільнота</label><select id="memberCommunity">${list.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('')}</select>`;
+
+  app.innerHTML = `<section class="hero account-hero"><h1>Новий учасник</h1><p class="lead">Додайте учасника до спільноти.</p></section>
+    <section class="card">
+      ${communityField}
+      <label>Імʼя / ПІБ</label><input id="memberName" placeholder="Наприклад: Ірина Протас">
+      <label>Email <span class="muted">необовʼязково</span></label><input id="memberEmail" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com">
+      <div class="buttons"><button id="addMemberBtn" onclick="addCommunityMember()">Додати учасника</button></div>
+      <div id="memberError" class="error hidden"></div>
+    </section>`;
 }
 
 export async function community(communityId, section = 'members') {
-  const session = await requireSession();
+  const session = await requireSession('communities');
   if (!session) return;
   const active = section === 'initiatives' ? 'initiatives' : 'members';
 
@@ -129,27 +183,17 @@ export async function community(communityId, section = 'members') {
   if (!item) return app.innerHTML = '<section class="card"><div class="error">Спільноту не знайдено.</div></section>';
 
   const header = `<section class="hero community-hero"><p class="eyebrow">Спільнота</p><h1>${esc(item.name)}</h1>${item.description ? `<p class="lead">${esc(item.description)}</p>` : ''}</section>
-    ${accountNav('communities')}
     ${communityTabs(communityId, active)}`;
 
   if (active === 'members') {
     const { data, error } = await db.rpc('get_my_members_v06_rpc', { p_community_id: communityId });
     if (error) return app.innerHTML = header + `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
-    const rows = (data || []).length ? data.map(m => `
-      <article class="member-card">
-        <div><h3>${esc(m.full_name)}</h3><p class="caption">${m.email ? esc(m.email) : 'Email не вказано'}</p></div>
-        <span class="tag ok">${m.status === 'active' ? 'Активний' : 'Неактивний'}</span>
-      </article>`).join('') : '<div class="privacy">У цій спільноті ще немає учасників.</div>';
+    const rows = (data || []).length ? data.map(m => memberCard(m, false)).join('') : '<div class="privacy">У цій спільноті ще немає учасників.</div>';
 
     app.innerHTML = header + `
-      <section class="card">
-        <h2>Додати учасника</h2>
-        <label>Імʼя / ПІБ</label><input id="memberName" placeholder="Наприклад: Ірина Протас">
-        <label>Email <span class="muted">необовʼязково</span></label><input id="memberEmail" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com">
-        <div class="buttons"><button id="addMemberBtn" onclick="addCommunityMember('${esc(communityId)}')">Додати учасника</button></div>
-        <div id="memberError" class="error hidden"></div>
-      </section>
-      <section class="account-section"><h2>Учасники · ${item.members_count}</h2><div class="member-list">${rows}</div></section>`;
+      <div class="account-create"><a class="button" href="#/community/${esc(communityId)}/new-member">+ Додати учасника</a></div>
+      <div class="member-search"><span aria-hidden="true">⌕</span><input id="memberSearch" type="search" placeholder="Пошук за імʼям або email" oninput="filterMembers()"></div>
+      <section class="account-section"><h2>Учасники · ${item.members_count}</h2><div class="member-list">${rows}</div><div id="memberSearchEmpty" class="privacy hidden">Нічого не знайдено.</div></section>`;
     return;
   }
 
@@ -163,7 +207,8 @@ export async function community(communityId, section = 'members') {
     <section class="account-section"><h2>Ініціативи · ${item.initiatives_count}</h2><div class="initiative-list">${cards}</div></section>`;
 }
 
-export async function addCommunityMember(communityId) {
+export async function addCommunityMember() {
+  const communityId = document.getElementById('memberCommunity')?.value || '';
   const nameInput = document.getElementById('memberName');
   const emailInput = document.getElementById('memberEmail');
   const button = document.getElementById('addMemberBtn');
@@ -172,6 +217,7 @@ export async function addCommunityMember(communityId) {
   const email = emailInput?.value.trim() || '';
 
   errorBox.classList.add('hidden');
+  if (!communityId) return ferr(errorBox, 'Оберіть спільноту.');
   if (!fullName) return ferr(errorBox, 'Вкажіть імʼя учасника.');
   if (email && !emailInput.checkValidity()) return ferr(errorBox, 'Перевірте правильність email.');
 
@@ -185,5 +231,5 @@ export async function addCommunityMember(communityId) {
   button.disabled = false;
   button.textContent = 'Додати учасника';
   if (error) return ferr(errorBox, error.message);
-  community(communityId, 'members');
+  location.hash = `#/community/${communityId}/members`;
 }
