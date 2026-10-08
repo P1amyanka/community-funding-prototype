@@ -89,7 +89,8 @@ export async function myCollection(collectionId) {
       ${c.note ? `<p class="contribution-note">${esc(c.note)}</p>` : ''}
     </article>`).join('') : '<div class="privacy">У вас ще немає внесків у цей збір.</div>';
 
-  app.innerHTML = `<section class="hero collection-hero">
+  app.innerHTML = `<a class="page-back" href="#/me/collections" aria-label="Повернутися до моїх зборів">← Мої збори</a>
+    <section class="hero collection-hero">
       <p class="eyebrow">${esc(item.community_name)}</p>
       <h1>${esc(item.name)}</h1>
       <span class="tag ok">${frequencyLabel(item.frequency)}</span>

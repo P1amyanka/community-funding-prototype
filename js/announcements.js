@@ -21,14 +21,14 @@ export async function announcements() {
   await syncManagerNavigation('announcements');
   const community = await getActiveManagerCommunity();
   if (!community) {
-    app.innerHTML = '<section class="hero account-hero"><h1>Оголошення</h1></section><section class="card"><div class="privacy">Спочатку створіть спільноту.</div><div class="buttons"><a class="button" href="#/communities/new">+ Створити спільноту</a></div></section>';
+    app.innerHTML = '<section class="hero account-hero"><h1>Оголошення</h1></section><section class="card"><div class="privacy">Спочатку створіть спільноту.</div><div class="buttons"><a class="button" href="#/communities/new">Створити спільноту</a></div></section>';
     return;
   }
   const { data, error } = await db.rpc('get_manager_announcements_v12_rpc', { p_community_id: community.id });
   if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
   const items = data || [];
   app.innerHTML = `<section class="hero account-hero"><h1>Оголошення</h1><p class="lead">${esc(community.name)}</p></section>
-    <div class="account-create"><a class="button" href="#/announcements/new">+ Створити оголошення</a></div>
+    <div class="account-create"><a class="button" href="#/announcements/new">Створити оголошення</a></div>
     <section class="account-section"><div class="announcement-list">${items.length ? items.map(card).join('') : '<div class="privacy">Оголошень ще немає.</div>'}</div></section>`;
 }
 
