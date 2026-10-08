@@ -40,12 +40,10 @@ const initiativeCard = item => {
 
 const memberCard = (m, showCommunity = true) => {
   const search = [m.full_name, m.email || '', m.community_name || ''].join(' ').toLocaleLowerCase('uk-UA');
-  const access = m.email
-    ? m.status === 'inactive'
-      ? '<span class="member-access-status muted-access">Доступ призупинено</span>'
-      : m.user_id
-        ? '<span class="member-access-status">Доступ активний</span>'
-        : `<button class="secondary small member-access-button" onclick="sendMemberAccess('${esc(m.id)}','${esc(m.email)}')">Надіслати доступ</button>`
+  const access = m.email && m.status === 'active'
+    ? m.user_id
+      ? '<span class="member-access-status">Доступ активний</span>'
+      : `<button class="secondary small member-access-button" onclick="sendMemberAccess('${esc(m.id)}','${esc(m.email)}')">Надіслати доступ</button>`
     : '';
   return `<article class="member-card" data-member-search="${esc(search)}">
     <div class="member-card-main">
@@ -54,7 +52,7 @@ const memberCard = (m, showCommunity = true) => {
       ${access}
       <a class="member-edit-link" href="#/members/${esc(m.id)}/edit">Редагувати</a>
     </div>
-    ${showCommunity ? `<a class="community-chip" href="#/community/${esc(m.community_id)}/members">${esc(m.community_name)}</a>` : `<span class="tag ok">${m.status === 'active' ? 'Активний' : 'Неактивний'}</span>`}
+    ${showCommunity ? `<a class="community-chip" href="#/community/${esc(m.community_id)}/members">${esc(m.community_name)}</a>` : `<span class="tag ${m.status === 'active' ? 'ok' : ''}">${m.status === 'active' ? 'Активний' : 'Не активний'}</span>`}
   </article>`;
 };
 
@@ -254,7 +252,7 @@ export async function editMember(memberId) {
         <option value="active" ${member.status === 'active' ? 'selected' : ''}>Активний</option>
         <option value="inactive" ${member.status === 'inactive' ? 'selected' : ''}>Неактивний</option>
       </select>
-      <p class="field-note">Неактивний учасник не має доступу до кабінету учасника.</p>
+      <p class="field-note">Не активний учасник не має доступу до кабінету учасника.</p>
       <p class="field-note">Якщо змінити email, доступ учасника потрібно буде надіслати повторно на нову адресу.</p>
       <div class="buttons"><button id="saveMemberBtn" onclick="saveMember()">Зберегти</button></div>
       <div id="memberEditError" class="error hidden"></div>
