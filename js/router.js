@@ -4,7 +4,7 @@ import { participant } from './participant.js';
 import { manager } from './manager.js';
 import { about, feedback } from './info-pages.js';
 import { login } from './auth.js';
-import { communities, community, editCommunity, members, newCommunity, newMember } from './communities.js';
+import { communities, community, editCommunity, editMember, members, newCommunity, newMember } from './communities.js';
 import { collection, collections, newCollection, statistics } from './collections.js';
 import { announcements, myAnnouncements, newAnnouncement } from './announcements.js';
 import { myCollection, myCollections, myStatistics } from './participant-account.js';
@@ -59,6 +59,7 @@ export function router() {
   if (k === 'collections') return collections();
   if (k === 'statistics') return statistics();
   if (k === 'members' && t === 'new') return newMember();
+  if (k === 'members' && t && section === 'edit') return editMember(t);
   if (k === 'members') return members();
   if (k === 'community' && t && section === 'edit') return editCommunity(t);
   if (k === 'community' && t === 'edit') return editCommunity();
