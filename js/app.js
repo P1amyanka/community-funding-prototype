@@ -1,13 +1,13 @@
-import { state } from './state.js?v=0.4.2-r16';
-import { createRound } from './home.js?v=0.4.2-r16';
-import { copyPaymentValue, refreshParticipant, submitProposal } from './participant.js?v=0.4.2-r16';
-import { closeProposalComment, closeRound, copyInput, downloadCsv, downloadHistoryCsv, manager, showNextRoundForm, showProposalComment, startNextRound } from './manager.js?v=0.4.2-r16';
-import { sendManagerMagicLink, signOutManager, updateAccountNav } from './auth.js?v=0.4.2-r16';
-import { activateCommunity, addCommunityMember, createCommunity, filterMembers, saveCommunity, sendMemberAccess } from './communities.js?v=0.4.2-r16';
-import { closeContributionDrawer, createCollection, filterContributionMembers, openContributionDrawer, saveContribution, selectContributionMember, updateContributionPeriodFields } from './collections.js?v=0.4.2-r16';
-import { closeManagerMenu, openManagerMenu, switchManagerCommunity, switchParticipantCommunity } from './navigation.js?v=0.4.2-r16';
-import { createAnnouncement } from './announcements.js?v=0.4.2-r16';
-import { route, router } from './router.js?v=0.4.2-r16';
+import { state } from './state.js?v=0.4.2-r17';
+import { createRound } from './home.js?v=0.4.2-r17';
+import { copyPaymentValue, refreshParticipant, submitProposal } from './participant.js?v=0.4.2-r17';
+import { closeProposalComment, closeRound, copyInput, downloadCsv, downloadHistoryCsv, manager, showNextRoundForm, showProposalComment, startNextRound } from './manager.js?v=0.4.2-r17';
+import { sendManagerMagicLink, signOutManager, updateAccountNav } from './auth.js?v=0.4.2-r17';
+import { activateCommunity, addCommunityMember, createCommunity, filterMembers, saveCommunity, sendMemberAccess } from './communities.js?v=0.4.2-r17';
+import { closeContributionDrawer, createCollection, filterContributionMembers, openContributionDrawer, saveContribution, selectContributionMember, updateContributionPeriodFields } from './collections.js?v=0.4.2-r17';
+import { closeManagerMenu, openManagerMenu, switchManagerCommunity, switchParticipantCommunity } from './navigation.js?v=0.4.2-r17';
+import { createAnnouncement } from './announcements.js?v=0.4.2-r17';
+import { route, router } from './router.js?v=0.4.2-r17';
 
 Object.assign(window, {
   state, createRound, submitProposal, refreshParticipant, copyPaymentValue, closeRound, copyInput,

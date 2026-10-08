@@ -60,6 +60,7 @@ export function router() {
   if (k === 'statistics') return statistics();
   if (k === 'members' && t === 'new') return newMember();
   if (k === 'members') return members();
+  if (k === 'community' && t && section === 'edit') return editCommunity(t);
   if (k === 'community' && t === 'edit') return editCommunity();
   if (k === 'communities' && t === 'new') return newCommunity();
   if (k === 'communities') return communities();

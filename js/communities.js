@@ -67,7 +67,7 @@ export async function communities() {
   const session = await requireSession('communities');
   if (!session) return;
 
-  app.innerHTML = `<section class="hero account-hero"><h1>Спільноти</h1><p class="lead">${esc(session.user.email || '')}</p></section>
+  app.innerHTML = `<section class="hero account-hero"><h1>Спільноти</h1></section>
     <div class="account-create"><a class="button" href="#/communities/new">+ Створити спільноту</a></div>
     <section class="card"><div class="privacy">Завантажуємо спільноти...</div></section>`;
 
@@ -75,19 +75,26 @@ export async function communities() {
   if (error) return app.innerHTML = `<section class="hero account-hero"><h1>Спільноти</h1></section><section class="card"><div class="error">${esc(error.message)}</div></section>`;
 
   const list = data || [];
-  const cards = list.length ? list.map(c => `
-    <article class="community-card">
-      <div>
-        <h3>${esc(c.name)}</h3>
-        ${c.description ? `<p class="caption community-description">${esc(c.description)}</p>` : ''}
-      </div>
-      <div class="community-meta"><span>Учасників: <strong>${c.members_count}</strong></span><span>Ініціатив: <strong>${c.initiatives_count}</strong></span></div>
-      <button class="secondary small" onclick="activateCommunity('${esc(c.id)}')">Зробити активною</button>
-    </article>`).join('') : '<div class="privacy">У вас ще немає спільнот.</div>';
+  const active = await getActiveManagerCommunity();
+  const cards = list.length ? list.map(item => {
+    const isActive = item.id === active?.id;
+    return `
+      <article class="community-card ${isActive ? 'active-community-card' : ''}">
+        <button class="community-card-open" onclick="activateCommunity('${esc(item.id)}')" aria-label="Відкрити спільноту ${esc(item.name)}">
+          <div class="community-card-title-row">
+            <h3>${esc(item.name)}</h3>
+            ${isActive ? '<span class="tag ok">Активна</span>' : ''}
+          </div>
+          ${item.description ? `<p class="caption community-description">${esc(item.description)}</p>` : ''}
+          <div class="community-meta"><span>Учасників: <strong>${item.members_count}</strong></span><span>Ініціатив: <strong>${item.initiatives_count}</strong></span></div>
+        </button>
+        <a class="community-edit-link" href="#/community/${esc(item.id)}/edit">Редагувати</a>
+      </article>`;
+  }).join('') : '<div class="privacy">У вас ще немає спільнот.</div>';
 
-  app.innerHTML = `<section class="hero account-hero"><h1>Спільноти</h1><p class="lead">${esc(session.user.email || '')}</p></section>
+  app.innerHTML = `<section class="hero account-hero"><h1>Спільноти</h1></section>
     <div class="account-create"><a class="button" href="#/communities/new">+ Створити спільноту</a></div>
-    <section class="account-section"><h2>Мої спільноти</h2><div class="community-list">${cards}</div></section>`;
+    <section class="account-section"><div class="community-list">${cards}</div></section>`;
 }
 
 export async function newCommunity() {
@@ -122,7 +129,7 @@ export async function createCommunity() {
 
   const id = data?.[0]?.id;
   if (id) localStorage.setItem('comfundy:managerCommunityId', id);
-  location.hash = '#/members';
+  location.hash = '#/communities';
 }
 
 export async function members() {
@@ -175,7 +182,7 @@ export async function newMember(communityId = null) {
     </section>`;
 }
 
-export async function community(communityId, section = 'members') {
+export async function community(communityId) {
   const session = await requireSession('communities');
   if (!session) return;
   const { data: rows, error } = await db.rpc('get_my_community_v06_rpc', { p_community_id: communityId });
@@ -184,7 +191,7 @@ export async function community(communityId, section = 'members') {
     return;
   }
   localStorage.setItem('comfundy:managerCommunityId', communityId);
-  location.hash = section === 'initiatives' ? '#/login' : '#/members';
+  location.hash = '#/announcements';
 }
 
 export async function addCommunityMember() {
@@ -241,13 +248,24 @@ export async function activateCommunity(id) {
   location.hash = '#/announcements';
 }
 
-export async function editCommunity() {
+export async function editCommunity(communityId = null) {
   const session = await requireSession('communities');
   if (!session) return;
-  const community = await getActiveManagerCommunity();
+
+  let community = null;
+  if (communityId) {
+    const { data, error } = await db.rpc('get_my_community_v06_rpc', { p_community_id: communityId });
+    if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
+    community = data?.[0] || null;
+  } else {
+    community = await getActiveManagerCommunity();
+  }
+
   if (!community) return newCommunity();
+
   app.innerHTML = `<section class="hero account-hero"><h1>Редагувати спільноту</h1></section>
     <section class="card">
+      <input id="editCommunityId" type="hidden" value="${esc(community.id)}">
       <label>Назва</label><input id="editCommunityName" value="${esc(community.name)}">
       <label>Опис <span class="muted">необовʼязково</span></label><textarea id="editCommunityDescription">${esc(community.description || '')}</textarea>
       <div class="buttons"><button id="saveCommunityBtn" onclick="saveCommunity()">Зберегти</button></div>
@@ -256,16 +274,16 @@ export async function editCommunity() {
 }
 
 export async function saveCommunity() {
-  const community = await getActiveManagerCommunity();
+  const communityId = document.getElementById('editCommunityId')?.value || '';
   const name = document.getElementById('editCommunityName')?.value.trim() || '';
   const description = document.getElementById('editCommunityDescription')?.value.trim() || '';
   const button = document.getElementById('saveCommunityBtn');
   const errorBox = document.getElementById('communityEditError');
-  if (!community) return ferr(errorBox, 'Спільноту не знайдено.');
+  if (!communityId) return ferr(errorBox, 'Спільноту не знайдено.');
   if (!name) return ferr(errorBox, 'Вкажіть назву спільноти.');
   button.disabled = true; button.textContent = 'Зберігаємо...';
-  const { error } = await db.rpc('update_community_v12_rpc', { p_community_id: community.id, p_name: name, p_description: description || null });
+  const { error } = await db.rpc('update_community_v12_rpc', { p_community_id: communityId, p_name: name, p_description: description || null });
   button.disabled = false; button.textContent = 'Зберегти';
   if (error) return ferr(errorBox, error.message);
-  location.hash = '#/announcements';
+  location.hash = '#/communities';
 }

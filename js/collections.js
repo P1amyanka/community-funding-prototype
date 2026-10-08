@@ -187,8 +187,10 @@ export async function openContributionDrawer(collectionId, communityId) {
         <div id="contributionPeriodFields"></div>
         <label>Примітка <span class="muted">необовʼязково</span></label>
         <textarea id="contributionNote" placeholder="Наприклад: оплата готівкою"></textarea>
-        <div class="buttons"><button id="saveContributionBtn" onclick="saveContribution('${esc(collectionId)}')">Додати внесок</button></div>
         <div id="contributionError" class="error hidden"></div>
+      </div>
+      <div class="contribution-actions">
+        <button id="saveContributionBtn" onclick="saveContribution('${esc(collectionId)}')">Додати внесок</button>
       </div>
     </aside>`;
   document.body.appendChild(overlay);
