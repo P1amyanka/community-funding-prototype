@@ -247,6 +247,12 @@ export async function editMember(memberId) {
       <input id="editMemberId" type="hidden" value="${esc(member.id)}">
       <label>Імʼя / ПІБ</label><input id="editMemberName" value="${esc(member.full_name)}">
       <label>Email <span class="muted">необовʼязково</span></label><input id="editMemberEmail" type="email" inputmode="email" autocomplete="email" value="${esc(member.email || '')}" placeholder="name@example.com">
+      <label>Статус</label>
+      <select id="editMemberStatus">
+        <option value="active" ${member.status === 'active' ? 'selected' : ''}>Активний</option>
+        <option value="inactive" ${member.status === 'inactive' ? 'selected' : ''}>Неактивний</option>
+      </select>
+      <p class="field-note">Неактивний учасник не має доступу до кабінету учасника.</p>
       <p class="field-note">Якщо змінити email, доступ учасника потрібно буде надіслати повторно на нову адресу.</p>
       <div class="buttons"><button id="saveMemberBtn" onclick="saveMember()">Зберегти</button></div>
       <div id="memberEditError" class="error hidden"></div>
@@ -259,6 +265,7 @@ export async function saveMember() {
   const emailInput = document.getElementById('editMemberEmail');
   const fullName = nameInput?.value.trim() || '';
   const email = emailInput?.value.trim() || '';
+  const status = document.getElementById('editMemberStatus')?.value || 'active';
   const button = document.getElementById('saveMemberBtn');
   const errorBox = document.getElementById('memberEditError');
 
@@ -273,6 +280,7 @@ export async function saveMember() {
     p_member_id: memberId,
     p_full_name: fullName,
     p_email: email || null,
+    p_status: status,
   });
   button.disabled = false;
   button.textContent = 'Зберегти';
