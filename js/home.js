@@ -9,8 +9,8 @@ export async function home() {
   app.innerHTML = `
     <div class="landing">
       <section class="landing-hero">
+        <h1 class="landing-hero-title">Спільні справи класу — в одному місці</h1>
         <div class="landing-hero-copy">
-          <h1>Спільні справи класу — в одному місці</h1>
           <p class="landing-lead">Comfundy допомагає батьківським і шкільним спільнотам організовувати збори, внески та оголошення без таблиць і нескінченних повідомлень у чатах.</p>
         </div>
         <div class="landing-hero-visual">
