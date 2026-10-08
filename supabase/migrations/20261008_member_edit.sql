@@ -1,11 +1,15 @@
 -- Member editing support.
--- Managers can edit name and email for members that belong to their Communities.
+-- Managers can edit name, email and status for members that belong to their Communities.
+-- Inactive members immediately lose participant-cabinet access because participant RPCs require status='active'.
 -- If a linked member's email changes, the auth link is cleared so access can be re-sent.
+
+drop function if exists public.update_community_member_v13_rpc(uuid,text,text);
 
 create or replace function public.update_community_member_v13_rpc(
   p_member_id uuid,
   p_full_name text,
-  p_email text default null
+  p_email text default null,
+  p_status text default 'active'
 )
 returns boolean
 language plpgsql
@@ -16,6 +20,7 @@ declare
   v_user_id uuid := auth.uid();
   v_old_email text;
   v_new_email text := nullif(lower(trim(p_email)), '');
+  v_status text := lower(trim(coalesce(p_status, 'active')));
 begin
   if v_user_id is null then
     raise exception 'Потрібно увійти в акаунт.';
@@ -23,6 +28,10 @@ begin
 
   if nullif(trim(p_full_name), '') is null then
     raise exception 'Вкажіть імʼя учасника.';
+  end if;
+
+  if v_status not in ('active','inactive') then
+    raise exception 'Некоректний статус учасника.';
   end if;
 
   select m.email
@@ -40,6 +49,7 @@ begin
   update public.community_members_v06
   set full_name = trim(p_full_name),
       email = v_new_email,
+      status = v_status,
       user_id = case
         when lower(trim(coalesce(v_old_email, ''))) is distinct from lower(trim(coalesce(v_new_email, '')))
           then null
@@ -52,5 +62,5 @@ begin
 end;
 $$;
 
-revoke all on function public.update_community_member_v13_rpc(uuid,text,text) from public;
-grant execute on function public.update_community_member_v13_rpc(uuid,text,text) to authenticated;
+revoke all on function public.update_community_member_v13_rpc(uuid,text,text,text) from public;
+grant execute on function public.update_community_member_v13_rpc(uuid,text,text,text) to authenticated;
