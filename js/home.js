@@ -10,16 +10,14 @@ export async function home() {
     <div class="landing">
       <section class="landing-hero">
         <div class="landing-hero-copy">
-          <p class="landing-eyebrow">Comfundy</p>
           <h1>Спільні справи класу — в одному місці</h1>
           <p class="landing-lead">Comfundy допомагає батьківським і шкільним спільнотам організовувати збори, внески та оголошення без таблиць і нескінченних повідомлень у чатах.</p>
-          <div class="landing-actions">
-            <a class="button landing-primary" href="#/communities/new">Створити спільноту</a>
-            <a class="landing-secondary" href="#/login">Увійти</a>
-          </div>
         </div>
         <div class="landing-hero-visual">
           <img src="assets/landing/community_planning_at_school.png" alt="Батьківська спільнота планує спільні справи">
+          <div class="landing-actions landing-actions-under-image">
+            <a class="landing-create" href="#/communities/new">Створити спільноту</a>
+          </div>
         </div>
       </section>
 
@@ -83,7 +81,7 @@ export async function home() {
         <p class="landing-eyebrow">Почати просто</p>
         <h2>Створіть простір для своєї спільноти</h2>
         <p>Збори, внески, оголошення та учасники — в одному місці.</p>
-        <a class="button landing-primary" href="#/communities/new">Створити спільноту</a>
+        <a class="landing-create" href="#/communities/new">Створити спільноту</a>
       </section>
     </div>`;
 }
