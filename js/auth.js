@@ -48,7 +48,7 @@ async function renderAccount(session) {
   if (!community) {
     app.innerHTML = `<section class="hero account-hero"><h1>Мої ініціативи</h1></section>
       <section class="card"><div class="privacy">Створіть нову ініціативу — спільнота <strong>«Моя спільнота»</strong> буде створена автоматично.</div>
-      <div class="buttons"><a class="button" href="#/new-initiative">+ Створити ініціативу</a></div></section>
+      <div class="buttons"><a class="button" href="#/new-initiative">Створити ініціативу</a></div></section>
       ${legacyHtml}`;
     return;
   }
@@ -64,7 +64,7 @@ async function renderAccount(session) {
     : '<div class="privacy">Завершених ініціатив немає.</div>';
 
   app.innerHTML = `<section class="hero account-hero"><h1>Мої ініціативи</h1><p class="lead">${esc(community.name)}</p></section>
-    <div class="account-create"><a class="button" href="#/new-initiative">+ Створити ініціативу</a></div>
+    <div class="account-create"><a class="button" href="#/new-initiative">Створити ініціативу</a></div>
     <section class="account-section"><h2>Активні</h2><div class="initiative-list">${activeHtml}</div></section>
     <section class="account-section"><h2>Завершені</h2><div class="initiative-list">${closedHtml}</div></section>
     ${legacyHtml}`;
