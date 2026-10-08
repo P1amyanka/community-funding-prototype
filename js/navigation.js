@@ -9,6 +9,7 @@ const managerItems = [
   ['collections', '#/collections', 'Збори'],
   ['initiatives', '#/login', 'Ініціативи'],
   ['members', '#/members', 'Учасники'],
+  ['communities', '#/communities', 'Спільноти'],
   ['statistics', '#/statistics', 'Статистика'],
 ];
 
@@ -64,14 +65,19 @@ export async function getActiveParticipantCommunity() {
 const communitySelector = (communities, active, handler, manage = false) => {
   if (!communities.length) {
     return manage
-      ? '<div class="menu-community-empty">Спільноту ще не створено.</div><a class="menu-community-action" href="#/communities/new" onclick="closeManagerMenu()">+ Створити спільноту</a>'
+      ? '<div class="menu-community-empty">Спільноту ще не створено.</div>'
       : '<div class="menu-community-empty">Немає активної спільноти.</div>';
+  }
+  if (manage) {
+    return `<div class="menu-community menu-community-fixed">
+      <span>Спільнота</span>
+      <strong>${esc(active?.name || '')}</strong>
+    </div>`;
   }
   const options = communities.map(c => `<option value="${esc(c.id)}" ${c.id === active?.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
   return `<div class="menu-community">
       <span>Спільнота</span>
       <select onchange="${handler}(this.value)">${options}</select>
-      ${manage ? '<div class="menu-community-actions"><a href="#/community/edit" onclick="closeManagerMenu()">Редагувати</a><a href="#/communities" onclick="closeManagerMenu()">Керувати</a></div>' : ''}
     </div>`;
 };
 
