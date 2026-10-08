@@ -73,7 +73,7 @@ export async function communities() {
   if (!session) return;
 
   app.innerHTML = `<section class="hero account-hero"><h1>Спільноти</h1></section>
-    <div class="account-create"><a class="button" href="#/communities/new">+ Створити спільноту</a></div>
+    <div class="account-create"><a class="button" href="#/communities/new">Створити спільноту</a></div>
     <section class="card"><div class="privacy">Завантажуємо спільноти...</div></section>`;
 
   const { data, error } = await db.rpc('get_my_communities_v06_rpc');
@@ -98,7 +98,7 @@ export async function communities() {
   }).join('') : '<div class="privacy">У вас ще немає спільнот.</div>';
 
   app.innerHTML = `<section class="hero account-hero"><h1>Спільноти</h1></section>
-    <div class="account-create"><a class="button" href="#/communities/new">+ Створити спільноту</a></div>
+    <div class="account-create"><a class="button" href="#/communities/new">Створити спільноту</a></div>
     <section class="account-section"><div class="community-list">${cards}</div></section>`;
 }
 
@@ -142,7 +142,7 @@ export async function members() {
   if (!session) return;
   const community = await getActiveManagerCommunity();
   if (!community) {
-    app.innerHTML = '<section class="hero account-hero"><h1>Учасники</h1></section><section class="card"><div class="privacy">Спочатку створіть спільноту.</div><div class="buttons"><a class="button" href="#/communities/new">+ Створити спільноту</a></div></section>';
+    app.innerHTML = '<section class="hero account-hero"><h1>Учасники</h1></section><section class="card"><div class="privacy">Спочатку створіть спільноту.</div><div class="buttons"><a class="button" href="#/communities/new">Створити спільноту</a></div></section>';
     return;
   }
 
@@ -151,7 +151,7 @@ export async function members() {
   const rows = (data || []).length ? data.map(m => memberCard(m, false)).join('') : '<div class="privacy">У цій спільноті ще немає учасників.</div>';
 
   app.innerHTML = `<section class="hero account-hero"><h1>Учасники</h1><p class="lead">${esc(community.name)}</p></section>
-    <div class="account-create"><a class="button" href="#/members/new">+ Додати учасника</a></div>
+    <div class="account-create"><a class="button" href="#/members/new">Додати учасника</a></div>
     <div class="member-search"><span aria-hidden="true">⌕</span><input id="memberSearch" type="search" placeholder="Пошук за імʼям або email" oninput="filterMembers()"></div>
     <section class="account-section"><div class="member-list">${rows}</div><div id="memberSearchEmpty" class="privacy hidden">Нічого не знайдено.</div></section>`;
 }
@@ -166,7 +166,7 @@ export async function newMember(communityId = null) {
 
   if (!communityId && !list.length) {
     app.innerHTML = `<section class="hero account-hero"><h1>Новий учасник</h1></section>
-      <section class="card"><div class="privacy">Спочатку створіть спільноту, до якої можна додати учасника.</div><div class="buttons"><a class="button" href="#/communities/new">+ Створити спільноту</a></div></section>`;
+      <section class="card"><div class="privacy">Спочатку створіть спільноту, до якої можна додати учасника.</div><div class="buttons"><a class="button" href="#/communities/new">Створити спільноту</a></div></section>`;
     return;
   }
 
