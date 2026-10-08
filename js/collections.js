@@ -39,7 +39,7 @@ export async function collections() {
   if (!session) return;
   const community = await getActiveManagerCommunity();
   if (!community) {
-    app.innerHTML = '<section class="hero account-hero"><h1>Збори</h1></section><section class="card"><div class="privacy">Спочатку створіть спільноту.</div><div class="buttons"><a class="button" href="#/communities/new">+ Створити спільноту</a></div></section>';
+    app.innerHTML = '<section class="hero account-hero"><h1>Збори</h1></section><section class="card"><div class="privacy">Спочатку створіть спільноту.</div><div class="buttons"><a class="button" href="#/communities/new">Створити спільноту</a></div></section>';
     return;
   }
 
@@ -61,7 +61,7 @@ export async function collections() {
     </article>`).join('') : '<div class="privacy">У цій спільноті ще немає зборів.</div>';
 
   app.innerHTML = `<section class="hero account-hero"><h1>Збори</h1><p class="lead">${esc(community.name)}</p></section>
-    <div class="account-create"><a class="button" href="#/collections/new">+ Створити збір</a></div>
+    <div class="account-create"><a class="button" href="#/collections/new">Створити збір</a></div>
     <section class="account-section"><div class="collection-list">${cards}</div></section>`;
 }
 
@@ -70,7 +70,7 @@ export async function newCollection() {
   if (!session) return;
   const community = await getActiveManagerCommunity();
   if (!community) {
-    app.innerHTML = '<section class="hero account-hero"><h1>Новий збір</h1></section><section class="card"><div class="privacy">Спочатку створіть спільноту.</div><div class="buttons"><a class="button" href="#/communities/new">+ Створити спільноту</a></div></section>';
+    app.innerHTML = '<section class="hero account-hero"><h1>Новий збір</h1></section><section class="card"><div class="privacy">Спочатку створіть спільноту.</div><div class="buttons"><a class="button" href="#/communities/new">Створити спільноту</a></div></section>';
     return;
   }
 
@@ -149,7 +149,7 @@ export async function collection(collectionId) {
       <h1>${esc(item.name)}</h1>
       <span class="tag ok">${frequencyLabel(item.frequency)}</span>
     </section>
-    <div class="account-create"><button onclick="openContributionDrawer('${esc(item.id)}','${esc(item.community_id)}')">+ Додати внесок</button></div>
+    <div class="account-create"><button onclick="openContributionDrawer('${esc(item.id)}','${esc(item.community_id)}')">Додати внесок</button></div>
     <section class="simple-stats" aria-label="Статистика збору">
       <div class="simple-stats-primary"><strong>${money(item.total_amount)}</strong><span>зібрано</span></div>
       <div class="simple-stats-meta"><strong>${item.contributors_count}</strong> учасників · <strong>${item.contributions_count}</strong> внесків</div>
