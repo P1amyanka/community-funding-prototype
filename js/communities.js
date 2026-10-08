@@ -41,9 +41,11 @@ const initiativeCard = item => {
 const memberCard = (m, showCommunity = true) => {
   const search = [m.full_name, m.email || '', m.community_name || ''].join(' ').toLocaleLowerCase('uk-UA');
   const access = m.email
-    ? m.user_id
-      ? '<span class="member-access-status">Доступ активний</span>'
-      : `<button class="secondary small member-access-button" onclick="sendMemberAccess('${esc(m.id)}','${esc(m.email)}')">Надіслати доступ</button>`
+    ? m.status === 'inactive'
+      ? '<span class="member-access-status muted-access">Доступ призупинено</span>'
+      : m.user_id
+        ? '<span class="member-access-status">Доступ активний</span>'
+        : `<button class="secondary small member-access-button" onclick="sendMemberAccess('${esc(m.id)}','${esc(m.email)}')">Надіслати доступ</button>`
     : '';
   return `<article class="member-card" data-member-search="${esc(search)}">
     <div class="member-card-main">
