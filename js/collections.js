@@ -143,7 +143,8 @@ export async function collection(collectionId) {
       <div class="contribution-created">${createdLabel(c.created_at)}</div>
     </article>`).join('') : '<div class="privacy">Внесків ще немає.</div>';
 
-  app.innerHTML = `<section class="hero collection-hero">
+  app.innerHTML = `<a class="page-back" href="#/collections" aria-label="Повернутися до зборів">← Збори</a>
+    <section class="hero collection-hero">
       <p class="eyebrow">${esc(item.community_name)}</p>
       <h1>${esc(item.name)}</h1>
       <span class="tag ok">${frequencyLabel(item.frequency)}</span>
