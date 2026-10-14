@@ -1,5 +1,20 @@
 export const app = document.getElementById('app');
 
+// Ukrainian plural: plural(1,'внесок','внески','внесків') -> '1 внесок', 3 -> '3 внески', 5 -> '5 внесків'.
+export function plural(n, one, few, many) {
+  const v = Math.abs(Number(n) || 0);
+  const mod100 = v % 100;
+  const mod10 = v % 10;
+  const word = mod100 > 10 && mod100 < 20 ? many : mod10 === 1 ? one : mod10 >= 2 && mod10 <= 4 ? few : many;
+  return word;
+}
+export const W = {
+  contributions: ['внесок', 'внески', 'внесків'],
+  members: ['учасник', 'учасники', 'учасників'],
+  collections: ['збір', 'збори', 'зборів'],
+};
+export const count = (n, forms) => `${n} ${plural(n, ...forms)}`;
+
 export const money = n => Math.round(Number(n || 0)).toLocaleString('uk-UA') + ' грн';
 export const esc = v => String(v ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
 

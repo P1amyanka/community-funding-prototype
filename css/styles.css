@@ -166,3 +166,23 @@ button,.button{width:100%;min-height:50px;border:0;border-radius:999px;padding:1
   transform:none;
   box-shadow:none;
 }
+
+
+/* Quick fixes 2026-10-14 */
+/* Closed side menu: no shadow bleeding in from the right edge. */
+.manager-menu-drawer:not(.open) .manager-menu-panel{box-shadow:none;visibility:hidden;transition:transform .24s ease,visibility 0s linear .24s}
+.manager-menu-drawer.open .manager-menu-panel{visibility:visible;transition:transform .24s ease}
+
+/* Collection card: three figures in one row on every width. */
+.collection-summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+.collection-summary span:last-child{grid-column:auto}
+.collection-summary strong{font-size:15px;white-space:nowrap}
+
+/* Inside the cabinet the footer keeps only feedback. */
+.in-cabinet .footer-link:not([href="#/feedback"]),.in-cabinet .footer-separator{display:none}
+
+/* Sign-in link in the header on the landing page. */
+.topbar-login{display:inline-flex;align-items:center;min-height:40px;padding:8px 16px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--accent);font-size:14px;font-weight:850;text-decoration:none;box-shadow:0 2px 8px rgba(31,33,31,.05);transition:border-color .15s ease,box-shadow .15s ease}
+.topbar-login:hover{border-color:rgba(36,84,71,.35);box-shadow:0 6px 14px rgba(31,33,31,.08)}
+.topbar-login.hidden{display:none}
+@media(min-width:821px){.on-landing .topbar-inner{max-width:min(1160px,calc(100vw - 48px))}}

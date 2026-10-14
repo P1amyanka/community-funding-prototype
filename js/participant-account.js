@@ -1,5 +1,5 @@
 import { db } from './supabase.js';
-import { app, esc, money } from './utils.js';
+import { app, count, esc, money, plural, W } from './utils.js';
 import { getActiveParticipantCommunity, syncParticipantNavigation } from './navigation.js';
 
 const months = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
@@ -52,7 +52,7 @@ export async function myCollections() {
         <span class="tag ok">${frequencyLabel(c.frequency)}</span>
       </div>
       <div class="personal-total"><strong>${money(c.personal_amount)}</strong><span>ви внесли</span></div>
-      <p class="caption">${c.personal_contributions_count} внесків</p>
+      <p class="caption">${count(c.personal_contributions_count, W.contributions)}</p>
       <a class="initiative-open" href="#/me/collections/${esc(c.id)}">Відкрити →</a>
     </article>`).join('') : '<div class="privacy">У цій спільноті ще немає зборів.</div>';
 
@@ -97,7 +97,7 @@ export async function myCollection(collectionId) {
     </section>
     <section class="simple-stats">
       <div class="simple-stats-primary"><strong>${money(item.personal_amount)}</strong><span>ви внесли</span></div>
-      <div class="simple-stats-meta"><strong>${item.personal_contributions_count}</strong> внесків</div>
+      <div class="simple-stats-meta"><strong>${item.personal_contributions_count}</strong> ${plural(item.personal_contributions_count, ...W.contributions)}</div>
     </section>
     <section class="account-section"><h2>Мої внески</h2><div class="contribution-list">${history}</div></section>`;
 }
@@ -121,14 +121,14 @@ export async function myStatistics() {
   const t = totals?.[0] || { total_amount:0, contributions_count:0, collections_count:0 };
   const scopedCollections = (collections || []).filter(c => c.community_id === community.id && Number(c.personal_contributions_count) > 0);
   const byCollections = scopedCollections.map(c => `
-    <div class="stats-row"><div><strong>${esc(c.name)}</strong><span>${c.personal_contributions_count} внесків</span></div><strong>${money(c.personal_amount)}</strong></div>`).join('') || '<div class="privacy">Внесків ще немає.</div>';
+    <div class="stats-row"><div><strong>${esc(c.name)}</strong><span>${count(c.personal_contributions_count, W.contributions)}</span></div><strong>${money(c.personal_amount)}</strong></div>`).join('') || '<div class="privacy">Внесків ще немає.</div>';
   const byPeriods = (periods || []).map(p => `
-    <div class="stats-row"><div><strong>${esc(periodLabel(p))}</strong><span>${p.contributions_count} внесків</span></div><strong>${money(p.total_amount)}</strong></div>`).join('') || '<div class="privacy">Періоди ще не вказані.</div>';
+    <div class="stats-row"><div><strong>${esc(periodLabel(p))}</strong><span>${count(p.contributions_count, W.contributions)}</span></div><strong>${money(p.total_amount)}</strong></div>`).join('') || '<div class="privacy">Періоди ще не вказані.</div>';
 
   app.innerHTML = `<section class="hero account-hero"><h1>Статистика</h1><p class="lead">${esc(community.name)}</p></section>
     <section class="simple-stats">
       <div class="simple-stats-primary"><strong>${money(t.total_amount)}</strong><span>всього внесено</span></div>
-      <div class="simple-stats-meta"><strong>${t.contributions_count}</strong> внесків · <strong>${t.collections_count}</strong> зборів</div>
+      <div class="simple-stats-meta"><strong>${t.contributions_count}</strong> ${plural(t.contributions_count, ...W.contributions)} · <strong>${t.collections_count}</strong> ${plural(t.collections_count, ...W.collections)}</div>
     </section>
     <section class="account-section"><h2>По зборах</h2><div class="stats-list">${byCollections}</div></section>
     <section class="account-section"><h2>По періодах</h2><div class="stats-list">${byPeriods}</div></section>`;

@@ -91,6 +91,7 @@ export async function syncManagerNavigation(active = null, forceVisible = false)
   const currentSession = await session();
   const visible = forceVisible || Boolean(currentSession);
   button.classList.toggle('hidden', !visible);
+  document.body.classList.toggle('in-cabinet', visible);
 
   let communities = [];
   let activeCommunity = null;
@@ -130,9 +131,11 @@ export async function syncParticipantNavigation(active = 'my-collections', role 
   const currentSession = await session();
   if (!currentSession) {
     button.classList.add('hidden');
+    document.body.classList.remove('in-cabinet');
     return;
   }
   button.classList.remove('hidden');
+  document.body.classList.add('in-cabinet');
 
   let communities = [];
   let activeCommunity = null;
@@ -180,6 +183,7 @@ export function hideManagerNavigation() {
   closeManagerMenu();
   const button = document.getElementById('managerMenuButton');
   if (button) button.classList.add('hidden');
+  document.body.classList.remove('in-cabinet');
 }
 
 export function openManagerMenu() {
