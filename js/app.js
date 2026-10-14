@@ -1,12 +1,12 @@
-import { state } from './state.js?v=0.4.2-r21';
-import { copyPaymentValue, refreshMyInitiative, submitProposal } from './participant.js?v=0.4.2-r21';
-import { closeProposalComment, closeRound, createInitiative, downloadCsv, downloadHistoryCsv, initiative, showNextRoundForm, showProposalComment, startNextRound } from './manager.js?v=0.4.2-r21';
-import { sendManagerMagicLink, signOutManager, updateAccountNav } from './auth.js?v=0.4.2-r21';
-import { activateCommunity, addCommunityManager, addCommunityMember, createCommunity, filterMembers, removeCommunityManager, saveCommunity, saveMember, sendManagerInvite, sendMemberAccess } from './communities.js?v=0.4.2-r21';
-import { closeContributionDrawer, createCollection, filterContributionMembers, openContributionDrawer, saveContribution, selectContributionMember, updateContributionPeriodFields } from './collections.js?v=0.4.2-r21';
-import { closeManagerMenu, openManagerMenu, switchManagerCommunity, switchParticipantCommunity } from './navigation.js?v=0.4.2-r21';
-import { createAnnouncement } from './announcements.js?v=0.4.2-r21';
-import { route, router } from './router.js?v=0.4.2-r21';
+import { state } from './state.js?v=0.4.2-r22';
+import { copyPaymentValue, refreshMyInitiative, submitProposal } from './participant.js?v=0.4.2-r22';
+import { closeProposalComment, closeRound, createInitiative, downloadCsv, downloadHistoryCsv, initiative, showNextRoundForm, showProposalComment, startNextRound } from './manager.js?v=0.4.2-r22';
+import { sendManagerMagicLink, signOutManager, updateAccountNav } from './auth.js?v=0.4.2-r22';
+import { activateCommunity, addCommunityManager, addCommunityMember, createCommunity, filterMembers, removeCommunityManager, saveCommunity, saveMember, sendManagerInvite, sendMemberAccess } from './communities.js?v=0.4.2-r22';
+import { closeContributionDrawer, createCollection, filterContributionMembers, openContributionDrawer, saveContribution, selectContributionMember, updateContributionPeriodFields } from './collections.js?v=0.4.2-r22';
+import { closeManagerMenu, openManagerMenu, switchManagerCommunity, switchParticipantCommunity } from './navigation.js?v=0.4.2-r22';
+import { createAnnouncement } from './announcements.js?v=0.4.2-r22';
+import { route, router } from './router.js?v=0.4.2-r22';
 
 Object.assign(window, {
   state, createInitiative, submitProposal, refreshMyInitiative, copyPaymentValue, closeRound,

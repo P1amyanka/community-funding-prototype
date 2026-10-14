@@ -119,3 +119,50 @@ button,.button{width:100%;min-height:50px;border:0;border-radius:999px;padding:1
     align-self:end;
   }
 }
+
+/* Cabinet buttons in the landing style (rounded rectangle, soft gradient, subtle lift). */
+:is(.app,.comment-drawer) :is(button,.button):not(.comment-link,.drawer-close,.drawer-backdrop,.community-card-open,.autosuggest-option,.menu-button){
+  border-radius:12px;
+  border:1px solid #1f4a3f;
+  background:linear-gradient(180deg,#2d6a5a 0%,#245447 100%);
+  color:#fff;
+  box-shadow:0 6px 16px rgba(36,84,71,.16);
+  font-weight:850;
+  letter-spacing:-.01em;
+  transition:transform .15s ease,box-shadow .15s ease,background .15s ease;
+}
+:is(.app,.comment-drawer) :is(button,.button):not(.comment-link,.drawer-close,.drawer-backdrop,.community-card-open,.autosuggest-option,.menu-button):hover{
+  transform:translateY(-1px);
+  background:linear-gradient(180deg,#275f51 0%,#1f4a3f 100%);
+  box-shadow:0 8px 18px rgba(36,84,71,.2);
+}
+:is(.app,.comment-drawer) :is(button,.button):not(.comment-link,.drawer-close,.drawer-backdrop,.community-card-open,.autosuggest-option,.menu-button):active{
+  transform:translateY(0);
+  box-shadow:0 3px 10px rgba(36,84,71,.16);
+}
+:is(.app,.comment-drawer) :is(button,.button):is(.secondary,.ghost):not(.comment-link){
+  background:#fff;
+  color:var(--accent);
+  border:1px solid var(--line);
+  box-shadow:0 2px 8px rgba(31,33,31,.05);
+}
+:is(.app,.comment-drawer) :is(button,.button):is(.secondary,.ghost):not(.comment-link):hover{
+  background:#fbfaf7;
+  border-color:rgba(36,84,71,.35);
+  box-shadow:0 6px 14px rgba(31,33,31,.08);
+}
+:is(.app,.comment-drawer) button.danger{
+  border-color:#8a3f28;
+  background:linear-gradient(180deg,#b35a3d 0%,#a14c32 100%);
+  box-shadow:0 6px 16px rgba(161,76,50,.18);
+}
+:is(.app,.comment-drawer) button.danger:hover{
+  background:linear-gradient(180deg,#a85236 0%,#8a3f28 100%);
+  box-shadow:0 8px 18px rgba(161,76,50,.22);
+}
+:is(.app,.comment-drawer) button:disabled{
+  opacity:.6;
+  cursor:default;
+  transform:none;
+  box-shadow:none;
+}
