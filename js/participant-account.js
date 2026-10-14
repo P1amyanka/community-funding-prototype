@@ -4,7 +4,7 @@ import { getActiveParticipantCommunity, syncParticipantNavigation } from './navi
 
 const months = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
 
-async function requireParticipant(active = 'my-collections') {
+export async function requireParticipant(active = 'my-collections') {
   const { data } = await db.auth.getSession();
   if (!data?.session) {
     location.hash = '#/login';

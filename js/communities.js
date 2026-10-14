@@ -1,6 +1,6 @@
 import { db } from './supabase.js';
 import { getActiveManagerCommunity, syncManagerNavigation } from './navigation.js';
-import { app, date, esc, ferr, money, toast } from './utils.js';
+import { app, esc, ferr, toast } from './utils.js';
 
 async function requireSession(active) {
   const { data, error } = await db.auth.getSession();
@@ -12,31 +12,6 @@ async function requireSession(active) {
   await syncManagerNavigation(active);
   return data.session;
 }
-
-const communityTabs = (communityId, active) => `
-  <nav class="community-tabs" aria-label="Спільнота">
-    <a class="community-tab ${active === 'members' ? 'active' : ''}" href="#/community/${esc(communityId)}/members">Учасники</a>
-    <a class="community-tab ${active === 'initiatives' ? 'active' : ''}" href="#/community/${esc(communityId)}/initiatives">Ініціативи</a>
-  </nav>`;
-
-const initiativeCard = item => {
-  const closed = item.status !== 'open';
-  const finance = item.target_amount !== null && item.target_amount !== undefined
-    ? `<div class="initiative-finance"><strong>${money(item.sum_max)}</strong><span>із ${money(item.target_amount)} цілі</span></div>`
-    : `<div class="initiative-finance"><strong>${money(item.sum_max)}</strong><span>сума максимумів</span></div>`;
-  const meta = closed
-    ? `Раунд ${item.round_number} · Завершено ${date(item.closed_at)}`
-    : `Раунд ${item.round_number} · Учасників: ${item.proposals_count}`;
-
-  return `<article class="initiative-card">
-    <div class="initiative-card-head">
-      <div><h3>${esc(item.title)}</h3><p class="caption">${meta}</p></div>
-      <span class="tag ${closed ? 'ok' : ''}">${closed ? 'Завершена' : 'Активна'}</span>
-    </div>
-    ${finance}
-    <a class="initiative-open" href="#/manage/${esc(item.manager_token)}">Відкрити →</a>
-  </article>`;
-};
 
 const memberCard = (m, showCommunity = true) => {
   const search = [m.full_name, m.email || '', m.community_name || ''].join(' ').toLocaleLowerCase('uk-UA');

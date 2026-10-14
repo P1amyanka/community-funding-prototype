@@ -83,7 +83,7 @@ export function downloadCsv(r, a) {
   const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
   const l = document.createElement('a');
   l.href = URL.createObjectURL(blob);
-  l.download = `initiative-${r.participant_token}-${hasTarget ? CONFIG.ALLOCATION_VERSION : 'statistics'}.csv`;
+  l.download = `initiative-${r.id}-${hasTarget ? CONFIG.ALLOCATION_VERSION : 'statistics'}.csv`;
   l.click();
   URL.revokeObjectURL(l.href);
 }
