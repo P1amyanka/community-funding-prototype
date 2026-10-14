@@ -5,6 +5,7 @@ const MANAGER_COMMUNITY_KEY = 'comfundy:managerCommunityId';
 const PARTICIPANT_COMMUNITY_KEY = 'comfundy:participantCommunityId';
 
 const ICONS = {
+  home: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11h5v-6h4v6h5V9"/>',
   announcements: '<path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1Z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M18.5 6.5a8 8 0 0 1 0 11"/>',
   collections: '<rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18"/><path d="M16 15h2"/>',
   initiatives: '<path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.9V16h5v-.2c0-.8.4-1.5 1-1.9A6 6 0 0 0 12 3Z"/>',
@@ -46,6 +47,7 @@ const managerItems = [
 ];
 
 const participantItems = [
+  ['my-home', '#/me', 'Головна'],
   ['my-announcements', '#/me/announcements', 'Оголошення'],
   ['my-collections', '#/me/collections', 'Збори'],
   ['my-initiatives', '#/me/initiatives', 'Ініціативи'],
@@ -101,7 +103,7 @@ const communitySelector = (communities, active, handler, manage = false) => {
       ? '<div class="menu-community-empty">Спільноту ще не створено.</div>'
       : '<div class="menu-community-empty">Немає активної спільноти.</div>';
   }
-  if (manage && communities.length < 2) {
+  if (communities.length < 2) {
     return `<div class="menu-community menu-community-fixed">
       <span>Спільнота</span>
       <strong>${esc(active?.name || '')}</strong>
@@ -140,7 +142,7 @@ export async function syncManagerNavigation(active = null, forceVisible = false)
 
   if (visible) {
     renderTabBar(managerItems.filter(([key]) => key !== 'communities'), active);
-    setCommunityPill(activeCommunity?.name);
+    setCommunityPill(communities.length > 1 ? activeCommunity?.name : null);
   } else {
     hideTabBar();
   }
@@ -154,7 +156,7 @@ export async function syncManagerNavigation(active = null, forceVisible = false)
   let switchLink = '';
   if (currentSession) {
     const { data: roles } = await db.rpc('get_my_account_roles_v11_rpc');
-    if (roles?.[0]?.is_participant) switchLink = '<a class="manager-menu-switch" href="#/me/collections" onclick="closeManagerMenu()">Мій кабінет</a>';
+    if (roles?.[0]?.is_participant) switchLink = '<a class="manager-menu-switch" href="#/me" onclick="closeManagerMenu()">Мій кабінет</a>';
   }
   account.innerHTML = currentSession
     ? `${switchLink}<div class="manager-menu-email">${esc(currentSession.user.email || '')}</div><button class="manager-menu-signout" onclick="signOutManager()">Вийти</button>`
@@ -189,7 +191,7 @@ export async function syncParticipantNavigation(active = 'my-collections', role 
   } catch {}
 
   renderTabBar(participantItems, active);
-  setCommunityPill(activeCommunity?.name);
+  setCommunityPill(communities.length > 1 ? activeCommunity?.name : null);
 
   links.innerHTML = `${communitySelector(communities, activeCommunity, 'switchParticipantCommunity', false)}
     <div class="manager-menu-separator"></div>
