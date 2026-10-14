@@ -1,30 +1,24 @@
-# Community Funding Prototype
+# Comfundy
 
-Prototype for testing a new coordination mechanism for collective financial decisions in communities such as:
+**Comfundy допомагає батьківським групам організовувати збори, внески, оголошення, учасників та спільні ініціативи в одному місці.**
 
-- condo associations (ОСББ)
-- parent groups
-- local communities
+🌐 https://comfundy.com
 
-## Problem
+## Що можна робити в Comfundy
 
-Communities often fail to solve shared financial problems because of:
+- створювати спільноти та додавати учасників;
+- вести разові й регулярні збори та фіксувати внески;
+- публікувати оголошення для групи;
+- переглядати статистику по зборах і внесках;
+- створювати **ініціативи**, щоб перевірити, чи готова група підтримати певну ідею та якими можуть бути внески;
+- надавати учасникам власний кабінет з оголошеннями, зборами та історією їхніх внесків.
 
-- free-rider behavior
-- conflict around “fair contribution”
-- social pressure
-- slow decision making
+## Ініціативи
 
-Traditional approaches usually assume equal contributions, but real people have different financial capabilities and different willingness to pay.
+Ініціатива — це спосіб перевірити фінансову готовність групи **до початку збору**.
 
-## Hypothesis
+Кожен учасник приватно вказує максимальну суму, яку готовий внести. Менеджер бачить агрегований результат і може зрозуміти, чи реалістично запускати збір або чи варто змінити умови.
 
-Collective decisions can be reached faster and with less conflict if:
+## Статус
 
-- contributions are private
-- contributions are not forced to be equal
-- the system only reveals whether the funding threshold has been reached
-
-## Prototype Goal
-
-Test whether an anonymous multi-round contribution mechanism helps communities converge to funding equilibrium.
+Comfundy зараз розвивається та тестується на реальних сценаріях батьківських груп.
