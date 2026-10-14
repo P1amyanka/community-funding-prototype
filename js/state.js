@@ -3,4 +3,5 @@ export const state = {
   currentAllocation: null,
   roundHistory: [],
   closeError: null,
+  currentContributions: [],
 };

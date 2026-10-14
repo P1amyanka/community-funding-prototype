@@ -204,7 +204,7 @@ export async function initiative(id, silent = false) {
     <section class="card"><div class="title-row"><div><h2>Раунд ${r.round_number}</h2><div class="caption rich-content">${richText(r.description)}</div></div><span class="tag ${closed ? 'ok' : ''}">${closed ? 'Раунд завершено' : 'Збір відповідей'}</span></div>
     <div class="status simple-status">${statusContent}${hasTarget ? `<div class="simple-stats-primary"><strong>${money(allocation.sumMax)}</strong><span>із ${money(r.target_amount)} цілі</span></div>` : proposals.length ? `<div class="simple-stats-primary"><strong>${money(allocation.sumMax)}</strong><span>сума максимумів</span></div>` : ''}${proposalStats}${r.deadline ? `<div class="simple-stats-detail">Дедлайн: ${date(r.deadline)}</div>` : ''}</div>
     ${closed ? '' : '<div class="privacy" style="margin-top:14px">Учасники бачать цю ініціативу у своєму кабінеті в розділі «Ініціативи». Суми одне одного вони не бачать.</div>'}
-    <div class="buttons">${closed ? `<button onclick="showNextRoundForm('${esc(id)}')">Новий раунд</button><button class="secondary" onclick="downloadCsv(state.currentRound,state.currentAllocation)">Завантажити CSV</button>` : `<button id="closeRoundBtn" class="danger" onclick="closeRound('${esc(id)}')">Завершити раунд</button>`}<button class="ghost" onclick="initiative('${esc(id)}')">Оновити</button></div>
+    <div class="buttons">${closed ? `<button onclick="showNextRoundForm('${esc(id)}')">Новий раунд</button><button class="secondary" onclick="downloadCurrentCsv()">Завантажити CSV</button>` : `<button id="closeRoundBtn" class="danger" onclick="closeRound('${esc(id)}')">Завершити раунд</button>`}<button class="ghost" onclick="initiative('${esc(id)}')">Оновити</button></div>
     <div id="managerError" class="error hidden"></div></section>
     <section class="card compact"><h2>${proposalTitle}</h2><div class="table" style="margin-top:12px">${tableHeader}${tableRows}</div></section>
     <section class="card compact"><h2>Історія раундів</h2><div class="history-list">${historyHtml}</div></section>`;
@@ -303,6 +303,10 @@ export async function startNextRound(id) {
 
   toast('Новий раунд відкрито');
   initiative(id);
+}
+
+export function downloadCurrentCsv() {
+  if (state.currentRound && state.currentAllocation) downloadCsv(state.currentRound, state.currentAllocation);
 }
 
 export function downloadHistoryCsv(index) {

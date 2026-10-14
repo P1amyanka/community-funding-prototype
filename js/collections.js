@@ -1,6 +1,8 @@
 import { db } from './supabase.js';
 import { getActiveManagerCommunity, syncManagerNavigation } from './navigation.js';
 import { app, esc, ferr, money, plural, W } from './utils.js';
+import { state } from './state.js';
+import { amountOne, duesTiles, monthDots, splitBar } from './dues-ui.js';
 import { currentSchoolYear, dueToDate, duesLine, hasDues, memberDues, monthsElapsed, schoolMonths, schoolYearLabel } from './dues.js';
 
 const months = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
@@ -216,49 +218,6 @@ export async function saveCollection() {
 
 const stateOrder = { none: 0, partial: 1, upcoming: 2, paid: 3 };
 
-function duesSection(item, members, contributions) {
-  const paidBy = new Map();
-  contributions.forEach(c => paidBy.set(c.member_id, (paidBy.get(c.member_id) || 0) + Number(c.amount)));
-  const active = members.filter(m => m.status === 'active');
-  const rows = active.map(m => ({ m, d: memberDues(item, paidBy.get(m.id) || 0) }))
-    .sort((a, b) => stateOrder[a.d.state] - stateOrder[b.d.state] || b.d.left - a.d.left || a.m.full_name.localeCompare(b.m.full_name, 'uk'));
-  const debtors = rows.filter(r => r.d.left > 0);
-  const debtTotal = debtors.reduce((s, r) => s + r.d.left, 0);
-  const expected = dueToDate(item) * active.length;
-
-  const summary = `<section class="card dues-card">
-      ${progressBlock(Number(item.total_amount), expected)}
-      <div class="dues-summary">${debtors.length
-        ? `<span class="row-status warn">Не здали: ${debtors.length} ${plural(debtors.length, ...W.members)}</span><span class="dues-summary-sum">${money(debtTotal)}</span>`
-        : `<span class="row-status ok">Усі здали вчасно</span>`}</div>
-    </section>`;
-
-  const list = `<section class="account-section"><h2>Хто скільки</h2><div class="list-rows">${rows.map(({ m, d }) => `
-      <article class="list-row">
-        <div class="list-row-main"><strong>${esc(m.full_name)}</strong><small>${esc(duesLine(d, item))}</small></div>
-        <div class="list-row-side">${d.state === 'paid'
-          ? '<span class="row-status ok">✓</span>'
-          : d.left > 0 ? `<strong class="row-amount debt">${money(d.left)}</strong>` : '<span class="row-status muted">—</span>'}</div>
-      </article>`).join('') || '<div class="privacy">Немає активних учасників.</div>'}</div></section>`;
-
-  let grid = '';
-  if (item.frequency === 'monthly' && rows.length) {
-    const months = schoolMonths(Number(item.school_year));
-    const elapsed = monthsElapsed(Number(item.school_year));
-    const byName = [...rows].sort((a, b) => a.m.full_name.localeCompare(b.m.full_name, 'uk'));
-    grid = `<section class="account-section"><h2>По місяцях</h2>
-      <div class="month-grid-wrap"><table class="month-grid">
-        <thead><tr><th></th>${months.map((mo, i) => `<th class="${i === elapsed - 1 ? 'current' : ''}">${mo.short}</th>`).join('')}</tr></thead>
-        <tbody>${byName.map(({ m, d }) => `<tr><th>${esc(m.full_name.split(' ')[0])}</th>${months.map((mo, i) => {
-          const cls = i < d.covered ? 'paid' : i < elapsed ? 'owed' : 'future';
-          return `<td class="${cls}${i === elapsed - 1 ? ' current' : ''}" title="${esc(m.full_name)} · ${mo.long} ${mo.year}">${cls === 'paid' ? '✓' : cls === 'owed' ? '•' : ''}</td>`;
-        }).join('')}</tr>`).join('')}</tbody>
-      </table></div>
-      <p class="caption month-grid-legend"><span class="lg paid">✓</span> сплачено <span class="lg owed">•</span> не сплачено <span class="lg future"></span> ще не настав</p>
-    </section>`;
-  }
-  return summary + list + grid;
-}
 
 export async function collection(collectionId) {
   const session = await requireSession('collections');
@@ -278,28 +237,18 @@ export async function collection(collectionId) {
     return app.innerHTML = '<section class="card"><div class="privacy">Цей збір належить іншій спільноті. Перемкніть активну спільноту в меню.</div></section>';
   }
 
-  let members = [];
-  if (hasDues(item)) {
-    const { data, error } = await db.rpc('get_my_members_v06_rpc', { p_community_id: item.community_id });
-    if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
-    members = data || [];
-  }
-
+  state.currentContributions = contributions || [];
   const history = (contributions || []).length ? contributions.map(c => `
-    <article class="list-row contribution-row">
+    <article class="list-row contribution-row is-editable" role="button" tabindex="0" aria-label="Змінити внесок: ${esc(c.member_name)}, ${money(c.amount)}"
+      onclick="openContributionDrawer('${esc(item.id)}','${esc(item.community_id)}','${esc(c.id)}')"
+      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
       <div class="list-row-main">
         <strong>${esc(c.member_name)}</strong>
         <small>${[periodLabel(c), createdLabel(c.created_at)].filter(Boolean).map(esc).join(' · ')}</small>
         ${c.note ? `<small class="row-note">${esc(c.note)}</small>` : ''}
       </div>
-      <div class="list-row-side"><strong class="row-amount">${money(c.amount)}</strong></div>
+      <div class="list-row-side"><strong class="row-amount">${money(c.amount)}</strong><svg class="row-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></div>
     </article>`).join('') : '<div class="privacy">Внесків ще немає.</div>';
-
-  const noDuesHint = hasDues(item) ? '' : `<section class="card compact"><p class="caption">Вкажіть суму з учасника в <a href="#/collections/${esc(item.id)}/edit">налаштуваннях збору</a>, щоб бачити, хто скільки має внести і хто ще не здав.</p></section>`;
-  const simpleStats = hasDues(item) ? '' : `<section class="simple-stats" aria-label="Статистика збору">
-      <div class="simple-stats-primary"><strong>${money(item.total_amount)}</strong><span>зібрано</span></div>
-      <div class="simple-stats-meta"><strong>${item.contributors_count}</strong> ${plural(item.contributors_count, ...W.members)} · <strong>${item.contributions_count}</strong> ${plural(item.contributions_count, ...W.contributions)}</div>
-    </section>`;
 
   app.innerHTML = `<a class="page-back" href="#/collections" aria-label="Повернутися до зборів">← Збори</a>
     <section class="hero collection-hero">
@@ -308,16 +257,20 @@ export async function collection(collectionId) {
       <div class="collection-hero-meta"><span class="tag ok">${collectionTag(item)}</span>${amountLine(item) ? `<span class="caption">${amountLine(item)}</span>` : ''}</div>
     </section>
     <div class="account-create collection-actions"><button onclick="openContributionDrawer('${esc(item.id)}','${esc(item.community_id)}')">Додати внесок</button><a class="collection-settings-link" href="#/collections/${esc(item.id)}/edit">Налаштування</a></div>
-    ${noDuesHint}${simpleStats}
-    ${hasDues(item) ? duesSection(item, members, contributions || []) : ''}
+    <a class="list-rows stats-link" href="#/statistics/collections/${esc(item.id)}">
+      <span class="list-row"><span class="list-row-main"><strong>Зібрано ${money(item.total_amount)}</strong></span><span class="list-row-side"><span class="collection-settings-link">Статистика збору</span><svg class="row-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></span>
+    </a>
     <section class="account-section"><h2>Історія внесків</h2><div class="list-rows">${history}</div></section>`;
 }
 
-export async function openContributionDrawer(collectionId, communityId) {
+export async function openContributionDrawer(collectionId, communityId, contributionId = null) {
   selectedContributionMember = null;
+  const editing = contributionId ? state.currentContributions.find(c => c.id === contributionId) : null;
+  if (contributionId && !editing) return;
   const { data, error } = await db.rpc('get_my_members_v06_rpc', { p_community_id: communityId });
   if (error) return alert(error.message);
-  contributionMembers = (data || []).filter(x => x.status === 'active');
+  contributionMembers = (data || []).filter(x => x.status === 'active' || x.id === editing?.member_id);
+  const idArg = editing ? `,'${esc(editing.id)}'` : '';
 
   const overlay = document.createElement('div');
   overlay.id = 'contributionDrawer';
@@ -325,7 +278,7 @@ export async function openContributionDrawer(collectionId, communityId) {
   overlay.innerHTML = `
     <button class="drawer-backdrop" aria-label="Закрити" onclick="closeContributionDrawer()"></button>
     <aside class="comment-drawer contribution-drawer" role="dialog" aria-modal="true" aria-labelledby="contributionDrawerTitle">
-      <div class="drawer-head"><div><h2 id="contributionDrawerTitle">Додати внесок</h2><p class="caption">Учасник і сума — обов’язкові.</p></div><button class="drawer-close" aria-label="Закрити" onclick="closeContributionDrawer()">×</button></div>
+      <div class="drawer-head"><div><h2 id="contributionDrawerTitle">${editing ? 'Змінити внесок' : 'Додати внесок'}</h2><p class="caption">Учасник і сума — обов’язкові.</p></div><button class="drawer-close" aria-label="Закрити" onclick="closeContributionDrawer()">×</button></div>
       <div class="contribution-form">
         <label>Учасник</label>
         <div class="autosuggest">
@@ -347,11 +300,24 @@ export async function openContributionDrawer(collectionId, communityId) {
         <div id="contributionError" class="error hidden"></div>
       </div>
       <div class="contribution-actions">
-        <button id="saveContributionBtn" onclick="saveContribution('${esc(collectionId)}')">Додати внесок</button>
+        <button id="saveContributionBtn" onclick="saveContribution('${esc(collectionId)}'${idArg})">${editing ? 'Зберегти зміни' : 'Додати внесок'}</button>
+        ${editing ? `<button id="deleteContributionBtn" class="secondary contribution-delete" onclick="deleteContribution('${esc(collectionId)}','${esc(editing.id)}')">Видалити внесок</button>` : ''}
       </div>
     </aside>`;
   document.body.appendChild(overlay);
-  document.getElementById('contributionMemberSearch')?.focus();
+  if (editing) {
+    const member = contributionMembers.find(m => m.id === editing.member_id);
+    if (member) selectContributionMember(member.id);
+    document.getElementById('contributionAmount').value = editing.amount;
+    document.getElementById('contributionPeriod').value = editing.period_type || '';
+    updateContributionPeriodFields();
+    if (editing.period_type === 'month') document.getElementById('contributionMonth').value = editing.month;
+    if (editing.period_type === 'half_year') document.getElementById('contributionHalfYear').value = editing.half_year;
+    if (editing.period_type) document.getElementById('contributionYear').value = editing.year;
+    document.getElementById('contributionNote').value = editing.note || '';
+  } else {
+    document.getElementById('contributionMemberSearch')?.focus();
+  }
 }
 
 export function closeContributionDrawer() {
@@ -409,7 +375,7 @@ export function updateContributionPeriodFields() {
   box.innerHTML = `<label>Рік</label><input id="contributionYear" type="number" min="2000" max="2100" value="${currentYear}">`;
 }
 
-export async function saveContribution(collectionId) {
+export async function saveContribution(collectionId, contributionId = null) {
   const memberId = document.getElementById('contributionMemberId')?.value || '';
   const amount = Number(document.getElementById('contributionAmount')?.value || 0);
   const periodType = document.getElementById('contributionPeriod')?.value || '';
@@ -424,10 +390,11 @@ export async function saveContribution(collectionId) {
   if (!memberId) return ferr(errorBox, 'Оберіть учасника зі списку.');
   if (!Number.isFinite(amount) || amount <= 0) return ferr(errorBox, 'Сума має бути більшою за 0.');
 
+  const label = contributionId ? 'Зберегти зміни' : 'Додати внесок';
   button.disabled = true;
   button.textContent = 'Зберігаємо...';
-  const { error } = await db.rpc('create_collection_contribution_v10_rpc', {
-    p_collection_id: collectionId,
+  const { error } = await db.rpc(contributionId ? 'update_collection_contribution_v17_rpc' : 'create_collection_contribution_v10_rpc', {
+    ...(contributionId ? { p_contribution_id: contributionId } : { p_collection_id: collectionId }),
     p_member_id: memberId,
     p_amount: amount,
     p_period_type: periodType || null,
@@ -437,14 +404,100 @@ export async function saveContribution(collectionId) {
     p_note: note || null,
   });
   button.disabled = false;
-  button.textContent = 'Додати внесок';
+  button.textContent = label;
   if (error) return ferr(errorBox, error.message);
 
   closeContributionDrawer();
   collection(collectionId);
 }
 
-export async function statistics() {
+export async function deleteContribution(collectionId, contributionId) {
+  const c = state.currentContributions.find(x => x.id === contributionId);
+  const what = c ? `${c.member_name}, ${money(c.amount)}` : 'цей внесок';
+  if (!confirm(`Видалити внесок (${what})? Це не можна скасувати.`)) return;
+  const button = document.getElementById('deleteContributionBtn');
+  const errorBox = document.getElementById('contributionError');
+  if (button) { button.disabled = true; button.textContent = 'Видаляємо...'; }
+  const { error } = await db.rpc('delete_collection_contribution_v17_rpc', { p_contribution_id: contributionId });
+  if (error) {
+    if (button) { button.disabled = false; button.textContent = 'Видалити внесок'; }
+    return ferr(errorBox, error.message);
+  }
+  closeContributionDrawer();
+  collection(collectionId);
+}
+
+// ---------- Statistics: by collection / by member ----------
+
+function paidByMember(contributions) {
+  const map = new Map();
+  (contributions || []).forEach(c => map.set(c.member_id, (map.get(c.member_id) || 0) + Number(c.amount)));
+  return map;
+}
+
+function duesPanel(item, members, contributions) {
+  const paidBy = paidByMember(contributions);
+  const active = members.filter(m => m.status === 'active');
+
+  if (!hasDues(item)) {
+    const rows = active.map(m => ({ m, paid: paidBy.get(m.id) || 0 })).sort((a, b) => b.paid - a.paid || a.m.full_name.localeCompare(b.m.full_name, 'uk'));
+    return `<section class="card dues-card">
+        <div class="dues-tiles"><div class="dues-tile paid"><strong>${money(item.total_amount)}</strong><span>внесено</span></div>
+          <div class="dues-tile"><strong>${item.contributions_count}</strong><span>${plural(item.contributions_count, ...W.contributions)}</span></div></div>
+        <p class="caption" style="margin-top:12px"><a href="#/collections/${esc(item.id)}/edit">Вкажіть суму з учасника</a>, щоб бачити борги.</p></section>
+      <section class="account-section"><h2>Оплати учасників</h2><div class="list-rows">${rows.map(({ m, paid }) => `
+        <article class="list-row"><div class="list-row-main"><strong>${esc(m.full_name)}</strong></div>
+          <div class="list-row-side">${amountOne(paid, 0)}</div></article>`).join('') || '<div class="privacy">Немає активних учасників.</div>'}</div></section>`;
+  }
+
+  const rows = active.map(m => ({ m, d: memberDues(item, paidBy.get(m.id) || 0) }))
+    .sort((a, b) => stateOrder[a.d.state] - stateOrder[b.d.state] || b.d.left - a.d.left || a.m.full_name.localeCompare(b.m.full_name, 'uk'));
+  const debtors = rows.filter(r => r.d.left > 0);
+  const debtTotal = debtors.reduce((s, r) => s + r.d.left, 0);
+  const expected = dueToDate(item) * active.length;
+  const monthly = item.frequency === 'monthly';
+
+  const pct = expected > 0 ? Math.min(100, Math.round(Number(item.total_amount) / expected * 100)) : 0;
+  const summary = `<section class="card dues-card">
+      ${duesTiles(Number(item.total_amount), debtTotal)}
+      <div class="dues-progress"><div class="dues-progress-bar"><span style="width:${pct}%"></span></div>
+        <div class="dues-progress-caption">${pct}% від ${money(expected)} на сьогодні</div></div>
+    </section>`;
+
+  const list = `<section class="account-section"><h2>Оплати учасників</h2><div class="list-rows">${rows.map(({ m, d }) => `
+      <article class="list-row">
+        <div class="list-row-main"><strong>${esc(m.full_name)}</strong>${monthly ? monthDots(d) : splitBar(d.paid, d.left)}</div>
+        <div class="list-row-side">${amountOne(d.paid, d.left)}</div>
+      </article>`).join('') || '<div class="privacy">Немає активних учасників.</div>'}</div>
+      ${monthly ? '<p class="caption dots-legend"><i class="paid"></i> внесено <i class="owed"></i> борг <i></i> ще не настав</p>' : ''}</section>`;
+
+  let grid = '';
+  if (monthly && rows.length) {
+    const months = schoolMonths(Number(item.school_year));
+    const elapsed = monthsElapsed(Number(item.school_year));
+    const byName = [...rows].sort((a, b) => a.m.full_name.localeCompare(b.m.full_name, 'uk'));
+    grid = `<section class="account-section month-grid-section"><h2>По місяцях</h2>
+      <div class="month-grid-wrap"><table class="month-grid">
+        <thead><tr><th></th>${months.map((mo, i) => `<th class="${i === elapsed - 1 ? 'current' : ''}">${mo.short}</th>`).join('')}</tr></thead>
+        <tbody>${byName.map(({ m, d }) => `<tr><th title="${esc(m.full_name)}">${esc(m.full_name)}</th>${months.map((mo, i) => {
+          const cls = i < d.covered ? 'paid' : i < elapsed ? 'owed' : 'future';
+          return `<td class="${cls}${i === elapsed - 1 ? ' current' : ''}" title="${esc(m.full_name)} · ${mo.long} ${mo.year}">${cls === 'paid' ? '✓' : cls === 'owed' ? '•' : ''}</td>`;
+        }).join('')}</tr>`).join('')}</tbody>
+      </table></div>
+      <p class="caption month-grid-legend"><span class="lg paid">✓</span> внесено <span class="lg owed">•</span> борг <span class="lg future"></span> ще не настав</p>
+    </section>`;
+  }
+  return summary + list + grid;
+}
+
+
+
+const statsTabs = view => `<nav class="stats-tabs" aria-label="Розріз статистики">
+    <a class="${view === 'collections' ? 'active' : ''}" href="#/statistics/collections">За зборами</a>
+    <a class="${view === 'members' ? 'active' : ''}" href="#/statistics/members">За учасниками</a>
+  </nav>`;
+
+export async function statistics(view = 'collections', collectionId = null) {
   const session = await requireSession('statistics');
   if (!session) return;
   const community = await getActiveManagerCommunity();
@@ -452,31 +505,81 @@ export async function statistics() {
     app.innerHTML = '<section class="hero account-hero"><h1>Статистика</h1></section><section class="card"><div class="privacy">Спочатку створіть спільноту.</div></section>';
     return;
   }
+  if (view !== 'members') view = 'collections';
 
-  const [{ data: totals, error: totalsError }, { data: members, error: membersError }, { data: collectionsData, error: collectionsError }] = await Promise.all([
-    db.rpc('get_manager_community_stats_v12_rpc', { p_community_id: community.id }),
-    db.rpc('get_manager_community_member_stats_v12_rpc', { p_community_id: community.id }),
-    db.rpc('get_my_collections_v10_rpc'),
+  const [{ data: collectionsData, error: collectionsError }, { data: membersData, error: membersError }] = await Promise.all([
+    db.rpc('get_my_collections_v16_rpc'),
+    db.rpc('get_my_members_v06_rpc', { p_community_id: community.id }),
   ]);
-  if (totalsError || membersError || collectionsError) {
-    const msg = totalsError?.message || membersError?.message || collectionsError?.message || 'Не вдалося завантажити статистику.';
+  if (collectionsError || membersError) {
+    const msg = collectionsError?.message || membersError?.message || 'Не вдалося завантажити статистику.';
     return app.innerHTML = `<section class="card"><div class="error">${esc(msg)}</div></section>`;
   }
 
-  const t = totals?.[0] || { total_amount:0, contributions_count:0, contributors_count:0, collections_count:0 };
-  const scopedCollections = (collectionsData || []).filter(x => x.community_id === community.id);
-  const byCollections = scopedCollections.length ? scopedCollections.map(c => `
-    <div class="stats-row"><div><strong>${esc(c.name)}</strong></div><strong>${money(c.total_amount)}</strong></div>`).join('') : '<div class="privacy">Зборів ще немає.</div>';
-  const byMembers = (members || []).length ? members.map(m => `
-    <div class="stats-row"><div><strong>${esc(m.member_name)}</strong><span>${m.contributions_count} ${plural(m.contributions_count, ...W.contributions)}</span></div><strong>${money(m.total_amount)}</strong></div>`).join('') : '<div class="privacy">Внесків ще немає.</div>';
+  const list = (collectionsData || []).filter(x => x.community_id === community.id);
+  const members = membersData || [];
 
-  app.innerHTML = `<section class="hero account-hero"><h1>Статистика</h1><p class="lead">${esc(community.name)}</p></section>
-    <section class="collection-stats statistics-overview">
-      <div><strong>${money(t.total_amount)}</strong><span>всього внесено</span></div>
-      <div><strong>${t.contributors_count}</strong><span>${plural(t.contributors_count, ...W.members)}</span></div>
-      <div><strong>${t.contributions_count}</strong><span>${plural(t.contributions_count, ...W.contributions)}</span></div>
-      <div><strong>${t.collections_count}</strong><span>${plural(t.collections_count, ...W.collections)}</span></div>
-    </section>
-    <section class="account-section"><h2>По зборах</h2><div class="stats-list">${byCollections}</div></section>
-    <section class="account-section"><h2>По учасниках</h2><div class="stats-list">${byMembers}</div></section>`;
+  const head = `<section class="hero account-hero"><h1>Статистика</h1><p class="lead">${esc(community.name)}</p></section>
+    ${statsTabs(view)}`;
+
+  if (!list.length) {
+    app.innerHTML = `${head}<div class="privacy">Зборів ще немає.</div>`;
+    return;
+  }
+
+  if (view === 'collections') {
+    const selected = list.find(c => c.id === collectionId) || list[0];
+    const { data: contributions, error } = await db.rpc('get_collection_contributions_v10_rpc', { p_collection_id: selected.id });
+    if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
+    const chips = `<div class="stats-chips" role="tablist">${list.map(c => `<a role="tab" class="stats-chip ${c.id === selected.id ? 'active' : ''}" href="#/statistics/collections/${esc(c.id)}">${esc(c.name)}</a>`).join('')}</div>`;
+    app.innerHTML = `${head}${chips}
+      <div class="stats-collection-head"><div><h2>${esc(selected.name)}</h2><p class="caption">${collectionTag(selected)}${amountLine(selected) ? ` · ${amountLine(selected)}` : ''}</p></div>
+        <a class="collection-settings-link" href="#/collections/${esc(selected.id)}">Історія внесків →</a></div>
+      ${duesPanel(selected, members, contributions || [])}`;
+    return;
+  }
+
+  // By member: paid in total and owed across collections with an amount.
+  const results = await Promise.all(list.map(c => db.rpc('get_collection_contributions_v10_rpc', { p_collection_id: c.id })));
+  const failed = results.find(r => r.error);
+  if (failed) return app.innerHTML = `<section class="card"><div class="error">${esc(failed.error.message)}</div></section>`;
+  const paidMaps = results.map(r => paidByMember(r.data));
+
+  const rows = members.filter(m => m.status === 'active' || paidMaps.some(p => p.has(m.id))).map(m => {
+    const per = list.map((c, i) => {
+      const paid = paidMaps[i].get(m.id) || 0;
+      const left = hasDues(c) && m.status === 'active' ? memberDues(c, paid).left : 0;
+      return { c, paid, left };
+    });
+    return { m, per, paid: per.reduce((s, x) => s + x.paid, 0), left: per.reduce((s, x) => s + x.left, 0) };
+  }).sort((a, b) => b.left - a.left || a.m.full_name.localeCompare(b.m.full_name, 'uk'));
+
+  if (collectionId) {
+    const r = rows.find(x => x.m.id === collectionId);
+    if (!r) return app.innerHTML = `${head}<div class="privacy">Учасника не знайдено.</div>`;
+    app.innerHTML = `<a class="page-back" href="#/statistics/members">← Усі учасники</a>
+      <section class="hero account-hero"><p class="eyebrow">${esc(community.name)}</p><h1>${esc(r.m.full_name)}</h1></section>
+      <section class="card dues-card">${duesTiles(r.paid, r.left)}</section>
+      <section class="account-section"><h2>Збори</h2><div class="list-rows">${r.per.map(x => {
+        const monthly = x.c.frequency === 'monthly' && hasDues(x.c) && r.m.status === 'active';
+        const visual = monthly ? monthDots(memberDues(x.c, x.paid)) : hasDues(x.c) ? splitBar(x.paid, x.left) : '';
+        return `<a class="list-row list-row-link" href="#/statistics/collections/${esc(x.c.id)}">
+          <span class="list-row-main"><strong>${esc(x.c.name)}</strong>${visual}</span>
+          <span class="list-row-side">${amountOne(x.paid, x.left)}<svg class="row-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></a>`;
+      }).join('')}</div></section>
+      <a class="collection-settings-link" href="#/members/${esc(r.m.id)}/edit">Картка учасника →</a>`;
+    return;
+  }
+
+  app.innerHTML = `${head}
+    <p class="caption color-legend"><i class="paid"></i> внесено <i class="debt"></i> борг</p>
+    <section class="account-section"><div class="list-rows">${rows.map(r => `
+      <details class="list-row member-stats-row">
+        <summary>
+          <div class="list-row-main"><strong>${esc(r.m.full_name)}</strong>${splitBar(r.paid, r.left)}</div>
+          <div class="list-row-side">${amountOne(r.paid, r.left)}<svg class="row-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></div>
+        </summary>
+        <div class="member-stats-breakdown"><a class="collection-settings-link breakdown-open" href="#/statistics/members/${esc(r.m.id)}">Детальніше →</a>${r.per.map(x => `
+          <div class="breakdown-row"><span class="breakdown-name">${esc(x.c.name)}${hasDues(x.c) ? splitBar(x.paid, x.left) : ''}</span>${x.left > 0 ? `<b class="debt">${money(x.left)}</b>` : `<b class="paid">${money(x.paid)}</b>`}</div>`).join('')}</div>
+      </details>`).join('') || '<div class="privacy">Учасників ще немає.</div>'}</div></section>`;
 }

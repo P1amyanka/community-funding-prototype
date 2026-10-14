@@ -218,6 +218,9 @@ export async function editMember(memberId) {
 
   app.innerHTML = `<a class="page-back" href="#/members" aria-label="Повернутися до учасників">← Учасники</a>
     <section class="hero account-hero"><h1>Редагувати учасника</h1><p class="lead">${esc(community.name)}</p></section>
+    <a class="list-rows stats-link" href="#/statistics/members/${esc(member.id)}">
+      <span class="list-row"><span class="list-row-main"><strong>${esc(member.full_name)}</strong></span><span class="list-row-side"><span class="collection-settings-link">Статистика учасника</span><svg class="row-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></span>
+    </a>
     <section class="card">
       <input id="editMemberId" type="hidden" value="${esc(member.id)}">
       <label>Імʼя / ПІБ</label><input id="editMemberName" value="${esc(member.full_name)}">
