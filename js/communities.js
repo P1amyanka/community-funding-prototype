@@ -13,21 +13,21 @@ async function requireSession(active) {
   return data.session;
 }
 
-const memberCard = (m, showCommunity = true) => {
+const memberStatus = m => {
+  if (m.status !== 'active') return '<span class="row-status warn">Неактивний</span>';
+  if (!m.email) return '<span class="row-status muted">Без email</span>';
+  if (m.user_id) return '<span class="row-status ok">Кабінет підключено</span>';
+  return `<button class="secondary small member-access-button" onclick="sendMemberAccess('${esc(m.id)}','${esc(m.email)}')">Надіслати доступ</button>`;
+};
+
+const memberCard = m => {
   const search = [m.full_name, m.email || '', m.community_name || ''].join(' ').toLocaleLowerCase('uk-UA');
-  const access = m.email && m.status === 'active'
-    ? m.user_id
-      ? '<span class="member-access-status">Доступ активний</span>'
-      : `<button class="secondary small member-access-button" onclick="sendMemberAccess('${esc(m.id)}','${esc(m.email)}')">Надіслати доступ</button>`
-    : '';
-  return `<article class="member-card" data-member-search="${esc(search)}">
-    <div class="member-card-main">
-      <h3>${esc(m.full_name)}</h3>
-      <p class="caption">${m.email ? esc(m.email) : 'Email не вказано'}</p>
-      ${access}
-      <a class="member-edit-link" href="#/members/${esc(m.id)}/edit">Редагувати</a>
-    </div>
-    ${showCommunity ? `<a class="community-chip" href="#/community/${esc(m.community_id)}/members">${esc(m.community_name)}</a>` : `<span class="tag ${m.status === 'active' ? 'ok' : ''}">${m.status === 'active' ? 'Активний' : 'Не активний'}</span>`}
+  return `<article class="list-row member-row ${m.status !== 'active' ? 'is-inactive' : ''}" data-member-search="${esc(search)}">
+    <a class="list-row-main" href="#/members/${esc(m.id)}/edit" aria-label="Редагувати: ${esc(m.full_name)}">
+      <strong>${esc(m.full_name)}</strong>
+      <small>${m.email ? esc(m.email) : 'Email не вказано'}</small>
+    </a>
+    <div class="list-row-side">${memberStatus(m)}</div>
   </article>`;
 };
 
@@ -123,12 +123,12 @@ export async function members() {
 
   const { data, error } = await db.rpc('get_my_members_v06_rpc', { p_community_id: community.id });
   if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
-  const rows = (data || []).length ? data.map(m => memberCard(m, false)).join('') : '<div class="privacy">У цій спільноті ще немає учасників.</div>';
+  const rows = (data || []).length ? data.map(m => memberCard(m)).join('') : '<div class="privacy">У цій спільноті ще немає учасників.</div>';
 
   app.innerHTML = `<section class="hero account-hero"><h1>Учасники</h1><p class="lead">${esc(community.name)}</p></section>
     <div class="account-create"><a class="button" href="#/members/new">Додати учасника</a></div>
     <div class="member-search"><span aria-hidden="true">⌕</span><input id="memberSearch" type="search" placeholder="Пошук за імʼям або email" oninput="filterMembers()"></div>
-    <section class="account-section"><div class="member-list">${rows}</div><div id="memberSearchEmpty" class="privacy hidden">Нічого не знайдено.</div></section>`;
+    <section class="account-section"><div class="list-rows">${rows}</div><div id="memberSearchEmpty" class="privacy hidden">Нічого не знайдено.</div></section>`;
 }
 
 export async function newMember(communityId = null) {

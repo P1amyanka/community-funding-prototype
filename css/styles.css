@@ -192,3 +192,57 @@ button,.button{width:100%;min-height:50px;border:0;border-radius:999px;padding:1
 .landing-initiatives .landing-steps{gap:28px;margin-top:28px}
 .landing-initiatives .landing-steps article{padding:0;border:0;background:transparent}
 @media(max-width:820px){.landing-initiatives .landing-steps{grid-template-columns:1fr;gap:20px}}
+
+/* ---------- Cabinet navigation (2026-10-14) ---------- */
+
+/* Community pill in the top bar (opens the menu with the community switcher). */
+.community-pill{display:inline-flex;align-items:center;gap:4px;width:auto;max-width:44vw;min-height:36px;margin-left:auto;margin-right:8px;padding:6px 10px 6px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-size:13px;font-weight:800;box-shadow:none;cursor:pointer}
+.community-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.community-pill svg{flex:none;width:16px;height:16px;fill:none;stroke:var(--accent);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.community-pill.hidden{display:none}
+
+/* Bottom tab bar on phones and tablets. */
+.tab-bar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(var(--tabs,5),minmax(0,1fr));gap:2px;padding:6px calc(6px + env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) calc(6px + env(safe-area-inset-left));background:rgba(255,253,249,.94);backdrop-filter:blur(18px);border-top:1px solid var(--line);box-shadow:0 -8px 24px rgba(31,33,31,.05)}
+.tab-bar.hidden{display:none}
+.tab-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:52px;padding:6px 2px;border-radius:12px;color:var(--muted);font-size:11px;font-weight:800;text-decoration:none;letter-spacing:-.01em}
+.tab-item svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tab-item span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tab-item.active{color:var(--accent);background:var(--soft)}
+.in-cabinet .app{padding-bottom:96px}
+.in-cabinet .footer{padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+
+/* Compact list rows (members, contributions). */
+.list-rows{display:grid;border:1px solid var(--line);border-radius:18px;background:#fff;overflow:hidden}
+.list-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-top:1px solid var(--line)}
+.list-row:first-child{border-top:0}
+.list-row.hidden{display:none}
+.list-row-main{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;color:var(--ink);text-decoration:none}
+.list-row-main strong{font-size:15px;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list-row-main small{color:var(--muted);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list-row-main small.row-note{white-space:normal;color:var(--ink);opacity:.75}
+a.list-row-main:hover strong{color:var(--accent);text-decoration:underline}
+.list-row-side{flex:none;display:flex;align-items:center}
+.list-row .member-access-button{margin:0}
+.row-amount{font-size:15px;white-space:nowrap}
+.row-status{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:11.5px;font-weight:850;white-space:nowrap}
+.row-status.ok{background:#e0f0e5;color:var(--ok)}
+.row-status.warn{background:#f2e9df;color:var(--warn)}
+.row-status.muted{background:#f2eee7;color:var(--muted)}
+.member-row.is-inactive .list-row-main strong{color:var(--muted)}
+
+/* Desktop: the menu becomes a permanent sidebar; no tab bar, no hamburger. */
+@media(min-width:1024px){
+  .in-cabinet .tab-bar,.in-cabinet .community-pill,.in-cabinet .menu-button{display:none}
+  .in-cabinet{padding-left:268px}
+  .in-cabinet .app{max-width:760px;padding-bottom:48px}
+  .in-cabinet .topbar-inner,.in-cabinet .footer-inner{max-width:760px}
+  .in-cabinet .footer{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+  .in-cabinet .manager-menu-drawer{pointer-events:auto;inset:0 auto 0 0;width:268px;z-index:35}
+  body.in-cabinet .manager-menu-backdrop{display:none}
+  body.in-cabinet .manager-menu-drawer .manager-menu-panel{left:0;right:auto;width:268px;transform:none;visibility:visible;box-shadow:none;border-right:1px solid var(--line);background:rgba(255,253,249,.96)}
+  .in-cabinet .manager-menu-close{display:none}
+  .in-cabinet .manager-menu-head strong{font-size:22px;letter-spacing:-.04em}
+}
+.manager-menu-link{gap:12px}
+.manager-menu-link svg{flex:none;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
+.manager-menu-link.active svg{opacity:1}
