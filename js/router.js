@@ -37,6 +37,8 @@ function outdatedLink() {
 
 export function router() {
   closeManagerMenu();
+  document.body.classList.remove('on-landing');
+  document.getElementById('topbarLogin')?.classList.add('hidden');
   const rawHash = location.hash;
   if (rawHash.includes('access_token=') || rawHash.includes('refresh_token=')) return finishAuthRedirect();
 

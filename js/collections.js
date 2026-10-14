@@ -1,6 +1,6 @@
 import { db } from './supabase.js';
 import { getActiveManagerCommunity, syncManagerNavigation } from './navigation.js';
-import { app, date, esc, ferr, money } from './utils.js';
+import { app, date, esc, ferr, money, plural, W } from './utils.js';
 
 const months = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
 let contributionMembers = [];
@@ -54,8 +54,8 @@ export async function collections() {
       </div>
       <div class="collection-summary">
         <span><strong>${money(c.total_amount)}</strong><small>зібрано</small></span>
-        <span><strong>${c.contributors_count}</strong><small>учасників</small></span>
-        <span><strong>${c.contributions_count}</strong><small>внесків</small></span>
+        <span><strong>${c.contributors_count}</strong><small>${plural(c.contributors_count, ...W.members)}</small></span>
+        <span><strong>${c.contributions_count}</strong><small>${plural(c.contributions_count, ...W.contributions)}</small></span>
       </div>
       <a class="initiative-open" href="#/collections/${esc(c.id)}">Відкрити →</a>
     </article>`).join('') : '<div class="privacy">У цій спільноті ще немає зборів.</div>';
@@ -152,7 +152,7 @@ export async function collection(collectionId) {
     <div class="account-create"><button onclick="openContributionDrawer('${esc(item.id)}','${esc(item.community_id)}')">Додати внесок</button></div>
     <section class="simple-stats" aria-label="Статистика збору">
       <div class="simple-stats-primary"><strong>${money(item.total_amount)}</strong><span>зібрано</span></div>
-      <div class="simple-stats-meta"><strong>${item.contributors_count}</strong> учасників · <strong>${item.contributions_count}</strong> внесків</div>
+      <div class="simple-stats-meta"><strong>${item.contributors_count}</strong> ${plural(item.contributors_count, ...W.members)} · <strong>${item.contributions_count}</strong> ${plural(item.contributions_count, ...W.contributions)}</div>
     </section>
     <section class="account-section"><h2>Історія внесків</h2><div class="contribution-list">${history}</div></section>`;
 }
@@ -312,14 +312,14 @@ export async function statistics() {
   const byCollections = scopedCollections.length ? scopedCollections.map(c => `
     <div class="stats-row"><div><strong>${esc(c.name)}</strong></div><strong>${money(c.total_amount)}</strong></div>`).join('') : '<div class="privacy">Зборів ще немає.</div>';
   const byMembers = (members || []).length ? members.map(m => `
-    <div class="stats-row"><div><strong>${esc(m.member_name)}</strong><span>${m.contributions_count} внесків</span></div><strong>${money(m.total_amount)}</strong></div>`).join('') : '<div class="privacy">Внесків ще немає.</div>';
+    <div class="stats-row"><div><strong>${esc(m.member_name)}</strong><span>${m.contributions_count} ${plural(m.contributions_count, ...W.contributions)}</span></div><strong>${money(m.total_amount)}</strong></div>`).join('') : '<div class="privacy">Внесків ще немає.</div>';
 
   app.innerHTML = `<section class="hero account-hero"><h1>Статистика</h1><p class="lead">${esc(community.name)}</p></section>
     <section class="collection-stats statistics-overview">
       <div><strong>${money(t.total_amount)}</strong><span>всього внесено</span></div>
-      <div><strong>${t.contributors_count}</strong><span>учасників</span></div>
-      <div><strong>${t.contributions_count}</strong><span>внесків</span></div>
-      <div><strong>${t.collections_count}</strong><span>зборів</span></div>
+      <div><strong>${t.contributors_count}</strong><span>${plural(t.contributors_count, ...W.members)}</span></div>
+      <div><strong>${t.contributions_count}</strong><span>${plural(t.contributions_count, ...W.contributions)}</span></div>
+      <div><strong>${t.collections_count}</strong><span>${plural(t.collections_count, ...W.collections)}</span></div>
     </section>
     <section class="account-section"><h2>По зборах</h2><div class="stats-list">${byCollections}</div></section>
     <section class="account-section"><h2>По учасниках</h2><div class="stats-list">${byMembers}</div></section>`;
