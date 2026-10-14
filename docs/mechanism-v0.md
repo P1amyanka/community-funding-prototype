@@ -1,5 +1,7 @@
 # Mechanism v0
 
+> **Status (2026-10):** the current product differs from this early sketch. Members answer from their cabinet; other members never see each other's amounts, but the community's managers see every answer with the member's name. Allocation rule in use: `allocation-v0.2` (`js/equilibrium.js`, `close_round_v04_rpc`).
+
 ## Core idea
 
 Instead of splitting a required budget equally among all participants, each participant privately declares how much they are willing to contribute.
