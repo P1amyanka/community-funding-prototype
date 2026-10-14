@@ -4,6 +4,38 @@ import { esc } from './utils.js';
 const MANAGER_COMMUNITY_KEY = 'comfundy:managerCommunityId';
 const PARTICIPANT_COMMUNITY_KEY = 'comfundy:participantCommunityId';
 
+const ICONS = {
+  announcements: '<path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1Z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M18.5 6.5a8 8 0 0 1 0 11"/>',
+  collections: '<rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18"/><path d="M16 15h2"/>',
+  initiatives: '<path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.9V16h5v-.2c0-.8.4-1.5 1-1.9A6 6 0 0 0 12 3Z"/>',
+  members: '<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6"/><path d="M17 14.2a5 5 0 0 1 3.5 4.8"/>',
+  communities: '<path d="M3 10.5 12 4l9 6.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/>',
+  statistics: '<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/>',
+};
+const iconFor = key => ICONS[key.replace(/^my-/, '')] || '';
+
+function renderTabBar(items, active) {
+  const bar = document.getElementById('tabBar');
+  if (!bar) return;
+  bar.style.setProperty('--tabs', items.length);
+  bar.innerHTML = items.map(([key, href, label]) => `<a class="tab-item ${active === key ? 'active' : ''}" href="${href}" ${active === key ? 'aria-current="page"' : ''}>
+      <svg viewBox="0 0 24 24" aria-hidden="true">${iconFor(key)}</svg><span>${label}</span></a>`).join('');
+  bar.classList.remove('hidden');
+}
+
+function hideTabBar() {
+  document.getElementById('tabBar')?.classList.add('hidden');
+  document.getElementById('communityPill')?.classList.add('hidden');
+}
+
+function setCommunityPill(name) {
+  const pill = document.getElementById('communityPill');
+  if (!pill) return;
+  if (!name) return pill.classList.add('hidden');
+  pill.innerHTML = `<span>${esc(name)}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>`;
+  pill.classList.remove('hidden');
+}
+
 const managerItems = [
   ['announcements', '#/announcements', 'Оголошення'],
   ['collections', '#/collections', 'Збори'],
@@ -15,7 +47,7 @@ const managerItems = [
 
 const participantItems = [
   ['my-announcements', '#/me/announcements', 'Оголошення'],
-  ['my-collections', '#/me/collections', 'Мої збори'],
+  ['my-collections', '#/me/collections', 'Збори'],
   ['my-initiatives', '#/me/initiatives', 'Ініціативи'],
   ['my-statistics', '#/me/statistics', 'Статистика'],
 ];
@@ -69,7 +101,7 @@ const communitySelector = (communities, active, handler, manage = false) => {
       ? '<div class="menu-community-empty">Спільноту ще не створено.</div>'
       : '<div class="menu-community-empty">Немає активної спільноти.</div>';
   }
-  if (manage) {
+  if (manage && communities.length < 2) {
     return `<div class="menu-community menu-community-fixed">
       <span>Спільнота</span>
       <strong>${esc(active?.name || '')}</strong>
@@ -106,10 +138,17 @@ export async function syncManagerNavigation(active = null, forceVisible = false)
     } catch {}
   }
 
+  if (visible) {
+    renderTabBar(managerItems.filter(([key]) => key !== 'communities'), active);
+    setCommunityPill(activeCommunity?.name);
+  } else {
+    hideTabBar();
+  }
+
   links.innerHTML = `${communitySelector(communities, activeCommunity, 'switchManagerCommunity', true)}
     <div class="manager-menu-separator"></div>
     ${managerItems.map(([key, href, label]) =>
-      `<a class="manager-menu-link ${active === key ? 'active' : ''}" href="${href}" onclick="closeManagerMenu()">${label}</a>`
+      `<a class="manager-menu-link ${active === key ? 'active' : ''}" href="${href}" onclick="closeManagerMenu()"><svg viewBox="0 0 24 24" aria-hidden="true">${iconFor(key)}</svg>${label}</a>`
     ).join('')}`;
 
   let switchLink = '';
@@ -132,6 +171,7 @@ export async function syncParticipantNavigation(active = 'my-collections', role 
   if (!currentSession) {
     button.classList.add('hidden');
     document.body.classList.remove('in-cabinet');
+    hideTabBar();
     return;
   }
   button.classList.remove('hidden');
@@ -148,10 +188,13 @@ export async function syncParticipantNavigation(active = 'my-collections', role 
     }
   } catch {}
 
+  renderTabBar(participantItems, active);
+  setCommunityPill(activeCommunity?.name);
+
   links.innerHTML = `${communitySelector(communities, activeCommunity, 'switchParticipantCommunity', false)}
     <div class="manager-menu-separator"></div>
     ${participantItems.map(([key, href, label]) =>
-      `<a class="manager-menu-link ${active === key ? 'active' : ''}" href="${href}" onclick="closeManagerMenu()">${label}</a>`
+      `<a class="manager-menu-link ${active === key ? 'active' : ''}" href="${href}" onclick="closeManagerMenu()"><svg viewBox="0 0 24 24" aria-hidden="true">${iconFor(key)}</svg>${label}</a>`
     ).join('')}`;
 
   let roles = role;
@@ -184,6 +227,7 @@ export function hideManagerNavigation() {
   const button = document.getElementById('managerMenuButton');
   if (button) button.classList.add('hidden');
   document.body.classList.remove('in-cabinet');
+  hideTabBar();
 }
 
 export function openManagerMenu() {

@@ -134,13 +134,13 @@ export async function collection(collectionId) {
   }
 
   const history = (contributions || []).length ? contributions.map(c => `
-    <article class="contribution-card">
-      <div class="contribution-head">
-        <div><h3>${esc(c.member_name)}</h3><strong class="contribution-amount">${money(c.amount)}</strong></div>
-        ${periodLabel(c) ? `<span class="collection-period">${esc(periodLabel(c))}</span>` : ''}
+    <article class="list-row contribution-row">
+      <div class="list-row-main">
+        <strong>${esc(c.member_name)}</strong>
+        <small>${[periodLabel(c), createdLabel(c.created_at)].filter(Boolean).map(esc).join(' · ')}</small>
+        ${c.note ? `<small class="row-note">${esc(c.note)}</small>` : ''}
       </div>
-      ${c.note ? `<p class="contribution-note">${esc(c.note)}</p>` : ''}
-      <div class="contribution-created">${createdLabel(c.created_at)}</div>
+      <div class="list-row-side"><strong class="row-amount">${money(c.amount)}</strong></div>
     </article>`).join('') : '<div class="privacy">Внесків ще немає.</div>';
 
   app.innerHTML = `<a class="page-back" href="#/collections" aria-label="Повернутися до зборів">← Збори</a>
@@ -154,7 +154,7 @@ export async function collection(collectionId) {
       <div class="simple-stats-primary"><strong>${money(item.total_amount)}</strong><span>зібрано</span></div>
       <div class="simple-stats-meta"><strong>${item.contributors_count}</strong> ${plural(item.contributors_count, ...W.members)} · <strong>${item.contributions_count}</strong> ${plural(item.contributions_count, ...W.contributions)}</div>
     </section>
-    <section class="account-section"><h2>Історія внесків</h2><div class="contribution-list">${history}</div></section>`;
+    <section class="account-section"><h2>Історія внесків</h2><div class="list-rows">${history}</div></section>`;
 }
 
 export async function openContributionDrawer(collectionId, communityId) {
