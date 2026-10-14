@@ -14,9 +14,9 @@ export async function home() {
   app.innerHTML = `
     <div class="landing">
       <section class="landing-hero">
-        <h1 class="landing-hero-title">Спільні справи класу — в одному місці</h1>
+        <h1 class="landing-hero-title">Управління шкільною групою — просто і в одному місці</h1>
         <div class="landing-hero-copy">
-          <p class="landing-lead">Comfundy допомагає батьківським групам вести збори, внески й оголошення та разом вирішувати, на що збирати, — без таблиць і нескінченних повідомлень у чатах.</p>
+          <p class="landing-lead">Збори, внески, оголошення, ініціативи й учасники класу — в одному зручному кабінеті, без таблиць і нескінченних повідомлень у чатах.</p>
         </div>
         <div class="landing-hero-visual">
           <img src="assets/landing/community_planning_at_school.png" alt="Батьківська група планує спільні справи">
@@ -46,6 +46,13 @@ export async function home() {
               <p>Публікуйте важливу інформацію для своєї спільноти в одному місці.</p>
             </div>
           </article>
+          <article class="landing-feature landing-feature-ideas">
+            <img src="assets/landing/community_planning_at_school.png" alt="">
+            <div class="landing-feature-copy">
+              <h3>Ініціативи</h3>
+              <p>Запитайте групу, скільки кожен готовий внести на нову ідею, перш ніж оголошувати збір.</p>
+            </div>
+          </article>
           <article class="landing-feature">
             <img src="assets/landing/collaborative_school_community_dashboard.png" alt="">
             <div class="landing-feature-copy">
@@ -64,20 +71,7 @@ export async function home() {
         <div class="landing-steps">
           <article><span>1</span><h3>Створіть спільноту</h3><p>Наприклад, свій клас або батьківську групу.</p></article>
           <article><span>2</span><h3>Додайте учасників</h3><p>За потреби вкажіть email і надайте доступ до кабінету.</p></article>
-          <article><span>3</span><h3>Організовуйте роботу</h3><p>Створюйте збори, фіксуйте внески, публікуйте оголошення і запитуйте групу про нові ідеї.</p></article>
-        </div>
-      </section>
-
-      <section class="landing-section landing-initiatives">
-        <div class="landing-section-head">
-          <p class="landing-eyebrow">Ініціативи</p>
-          <h2>Спершу дізнайтеся, скільки кожен готовий внести</h2>
-          <p class="landing-section-note">Новий проектор, подарунок вчительці, ремонт — перш ніж оголошувати збір, запитайте групу.</p>
-        </div>
-        <div class="landing-steps">
-          <article><span>1</span><h3>Опишіть ідею</h3><p>Що плануєте і, за бажанням, скільки це коштує.</p></article>
-          <article><span>2</span><h3>Батьки відповідають</h3><p>Кожен у своєму кабінеті вказує максимум, який готовий внести. Інші батьки цих сум не бачать.</p></article>
-          <article><span>3</span><h3>Comfundy рахує внески</h3><p>Якщо бюджет набрано — кожен бачить свій внесок, і ніхто не платить більше, ніж сам указав.</p></article>
+          <article><span>3</span><h3>Організовуйте роботу</h3><p>Створюйте збори, фіксуйте внески, публікуйте оголошення та запускайте ініціативи.</p></article>
         </div>
       </section>
 
