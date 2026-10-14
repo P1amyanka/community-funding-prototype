@@ -1,6 +1,6 @@
 import { db } from './supabase.js';
 import { getActiveManagerCommunity, syncManagerNavigation } from './navigation.js';
-import { app, date, esc, ferr, money } from './utils.js';
+import { app, date, esc, ferr, money, toast } from './utils.js';
 
 async function requireSession(active) {
   const { data, error } = await db.auth.getSession();
@@ -337,7 +337,101 @@ export async function editCommunity(communityId = null) {
       <label>Опис <span class="muted">необовʼязково</span></label><textarea id="editCommunityDescription">${esc(community.description || '')}</textarea>
       <div class="buttons"><button id="saveCommunityBtn" onclick="saveCommunity()">Зберегти</button></div>
       <div id="communityEditError" class="error hidden"></div>
+    </section>
+    <section class="account-section">
+      <h2>Менеджери</h2>
+      <p class="caption">Усі менеджери мають однакові права: учасники, збори, внески, оголошення, статистика та ініціативи цієї спільноти.</p>
+      <div id="managerList" class="member-list" style="margin-top:12px"><div class="privacy">Завантажуємо менеджерів...</div></div>
+    </section>
+    <section class="card">
+      <h2>Додати менеджера</h2>
+      <label>Email</label><input id="newManagerEmail" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com">
+      <p class="field-note">Людина отримає посилання для входу. Доступ зʼявиться після першого входу з цим email.</p>
+      <div class="buttons"><button id="addManagerBtn" onclick="addCommunityManager()">Додати менеджера</button></div>
+      <div id="managerError" class="error hidden"></div>
     </section>`;
+  await renderManagers(community.id);
+}
+
+const managerCard = (m, canRemove) => `<article class="member-card">
+    <div class="member-card-main">
+      <h3>${esc(m.email || '—')}${m.is_me ? ' <span class="muted">(ви)</span>' : ''}</h3>
+      ${m.is_active
+        ? '<span class="member-access-status">Доступ активний</span>'
+        : `<span class="tag" style="display:inline-flex;margin-top:10px">Запрошено · ще не входив(-ла)</span>
+           <button class="secondary small member-access-button" onclick="sendManagerInvite('${esc(m.id)}','${esc(m.email)}')">Надіслати посилання ще раз</button>`}
+    </div>
+    ${canRemove ? `<button class="ghost small" onclick="removeCommunityManager('${esc(m.id)}',${m.is_me ? 'true' : 'false'})">${m.is_me ? 'Вийти з менеджерів' : 'Прибрати'}</button>` : ''}
+  </article>`;
+
+async function renderManagers(communityId) {
+  const box = document.getElementById('managerList');
+  if (!box) return;
+  const { data, error } = await db.rpc('get_community_managers_v14_rpc', { p_community_id: communityId });
+  if (error) {
+    box.innerHTML = `<div class="error">${esc(error.message)}</div>`;
+    return;
+  }
+  const list = data || [];
+  const activeCount = list.filter(m => m.is_active).length;
+  box.innerHTML = list.map(m => managerCard(m, !m.is_active || activeCount > 1)).join('');
+}
+
+async function sendLoginLink(email) {
+  const redirectUrl = `${window.location.origin}${window.location.pathname}`;
+  return db.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectUrl } });
+}
+
+export async function addCommunityManager() {
+  const communityId = document.getElementById('editCommunityId')?.value || '';
+  const input = document.getElementById('newManagerEmail');
+  const button = document.getElementById('addManagerBtn');
+  const errorBox = document.getElementById('managerError');
+  const email = input?.value.trim() || '';
+
+  errorBox.classList.add('hidden');
+  if (!email || !input.checkValidity()) return ferr(errorBox, 'Перевірте правильність email.');
+
+  button.disabled = true;
+  button.textContent = 'Додаємо...';
+  const { error } = await db.rpc('add_community_manager_v14_rpc', { p_community_id: communityId, p_email: email });
+  if (error) {
+    button.disabled = false;
+    button.textContent = 'Додати менеджера';
+    return ferr(errorBox, error.message);
+  }
+  const { error: mailError } = await sendLoginLink(email);
+  button.disabled = false;
+  button.textContent = 'Додати менеджера';
+  input.value = '';
+  toast(mailError ? 'Менеджера додано, але лист не відправлено' : 'Менеджера додано, посилання надіслано');
+  await renderManagers(communityId);
+}
+
+export async function sendManagerInvite(managerId, email) {
+  if (!email) return;
+  const button = [...document.querySelectorAll('.member-access-button')].find(x => x.getAttribute('onclick')?.includes(managerId));
+  if (button) { button.disabled = true; button.textContent = 'Надсилаємо...'; }
+  const { error } = await sendLoginLink(email);
+  if (button) { button.disabled = false; button.textContent = error ? 'Спробувати ще раз' : 'Посилання надіслано'; }
+  if (error) alert(error.message);
+}
+
+export async function removeCommunityManager(managerId, isMe) {
+  const communityId = document.getElementById('editCommunityId')?.value || '';
+  const question = isMe
+    ? 'Вийти з менеджерів цієї спільноти? Ви втратите до неї доступ.'
+    : 'Прибрати цього менеджера? Він втратить доступ до спільноти.';
+  if (!confirm(question)) return;
+  const { error } = await db.rpc('remove_community_manager_v14_rpc', { p_manager_id: managerId });
+  if (error) return alert(error.message);
+  if (isMe) {
+    if (localStorage.getItem('comfundy:managerCommunityId') === communityId) localStorage.removeItem('comfundy:managerCommunityId');
+    location.hash = '#/communities';
+    return;
+  }
+  toast('Менеджера прибрано');
+  await renderManagers(communityId);
 }
 
 export async function saveCommunity() {
