@@ -16,10 +16,10 @@ export async function home() {
       <section class="landing-hero">
         <h1 class="landing-hero-title">Спільні справи класу — в одному місці</h1>
         <div class="landing-hero-copy">
-          <p class="landing-lead">Comfundy допомагає батьківським і шкільним спільнотам організовувати збори, внески та оголошення без таблиць і нескінченних повідомлень у чатах.</p>
+          <p class="landing-lead">Comfundy допомагає батьківським групам вести збори, внески й оголошення та разом вирішувати, на що збирати, — без таблиць і нескінченних повідомлень у чатах.</p>
         </div>
         <div class="landing-hero-visual">
-          <img src="assets/landing/community_planning_at_school.png" alt="Батьківська спільнота планує спільні справи">
+          <img src="assets/landing/community_planning_at_school.png" alt="Батьківська група планує спільні справи">
           <div class="landing-actions landing-actions-under-image">
             <a class="landing-create" href="#/communities/new">Створити спільноту</a>
           </div>
@@ -64,7 +64,20 @@ export async function home() {
         <div class="landing-steps">
           <article><span>1</span><h3>Створіть спільноту</h3><p>Наприклад, свій клас або батьківську групу.</p></article>
           <article><span>2</span><h3>Додайте учасників</h3><p>За потреби вкажіть email і надайте доступ до кабінету.</p></article>
-          <article><span>3</span><h3>Організовуйте роботу</h3><p>Створюйте збори, фіксуйте внески та публікуйте оголошення.</p></article>
+          <article><span>3</span><h3>Організовуйте роботу</h3><p>Створюйте збори, фіксуйте внески, публікуйте оголошення і запитуйте групу про нові ідеї.</p></article>
+        </div>
+      </section>
+
+      <section class="landing-section landing-initiatives">
+        <div class="landing-section-head">
+          <p class="landing-eyebrow">Ініціативи</p>
+          <h2>Спершу дізнайтеся, скільки кожен готовий внести</h2>
+          <p class="landing-section-note">Новий проектор, подарунок вчительці, ремонт — перш ніж оголошувати збір, запитайте групу.</p>
+        </div>
+        <div class="landing-steps">
+          <article><span>1</span><h3>Опишіть ідею</h3><p>Що плануєте і, за бажанням, скільки це коштує.</p></article>
+          <article><span>2</span><h3>Батьки відповідають</h3><p>Кожен у своєму кабінеті вказує максимум, який готовий внести. Інші батьки цих сум не бачать.</p></article>
+          <article><span>3</span><h3>Comfundy рахує внески</h3><p>Якщо бюджет набрано — кожен бачить свій внесок, і ніхто не платить більше, ніж сам указав.</p></article>
         </div>
       </section>
 
@@ -72,11 +85,12 @@ export async function home() {
         <div>
           <p class="landing-eyebrow">Для учасників</p>
           <h2>У кожного — свій простий кабінет</h2>
-          <p>Учасник бачить актуальні оголошення, свої збори, власну історію внесків і статистику — без зайвої інформації про інших.</p>
+          <p>Учасник бачить оголошення, свої збори, власну історію внесків та ініціативи — без зайвої інформації про інших.</p>
         </div>
         <ul>
           <li>Оголошення своєї спільноти</li>
           <li>Свої збори</li>
+          <li>Відповіді на ініціативи</li>
           <li>Власна історія внесків</li>
           <li>Особиста статистика</li>
         </ul>
@@ -85,7 +99,7 @@ export async function home() {
       <section class="landing-cta">
         <p class="landing-eyebrow">Почати просто</p>
         <h2>Створіть простір для своєї спільноти</h2>
-        <p>Збори, внески, оголошення та учасники — в одному місці.</p>
+        <p>Збори, внески, оголошення та ініціативи — в одному місці.</p>
         <a class="landing-create" href="#/communities/new">Створити спільноту</a>
       </section>
     </div>`;
