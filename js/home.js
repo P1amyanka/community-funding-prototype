@@ -16,7 +16,7 @@ export async function home() {
       <section class="landing-hero">
         <h1 class="landing-hero-title">Управління шкільною групою — просто і в одному місці</h1>
         <div class="landing-hero-copy">
-          <p class="landing-lead">Збори, внески, оголошення, ініціативи й учасники класу — в одному зручному кабінеті, без таблиць і нескінченних повідомлень у чатах.</p>
+          <p class="landing-lead">Збори, внески, оголошення, ініціативи й учасники класу — в одному зручному кабінеті.</p>
         </div>
         <div class="landing-hero-visual">
           <img src="assets/landing/community_planning_at_school.png" alt="Батьківська група планує спільні справи">

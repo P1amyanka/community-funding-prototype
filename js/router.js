@@ -7,7 +7,7 @@ import { login } from './auth.js';
 import { communities, community, editCommunity, editMember, members, newCommunity, newMember } from './communities.js';
 import { collection, collections, editCollection, newCollection, statistics } from './collections.js';
 import { announcements, myAnnouncements, newAnnouncement } from './announcements.js';
-import { myCollection, myCollections, myStatistics } from './participant-account.js';
+import { myCollection, myCollections, myHome, myStatistics } from './participant-account.js';
 import { closeManagerMenu, hideManagerNavigation } from './navigation.js';
 import { app, fail } from './utils.js';
 
@@ -49,6 +49,7 @@ export function router() {
   if (k === 'login') return login();
   if (k === 'announcements' && t === 'new') return newAnnouncement();
   if (k === 'announcements') return announcements();
+  if (k === 'me' && !t) return myHome();
   if (k === 'me' && t === 'announcements') return myAnnouncements();
   if (k === 'me' && t === 'initiatives' && section) return myInitiative(section);
   if (k === 'me' && t === 'initiatives') return myInitiatives();

@@ -464,7 +464,7 @@ function duesPanel(item, members, contributions) {
         <div class="dues-progress-caption">${pct}% від ${money(expected)} на сьогодні</div></div>
     </section>`;
 
-  const list = `<section class="account-section"><h2>Оплати учасників</h2><div class="list-rows">${rows.map(({ m, d }) => `
+  const list = `<section class="account-section member-dues-list"><h2>Оплати учасників</h2><div class="list-rows">${rows.map(({ m, d }) => `
       <article class="list-row">
         <div class="list-row-main"><strong>${esc(m.full_name)}</strong>${monthly ? monthDots(d) : splitBar(d.paid, d.left)}</div>
         <div class="list-row-side">${amountOne(d.paid, d.left)}</div>

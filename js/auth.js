@@ -43,7 +43,7 @@ export async function login() {
       return;
     }
     if (role?.is_participant) {
-      location.hash = '#/me/collections';
+      location.hash = '#/me';
       return;
     }
     return renderWelcome(session);
