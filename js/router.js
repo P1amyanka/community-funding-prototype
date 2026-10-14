@@ -5,7 +5,7 @@ import { initiative, initiatives, newInitiative } from './manager.js';
 import { about, feedback } from './info-pages.js';
 import { login } from './auth.js';
 import { communities, community, editCommunity, editMember, members, newCommunity, newMember } from './communities.js';
-import { collection, collections, newCollection, statistics } from './collections.js';
+import { collection, collections, editCollection, newCollection, statistics } from './collections.js';
 import { announcements, myAnnouncements, newAnnouncement } from './announcements.js';
 import { myCollection, myCollections, myStatistics } from './participant-account.js';
 import { closeManagerMenu, hideManagerNavigation } from './navigation.js';
@@ -59,6 +59,7 @@ export function router() {
   if (k === 'initiatives' && t) return initiative(t);
   if (k === 'initiatives') return initiatives();
   if (k === 'collections' && t === 'new') return newCollection();
+  if (k === 'collections' && t && section === 'edit') return editCollection(t);
   if (k === 'collections' && t) return collection(t);
   if (k === 'collections') return collections();
   if (k === 'statistics') return statistics();
