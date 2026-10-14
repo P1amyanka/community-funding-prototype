@@ -62,7 +62,7 @@ export function router() {
   if (k === 'collections' && t && section === 'edit') return editCollection(t);
   if (k === 'collections' && t) return collection(t);
   if (k === 'collections') return collections();
-  if (k === 'statistics') return statistics();
+  if (k === 'statistics') return statistics(t || 'collections', section || null);
   if (k === 'members' && t === 'new') return newMember();
   if (k === 'members' && t && section === 'edit') return editMember(t);
   if (k === 'members') return members();

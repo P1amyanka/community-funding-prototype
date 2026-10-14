@@ -2,6 +2,7 @@ import { db } from './supabase.js';
 import { app, count, esc, money, plural, W } from './utils.js';
 import { getActiveParticipantCommunity, syncParticipantNavigation } from './navigation.js';
 import { coveredRange, hasDues, memberDues, schoolYearLabel } from './dues.js';
+import { amountOne, duesTiles, monthDots, splitBar } from './dues-ui.js';
 
 const months = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
 
@@ -158,28 +159,25 @@ export async function myStatistics() {
   const community = await getActiveParticipantCommunity();
   if (!community) return;
 
-  const [{ data: totals, error }, { data: periods, error: periodsError }, { data: collections, error: collectionsError }] = await Promise.all([
-    db.rpc('get_participant_community_stats_v12_rpc', { p_community_id: community.id }),
-    db.rpc('get_participant_community_period_stats_v12_rpc', { p_community_id: community.id }),
-    db.rpc('get_my_participant_collections_v11_rpc'),
-  ]);
-  if (error || periodsError || collectionsError) {
-    const msg = error?.message || periodsError?.message || collectionsError?.message;
-    return app.innerHTML = `<section class="card"><div class="error">${esc(msg)}</div></section>`;
-  }
+  const { data, error } = await db.rpc('get_my_participant_collections_v16_rpc');
+  if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
 
-  const t = totals?.[0] || { total_amount:0, contributions_count:0, collections_count:0 };
-  const scopedCollections = (collections || []).filter(c => c.community_id === community.id && Number(c.personal_contributions_count) > 0);
-  const byCollections = scopedCollections.map(c => `
-    <div class="stats-row"><div><strong>${esc(c.name)}</strong><span>${count(c.personal_contributions_count, W.contributions)}</span></div><strong>${money(c.personal_amount)}</strong></div>`).join('') || '<div class="privacy">Внесків ще немає.</div>';
-  const byPeriods = (periods || []).map(p => `
-    <div class="stats-row"><div><strong>${esc(periodLabel(p))}</strong><span>${count(p.contributions_count, W.contributions)}</span></div><strong>${money(p.total_amount)}</strong></div>`).join('') || '<div class="privacy">Періоди ще не вказані.</div>';
+  const items = (data || []).filter(c => c.community_id === community.id).map(c => {
+    const paid = Number(c.personal_amount);
+    const d = hasDues(c) ? memberDues(c, paid) : null;
+    return { c, paid, d, left: d ? d.left : 0 };
+  });
+  const paid = items.reduce((s, x) => s + x.paid, 0);
+  const left = items.reduce((s, x) => s + x.left, 0);
+
+  const rows = items.map(({ c, paid, d, left }) => {
+    const visual = d ? (c.frequency === 'monthly' ? monthDots(d) : splitBar(paid, left)) : '';
+    return `<a class="list-row list-row-link" href="#/me/collections/${esc(c.id)}">
+      <span class="list-row-main"><strong>${esc(c.name)}</strong>${visual}</span>
+      <span class="list-row-side">${amountOne(paid, left)}<svg class="row-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></a>`;
+  }).join('') || '<div class="privacy">У цій спільноті ще немає зборів.</div>';
 
   app.innerHTML = `<section class="hero account-hero"><h1>Статистика</h1><p class="lead">${esc(community.name)}</p></section>
-    <section class="simple-stats">
-      <div class="simple-stats-primary"><strong>${money(t.total_amount)}</strong><span>всього внесено</span></div>
-      <div class="simple-stats-meta"><strong>${t.contributions_count}</strong> ${plural(t.contributions_count, ...W.contributions)} · <strong>${t.collections_count}</strong> ${plural(t.collections_count, ...W.collections)}</div>
-    </section>
-    <section class="account-section"><h2>По зборах</h2><div class="stats-list">${byCollections}</div></section>
-    <section class="account-section"><h2>По періодах</h2><div class="stats-list">${byPeriods}</div></section>`;
+    <section class="card dues-card">${duesTiles(paid, left)}</section>
+    <section class="account-section"><h2>Мої збори</h2><div class="list-rows">${rows}</div></section>`;
 }
