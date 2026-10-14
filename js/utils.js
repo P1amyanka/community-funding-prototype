@@ -67,10 +67,6 @@ export function toast(x) {
   setTimeout(() => t.classList.remove('show'), 1800);
 }
 
-export function purl(t) {
-  return `${location.origin}${location.pathname}#/r/${t}`;
-}
-
 export function date(v) {
   return new Date(v).toLocaleString('uk-UA');
 }

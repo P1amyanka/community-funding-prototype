@@ -7,7 +7,7 @@ const PARTICIPANT_COMMUNITY_KEY = 'comfundy:participantCommunityId';
 const managerItems = [
   ['announcements', '#/announcements', 'Оголошення'],
   ['collections', '#/collections', 'Збори'],
-  ['initiatives', '#/login', 'Ініціативи'],
+  ['initiatives', '#/initiatives', 'Ініціативи'],
   ['members', '#/members', 'Учасники'],
   ['communities', '#/communities', 'Спільноти'],
   ['statistics', '#/statistics', 'Статистика'],
@@ -16,6 +16,7 @@ const managerItems = [
 const participantItems = [
   ['my-announcements', '#/me/announcements', 'Оголошення'],
   ['my-collections', '#/me/collections', 'Мої збори'],
+  ['my-initiatives', '#/me/initiatives', 'Ініціативи'],
   ['my-statistics', '#/me/statistics', 'Статистика'],
 ];
 
@@ -156,7 +157,7 @@ export async function syncParticipantNavigation(active = 'my-collections', role 
     roles = roleRows?.[0] || null;
   }
   const switchLink = roles?.is_manager
-    ? '<a class="manager-menu-switch" href="#/login" onclick="closeManagerMenu()">Кабінет менеджера</a>'
+    ? '<a class="manager-menu-switch" href="#/announcements" onclick="closeManagerMenu()">Кабінет менеджера</a>'
     : '';
   account.innerHTML = `${switchLink}<div class="manager-menu-email">${esc(currentSession.user.email || '')}</div><button class="manager-menu-signout" onclick="signOutManager()">Вийти</button>`;
 }
