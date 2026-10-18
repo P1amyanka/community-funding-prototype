@@ -2,7 +2,7 @@ import { db } from './supabase.js';
 import { home } from './home.js';
 import { myInitiative, myInitiatives } from './participant.js';
 import { initiative, initiatives, newInitiative } from './manager.js';
-import { about, feedback } from './info-pages.js';
+import { feedback } from './info-pages.js';
 import { login } from './auth.js';
 import { communities, community, editCommunity, editMember, members, newCommunity, newMember } from './communities.js';
 import { collection, collections, editCollection, memberStats, newCollection, statistics } from './collections.js';
@@ -44,7 +44,7 @@ export function router() {
 
   const [k, t, section] = parts();
   if (!k) return home();
-  if (k === 'about') { hideManagerNavigation(); return about(); }
+  if (k === 'about') { location.replace('/about/'); return; }
   if (k === 'feedback') { hideManagerNavigation(); return feedback(); }
   if (k === 'login') return login();
   if (k === 'announcements' && t === 'new') return newAnnouncement();
