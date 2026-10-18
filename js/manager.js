@@ -1,7 +1,7 @@
 import { db } from './supabase.js';
 import { state } from './state.js';
 import { allocationV02, downloadCsv, proposalsWithoutTarget } from './equilibrium.js';
-import { app, date, esc, fail, ferr, getRichText, loading, money, richEditor, richText, richTextToPlainText, toast } from './utils.js';
+import { app, date, esc, fail, ferr, getRichText, loading, money, redirect, richEditor, richText, richTextToPlainText, toast } from './utils.js';
 import { getActiveManagerCommunity, syncManagerNavigation } from './navigation.js';
 
 let managerPoll = null;
@@ -9,7 +9,7 @@ let managerPoll = null;
 async function requireManager() {
   const { data } = await db.auth.getSession();
   if (!data?.session) {
-    location.hash = '#/login';
+    redirect('#/login');
     return null;
   }
   await syncManagerNavigation('initiatives');
@@ -136,7 +136,7 @@ export async function createInitiative() {
   b.disabled = false; b.textContent = 'Створити ініціативу';
   if (error) return ferr(e, error.message);
   const id = data?.[0]?.id;
-  location.hash = id ? `#/initiatives/${id}` : '#/initiatives';
+  redirect(id ? `#/initiatives/${id}` : '#/initiatives');
 }
 
 // --- One initiative ----------------------------------------------------------

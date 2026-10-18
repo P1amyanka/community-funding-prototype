@@ -1,12 +1,12 @@
 import { db } from './supabase.js';
 import { getActiveManagerCommunity, syncManagerNavigation } from './navigation.js';
-import { app, esc, ferr, toast } from './utils.js';
+import { app, esc, ferr, redirect, toast } from './utils.js';
 
 async function requireSession(active) {
   const { data, error } = await db.auth.getSession();
   if (error) throw error;
   if (!data?.session) {
-    location.hash = '#/login';
+    redirect('#/login');
     return null;
   }
   await syncManagerNavigation(active);
@@ -109,7 +109,7 @@ export async function createCommunity() {
 
   const id = data?.[0]?.id;
   if (id) localStorage.setItem('comfundy:managerCommunityId', id);
-  location.hash = '#/communities';
+  redirect('#/communities');
 }
 
 export async function members() {
@@ -171,7 +171,7 @@ export async function community(communityId) {
     return;
   }
   localStorage.setItem('comfundy:managerCommunityId', communityId);
-  location.hash = '#/announcements';
+  redirect('#/announcements');
 }
 
 export async function addCommunityMember() {
@@ -198,7 +198,7 @@ export async function addCommunityMember() {
   button.disabled = false;
   button.textContent = 'Додати учасника';
   if (error) return ferr(errorBox, error.message);
-  location.hash = '#/members';
+  redirect('#/members');
 }
 
 
@@ -207,7 +207,7 @@ export async function editMember(memberId) {
   if (!session) return;
   const community = await getActiveManagerCommunity();
   if (!community) {
-    location.hash = '#/members';
+    redirect('#/members');
     return;
   }
 
@@ -263,7 +263,7 @@ export async function saveMember() {
   button.disabled = false;
   button.textContent = 'Зберегти';
   if (error) return ferr(errorBox, error.message);
-  location.hash = '#/members';
+  redirect('#/members');
 }
 
 
@@ -405,7 +405,7 @@ export async function removeCommunityManager(managerId, isMe) {
   if (error) return alert(error.message);
   if (isMe) {
     if (localStorage.getItem('comfundy:managerCommunityId') === communityId) localStorage.removeItem('comfundy:managerCommunityId');
-    location.hash = '#/communities';
+    redirect('#/communities');
     return;
   }
   toast('Менеджера прибрано');
@@ -424,5 +424,5 @@ export async function saveCommunity() {
   const { error } = await db.rpc('update_community_v12_rpc', { p_community_id: communityId, p_name: name, p_description: description || null });
   button.disabled = false; button.textContent = 'Зберегти';
   if (error) return ferr(errorBox, error.message);
-  location.hash = '#/communities';
+  redirect('#/communities');
 }

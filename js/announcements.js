@@ -1,5 +1,5 @@
 import { db } from './supabase.js';
-import { app, esc, ferr } from './utils.js';
+import { app, esc, ferr, redirect } from './utils.js';
 import { getActiveManagerCommunity, getActiveParticipantCommunity, syncManagerNavigation, syncParticipantNavigation } from './navigation.js';
 
 const publishedLabel = value => new Intl.DateTimeFormat('uk-UA', {
@@ -15,7 +15,7 @@ const card = a => `<article class="announcement-card">
 export async function announcements() {
   const { data: sessionData } = await db.auth.getSession();
   if (!sessionData?.session) {
-    location.hash = '#/login';
+    redirect('#/login');
     return;
   }
   await syncManagerNavigation('announcements');
@@ -35,7 +35,7 @@ export async function announcements() {
 export async function newAnnouncement() {
   const { data: sessionData } = await db.auth.getSession();
   if (!sessionData?.session) {
-    location.hash = '#/login';
+    redirect('#/login');
     return;
   }
   await syncManagerNavigation('announcements');
@@ -63,13 +63,13 @@ export async function createAnnouncement() {
   const { error } = await db.rpc('create_announcement_v12_rpc', { p_community_id: community.id, p_title: title, p_body: body });
   button.disabled = false; button.textContent = 'Опублікувати';
   if (error) return ferr(errorBox, error.message);
-  location.hash = '#/announcements';
+  redirect('#/announcements');
 }
 
 export async function myAnnouncements() {
   const { data: sessionData } = await db.auth.getSession();
   if (!sessionData?.session) {
-    location.hash = '#/login';
+    redirect('#/login');
     return;
   }
   await db.rpc('claim_my_memberships_v11_rpc');

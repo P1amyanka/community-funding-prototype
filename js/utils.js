@@ -104,3 +104,12 @@ export function copyInput(id) {
   x.select();
   navigator.clipboard.writeText(x.value).then(() => toast('Посилання скопійовано'));
 }
+
+// Програмний перехід без нового запису в історії браузера.
+// Для перенаправлень (немає сесії, після входу, після збереження форми):
+// інакше «Назад» повертає на сторінку, яка знову перекидає вперед,
+// і деякі браузери (Samsung Internet) вважають це пасткою кнопки «Назад».
+export function redirect(hash) {
+  history.replaceState(history.state, '', `${location.pathname}${location.search}${hash}`);
+  window.dispatchEvent(new HashChangeEvent('hashchange'));
+}

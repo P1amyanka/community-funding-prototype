@@ -1,6 +1,6 @@
 import { db } from './supabase.js';
 import { getActiveManagerCommunity, syncManagerNavigation } from './navigation.js';
-import { app, esc, ferr, money, plural, W } from './utils.js';
+import { app, esc, ferr, money, plural, redirect, W } from './utils.js';
 import { state } from './state.js';
 import { amountOne, duesTiles, monthDots, splitBar } from './dues-ui.js';
 import { currentSchoolYear, dueToDate, duesLine, hasDues, memberDues, monthsElapsed, schoolMonths, schoolYearLabel } from './dues.js';
@@ -13,7 +13,7 @@ async function requireSession(active = 'collections') {
   const { data, error } = await db.auth.getSession();
   if (error) throw error;
   if (!data?.session) {
-    location.hash = '#/login';
+    redirect('#/login');
     return null;
   }
   await syncManagerNavigation(active);
@@ -171,7 +171,7 @@ export async function createCollection() {
   if (error) return ferr(errorBox, error.message);
 
   const id = data?.[0]?.id;
-  location.hash = id ? `#/collections/${id}` : '#/collections';
+  redirect(id ? `#/collections/${id}` : '#/collections');
 }
 
 export async function editCollection(collectionId) {
@@ -213,7 +213,7 @@ export async function saveCollection() {
   button.disabled = false;
   button.textContent = 'Зберегти';
   if (error) return ferr(errorBox, error.message);
-  location.hash = `#/collections/${collectionId}`;
+  redirect(`#/collections/${collectionId}`);
 }
 
 const stateOrder = { none: 0, partial: 1, upcoming: 2, paid: 3 };
