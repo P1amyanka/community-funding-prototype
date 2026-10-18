@@ -1,6 +1,8 @@
 import { db } from './supabase.js';
 import { app, esc, ferr, redirect } from './utils.js';
-import { getActiveManagerCommunity, getActiveParticipantCommunity, syncManagerNavigation, syncParticipantNavigation } from './navigation.js';
+import { rememberAfterLogin } from './auth.js';
+import { state } from './state.js';
+import { getActiveManagerCommunity, getActiveParticipantCommunity, getManagerCommunities, getParticipantCommunities, syncManagerNavigation, syncParticipantNavigation } from './navigation.js';
 
 const publishedLabel = value => new Intl.DateTimeFormat('uk-UA', {
   day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'
@@ -18,7 +20,10 @@ const managerCard = a => `<article class="announcement-card">
   <p>${esc(a.body)}</p>
   <div class="announcement-date announcement-footer">
     <span>${publishedLabel(a.created_at)}</span>
-    <a class="announcement-edit" href="#/announcements/${esc(a.id)}/edit">Змінити</a>
+    <span class="announcement-actions">
+      <button class="comment-link announcement-share" onclick="shareAnnouncement('${esc(a.id)}')">Поділитися</button>
+      <a class="announcement-edit" href="#/announcements/${esc(a.id)}/edit">Змінити</a>
+    </span>
   </div>
 </article>`;
 
@@ -52,6 +57,7 @@ export async function announcements() {
   const { data, error } = await db.rpc('get_manager_announcements_v12_rpc', { p_community_id: community.id });
   if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
   const items = data || [];
+  state.shareAnnouncements = new Map(items.map(a => [a.id, a]));
   app.innerHTML = `<section class="hero account-hero tab-hero"><h1>Оголошення</h1><p class="lead">${esc(community.name)}</p></section>
     <div class="account-create create-main"><a class="button" href="#/announcements/new">Створити оголошення</a></div>
     <section class="account-section"><div class="announcement-list">${items.length ? items.map(managerCard).join('') : '<div class="privacy">Оголошень ще немає.</div>'}</div></section>`;
@@ -149,4 +155,114 @@ export async function myAnnouncements() {
   const items = data || [];
   app.innerHTML = `<section class="hero account-hero tab-hero"><h1>Оголошення</h1><p class="lead">${esc(community.name)}</p></section>
     <section class="account-section"><div class="announcement-list">${items.length ? items.map(card).join('') : '<div class="privacy">Оголошень ще немає.</div>'}</div></section>`;
+}
+
+// ---------- Sharing an announcement to a messenger group ----------
+
+const SITE = 'https://comfundy.com/';
+export const announcementLink = id => `${SITE}#/a/${id}`;
+
+function shareText(a) {
+  const body = a.body.replace(/\s+/g, ' ').trim();
+  const excerpt = body.length > 200 ? `${body.slice(0, 197).replace(/\s+\S*$/, '')}…` : body;
+  return `📢 ${a.title}\n\n${excerpt}`;
+}
+
+export async function shareAnnouncement(id) {
+  // Shared module state: the page and the button handler may be different module copies.
+  const a = state.shareAnnouncements?.get(id);
+  if (!a) return;
+  const text = shareText(a);
+  const url = announcementLink(id);
+  // Phones: the system share sheet (Viber, Telegram, WhatsApp…).
+  if (navigator.share && matchMedia('(pointer: coarse)').matches) {
+    try { await navigator.share({ title: a.title, text: `${text}\n\nЧитати повністю:`, url }); return; }
+    catch (e) { if (e?.name === 'AbortError') return; }
+  }
+  openShareDrawer(text, url);
+}
+
+function openShareDrawer(text, url) {
+  closeShareDrawer();
+  const full = `${text}\n\nЧитати повністю: ${url}`;
+  const overlay = document.createElement('div');
+  overlay.id = 'shareDrawer';
+  overlay.className = 'drawer-overlay';
+  overlay.innerHTML = `
+    <button class="drawer-backdrop" aria-label="Закрити" onclick="closeShareDrawer()"></button>
+    <aside class="comment-drawer share-drawer" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+      <div class="drawer-head"><div><h2 id="shareTitle">Поділитися в групу</h2><p class="caption">Батьки відкриють повний текст у своєму кабінеті Comfundy.</p></div><button class="drawer-close" aria-label="Закрити" onclick="closeShareDrawer()">×</button></div>
+      <pre class="share-preview">${esc(full)}</pre>
+      <div class="buttons share-buttons">
+        <a class="button" href="https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}" target="_blank" rel="noopener" onclick="closeShareDrawer()">Telegram</a>
+        <a class="button" href="viber://forward?text=${encodeURIComponent(full)}" onclick="closeShareDrawer()">Viber</a>
+        <button class="secondary" id="shareCopyBtn" onclick="copyShareText()">Копіювати текст</button>
+      </div>
+    </aside>`;
+  overlay.dataset.text = full;
+  document.body.appendChild(overlay);
+}
+
+export function closeShareDrawer() {
+  document.getElementById('shareDrawer')?.remove();
+}
+
+export async function copyShareText() {
+  const text = document.getElementById('shareDrawer')?.dataset.text || '';
+  const button = document.getElementById('shareCopyBtn');
+  try {
+    await navigator.clipboard.writeText(text);
+    if (button) button.textContent = 'Скопійовано ✓';
+  } catch {
+    if (button) button.textContent = 'Не вдалося скопіювати';
+  }
+}
+
+// ---------- #/a/<id>: the link from the messenger ----------
+
+export async function sharedAnnouncement(id) {
+  const { data: sessionData } = await db.auth.getSession();
+  if (!sessionData?.session) {
+    rememberAfterLogin(`#/a/${id}`);
+    return redirect('#/login');
+  }
+  app.innerHTML = '<section class="card"><div class="privacy">Відкриваємо оголошення…</div></section>';
+  await db.rpc('claim_my_memberships_v11_rpc');
+
+  // Is it in one of my communities as a participant, or as a manager?
+  const [participantOf, managerOf] = await Promise.all([
+    getParticipantCommunities().catch(() => []),
+    getManagerCommunities().catch(() => []),
+  ]);
+  for (const c of participantOf) {
+    const { data } = await db.rpc('get_participant_announcements_v12_rpc', { p_community_id: c.id });
+    const a = (data || []).find(x => x.id === id);
+    if (a) {
+      localStorage.setItem('comfundy:participantCommunityId', c.id);
+      await syncParticipantNavigation('my-announcements');
+      return renderSingle(a, c, '#/me/announcements');
+    }
+  }
+  for (const c of managerOf) {
+    const { data } = await db.rpc('get_manager_announcements_v12_rpc', { p_community_id: c.id });
+    const a = (data || []).find(x => x.id === id);
+    if (a) {
+      localStorage.setItem('comfundy:managerCommunityId', c.id);
+      await syncManagerNavigation('announcements');
+      return renderSingle(a, c, '#/announcements');
+    }
+  }
+  app.innerHTML = `<section class="card"><h2>Оголошення не знайдено</h2>
+    <p class="status-text">Можливо, його видалили, або ви ще не учасник цієї спільноти. Попросіть менеджера класу додати вас з цим email.</p>
+    <div class="buttons"><a class="button" href="#/login">До кабінету</a></div></section>`;
+}
+
+function renderSingle(a, community, back) {
+  app.innerHTML = `<a class="page-back" href="${back}">← Усі оголошення</a>
+    <section class="hero account-hero"><p class="eyebrow">${esc(community.name)}</p></section>
+    <article class="announcement-card announcement-single">
+      <h1>${esc(a.title)}</h1>
+      <p>${esc(a.body)}</p>
+      <div class="announcement-date">${publishedLabel(a.created_at)}</div>
+    </article>`;
 }

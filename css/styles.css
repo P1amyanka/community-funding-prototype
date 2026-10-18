@@ -462,3 +462,12 @@ a.list-row-main:hover strong{color:var(--accent);text-decoration:underline}
 .info-card.faq h3{margin-top:20px}
 .info-cta{margin:24px 0 8px}
 .landing-hero-visual img{height:auto}
+/* Share an announcement to a messenger group */
+.announcement-actions{display:inline-flex;align-items:center;gap:16px}
+.announcement-card .announcement-actions :is(a,button).comment-link{color:var(--accent);font-size:13px;line-height:20px;font-weight:850;text-decoration:none;letter-spacing:0}
+.announcement-card .announcement-actions :is(a,button).comment-link:hover{text-decoration:underline}
+.share-drawer{height:auto}
+.share-preview{margin:16px 0 4px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#fff;white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;font-size:14px;line-height:1.5;color:var(--ink)}
+.share-buttons{grid-template-columns:1fr 1fr}
+.share-buttons .secondary{grid-column:1/-1}
+.announcement-single h1{margin:0 0 10px;font-size:clamp(26px,7vw,36px);letter-spacing:-.04em}

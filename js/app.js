@@ -1,13 +1,13 @@
-import { state } from './state.js?v=0.4.2-r37';
-import { copyPaymentValue, refreshMyInitiative, submitProposal } from './participant.js?v=0.4.2-r37';
-import { closeProposalComment, closeRound, createInitiative, downloadCsv, downloadCurrentCsv, downloadHistoryCsv, initiative, showNextRoundForm, showProposalComment, startNextRound } from './manager.js?v=0.4.2-r37';
-import { sendManagerMagicLink, signOutManager, updateAccountNav } from './auth.js?v=0.4.2-r37';
-import { activateCommunity, addCommunityManager, addCommunityMember, createCommunity, filterMembers, removeCommunityManager, saveCommunity, saveMember, sendManagerInvite, sendMemberAccess } from './communities.js?v=0.4.2-r37';
-import { closeContributionDrawer, createCollection, deleteCollection, deleteContribution, saveCollection, setCollectionStatus, toggleCollectionFields, filterContributionMembers, openContributionDrawer, saveContribution, selectContributionMember, updateContributionPeriodFields } from './collections.js?v=0.4.2-r37';
-import { closeManagerMenu, openManagerMenu, switchManagerCommunity, switchParticipantCommunity } from './navigation.js?v=0.4.2-r37';
-import { createAnnouncement, deleteAnnouncement, saveAnnouncement } from './announcements.js?v=0.4.2-r37';
-import { closeCreateSheet, openCreateSheet } from './create-sheet.js?v=0.4.2-r37';
-import { route, router } from './router.js?v=0.4.2-r37';
+import { state } from './state.js?v=0.4.2-r38';
+import { copyPaymentValue, refreshMyInitiative, submitProposal } from './participant.js?v=0.4.2-r38';
+import { closeProposalComment, closeRound, createInitiative, downloadCsv, downloadCurrentCsv, downloadHistoryCsv, initiative, showNextRoundForm, showProposalComment, startNextRound } from './manager.js?v=0.4.2-r38';
+import { sendManagerMagicLink, signOutManager, updateAccountNav } from './auth.js?v=0.4.2-r38';
+import { activateCommunity, addCommunityManager, addCommunityMember, createCommunity, filterMembers, removeCommunityManager, saveCommunity, saveMember, sendManagerInvite, sendMemberAccess } from './communities.js?v=0.4.2-r38';
+import { closeContributionDrawer, createCollection, deleteCollection, deleteContribution, saveCollection, setCollectionStatus, toggleCollectionFields, filterContributionMembers, openContributionDrawer, saveContribution, selectContributionMember, updateContributionPeriodFields } from './collections.js?v=0.4.2-r38';
+import { closeManagerMenu, openManagerMenu, switchManagerCommunity, switchParticipantCommunity } from './navigation.js?v=0.4.2-r38';
+import { closeShareDrawer, copyShareText, createAnnouncement, deleteAnnouncement, saveAnnouncement, shareAnnouncement } from './announcements.js?v=0.4.2-r38';
+import { closeCreateSheet, openCreateSheet } from './create-sheet.js?v=0.4.2-r38';
+import { route, router } from './router.js?v=0.4.2-r38';
 
 Object.assign(window, {
   state, createInitiative, submitProposal, refreshMyInitiative, copyPaymentValue, closeRound,
@@ -15,7 +15,7 @@ Object.assign(window, {
   closeProposalComment, sendManagerMagicLink, signOutManager, addCommunityMember, createCommunity, saveCommunity, saveMember, activateCommunity, sendMemberAccess,
   addCommunityManager, sendManagerInvite, removeCommunityManager,
   filterMembers, createCollection, deleteContribution, saveCollection, toggleCollectionFields, openContributionDrawer, closeContributionDrawer, filterContributionMembers,
-  selectContributionMember, updateContributionPeriodFields, saveContribution, createAnnouncement, saveAnnouncement, deleteAnnouncement,
+  selectContributionMember, updateContributionPeriodFields, saveContribution, createAnnouncement, saveAnnouncement, deleteAnnouncement, shareAnnouncement, closeShareDrawer, copyShareText,
   deleteCollection, setCollectionStatus, switchManagerCommunity,
   switchParticipantCommunity, openManagerMenu, closeManagerMenu, route, openCreateSheet, closeCreateSheet,
 });
