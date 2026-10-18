@@ -26,7 +26,10 @@ export function monthsElapsed(year, today = new Date()) {
   return Math.max(0, Math.min(SCHOOL_MONTHS.length, idx + 1));
 }
 
-export const hasDues = c => c && c.amount_per_member !== null && c.amount_per_member !== undefined && Number(c.amount_per_member) > 0
+// A finished collection keeps its history but no longer asks anyone for money.
+export const isClosed = c => c?.status === 'closed';
+
+export const hasDues = c => c && !isClosed(c) && c.amount_per_member !== null && c.amount_per_member !== undefined && Number(c.amount_per_member) > 0
   && (c.frequency !== 'monthly' || Number.isInteger(Number(c.school_year)));
 
 // Amount every member should have paid by `today`.
