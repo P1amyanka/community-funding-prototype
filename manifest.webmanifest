@@ -1,0 +1,15 @@
+{
+  "name": "Comfundy",
+  "short_name": "Comfundy",
+  "description": "Оголошення, збори і внески батьківського комітету в одному місці.",
+  "lang": "uk",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f3ec",
+  "theme_color": "#245447",
+  "icons": [
+    { "src": "/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/assets/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
