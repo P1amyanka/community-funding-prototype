@@ -88,7 +88,7 @@ export async function createAnnouncement() {
 export async function editAnnouncement(announcementId) {
   const { data: sessionData } = await db.auth.getSession();
   if (!sessionData?.session) {
-    location.hash = '#/login';
+    redirect('#/login');
     return;
   }
   await syncManagerNavigation('announcements');
@@ -116,14 +116,14 @@ export async function saveAnnouncement() {
   const { error } = await db.rpc('update_announcement_v18_rpc', { p_announcement_id: id, p_title: f.title, p_body: f.body });
   button.disabled = false; button.textContent = 'Зберегти';
   if (error) return ferr(errorBox, error.message);
-  location.hash = '#/announcements';
+  redirect('#/announcements');
 }
 
 export async function deleteAnnouncement(announcementId) {
   if (!confirm('Видалити оголошення? Учасники більше його не побачать. Це не можна скасувати.')) return;
   const { error } = await db.rpc('delete_announcement_v18_rpc', { p_announcement_id: announcementId });
   if (error) return alert(error.message);
-  location.hash = '#/announcements';
+  redirect('#/announcements');
 }
 
 export async function myAnnouncements() {

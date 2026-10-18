@@ -220,7 +220,7 @@ export async function setCollectionStatus(collectionId, status) {
     if (button) { button.disabled = false; button.textContent = closing ? 'Завершити збір' : 'Відновити збір'; }
     return ferr(errorBox, error.message);
   }
-  location.hash = `#/collections/${collectionId}`;
+  redirect(`#/collections/${collectionId}`);
 }
 
 export async function deleteCollection(collectionId) {
@@ -233,7 +233,7 @@ export async function deleteCollection(collectionId) {
     if (button) { button.disabled = false; button.textContent = 'Видалити збір'; }
     return ferr(errorBox, error.message);
   }
-  location.hash = '#/collections';
+  redirect('#/collections');
 }
 
 export async function saveCollection() {
