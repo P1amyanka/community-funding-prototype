@@ -4,8 +4,37 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#245447">
-  <title>Comfundy</title>
-  <link rel="stylesheet" href="css/styles.css?v=0.4.2-r36">
+  <title>Comfundy — оголошення, збори і внески батьківського комітету</title>
+  <meta name="description" content="Comfundy допомагає батьківському комітету вести клас: оголошення, збори і внески — без таблиць і нагадувань у чаті. Безкоштовно.">
+  <link rel="canonical" href="https://comfundy.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="uk_UA">
+  <meta property="og:site_name" content="Comfundy">
+  <meta property="og:title" content="Comfundy — батьківський комітет без таблиць і нагадувань у чаті">
+  <meta property="og:description" content="Оголошення, збори і внески класу в одному місці. Кожен з батьків бачить свій борг, менеджер — хто скільки здав. Безкоштовно.">
+  <meta property="og:url" content="https://comfundy.com/">
+  <meta property="og:image" content="https://comfundy.com/assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Comfundy",
+    "url": "https://comfundy.com/",
+    "description": "Comfundy допомагає батьківському комітету вести клас: оголошення, збори і внески — без таблиць і нагадувань у чаті.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "inLanguage": "uk",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "UAH" },
+    "audience": { "@type": "Audience", "audienceType": "Батьківські комітети шкільних класів" },
+    "featureList": ["Оголошення для батьків класу", "Разові й щомісячні збори", "Облік внесків і боргів", "Ініціативи: скільки кожен готовий внести", "Особистий кабінет для кожного з батьків"]
+  }
+  </script>
+  <script>if (location.hash.length > 2) document.documentElement.classList.add('has-route');</script>
+  <link rel="stylesheet" href="css/styles.css?v=0.4.2-r37">
 </head>
 <body>
   <div class="topbar">
@@ -21,7 +50,93 @@
     </div>
     <nav id="tabBar" class="tab-bar hidden" aria-label="Розділи кабінету"></nav>
   </div>
-  <main class="app" id="app"></main>
+  <main class="app" id="app">
+    <div class="landing">
+      <section class="landing-hero">
+        <h1 class="landing-hero-title">Ведіть клас без таблиць і нагадувань у чаті</h1>
+        <div class="landing-hero-copy">
+          <p class="landing-lead">Comfundy допомагає батьківському комітету: оголошення, збори і внески класу — в одному місці. Безкоштовно.</p>
+        </div>
+        <div class="landing-hero-visual">
+          <img src="assets/landing/community_planning_at_school.webp" width="1200" height="675" alt="Батьки класу разом планують справи за ноутбуком">
+        </div>
+        <div class="landing-actions landing-hero-actions">
+          <a class="landing-create" href="#/communities/new">Створити спільноту</a>
+        </div>
+      </section>
+
+      <section class="landing-section">
+        <div class="landing-section-head">
+          <p class="landing-eyebrow">Все необхідне батьківському комітету</p>
+          <h2>Менше ручної координації — більше зрозумілого порядку</h2>
+        </div>
+        <div class="landing-features">
+          <article class="landing-feature">
+            <img src="assets/landing/community_school_fundraising_jar.webp" loading="lazy" alt="">
+            <div class="landing-feature-copy">
+              <h3>Збори</h3>
+              <p>Створюйте разові або щомісячні збори та фіксуйте внески батьків. Видно, хто вже здав і скільки ще залишилось.</p>
+            </div>
+          </article>
+          <article class="landing-feature">
+            <img src="assets/landing/community_noticeboard_in_the_courtyard.webp" loading="lazy" alt="">
+            <div class="landing-feature-copy">
+              <h3>Оголошення</h3>
+              <p>Важлива інформація для класу в одному місці — не загубиться серед повідомлень у чаті.</p>
+            </div>
+          </article>
+          <article class="landing-feature landing-feature-ideas">
+            <img src="assets/landing/community_planning_at_school.webp" loading="lazy" alt="">
+            <div class="landing-feature-copy">
+              <h3>Ініціативи</h3>
+              <p>Запитайте батьків, скільки кожен готовий внести на нову ідею, перш ніж оголошувати збір.</p>
+            </div>
+          </article>
+          <article class="landing-feature">
+            <img src="assets/landing/collaborative_school_community_dashboard.webp" loading="lazy" alt="">
+            <div class="landing-feature-copy">
+              <h3>Учасники та статистика</h3>
+              <p>Ведіть список батьків і бачте, скільки вже зібрано та хто ще не вніс.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="landing-section landing-how">
+        <div class="landing-section-head">
+          <p class="landing-eyebrow">Як це працює</p>
+          <h2>Три прості кроки</h2>
+        </div>
+        <div class="landing-steps">
+          <article><span>1</span><h3>Створіть спільноту</h3><p>Наприклад, «5-А клас».</p></article>
+          <article><span>2</span><h3>Додайте батьків</h3><p>За потреби вкажіть email — кожен отримає свій кабінет.</p></article>
+          <article><span>3</span><h3>Ведіть справи класу</h3><p>Публікуйте оголошення, створюйте збори, позначайте внески та запускайте ініціативи.</p></article>
+        </div>
+      </section>
+
+      <section class="landing-section landing-participant">
+        <div>
+          <p class="landing-eyebrow">Для батьків</p>
+          <h2>У кожного — свій простий кабінет</h2>
+          <p>Кожен з батьків бачить оголошення, свої збори й борг, власну історію внесків та ініціативи. Чужих імен і сум — не бачить.</p>
+        </div>
+        <ul>
+          <li>Оголошення класу</li>
+          <li>Свої збори і борг</li>
+          <li>Відповіді на ініціативи</li>
+          <li>Власна історія внесків</li>
+          <li>Особиста статистика</li>
+        </ul>
+      </section>
+
+      <section class="landing-cta">
+        <p class="landing-eyebrow">Почати просто</p>
+        <h2>Створіть простір для свого класу</h2>
+        <p>Оголошення, збори і внески — в одному місці. Безкоштовно.</p>
+        <a class="landing-create" href="#/communities/new">Створити спільноту</a>
+      </section>
+    </div>
+  </main>
   <button id="createFab" class="create-fab hidden" onclick="openCreateSheet()" aria-label="Створити">+</button>
   <div id="managerMenuDrawer" class="manager-menu-drawer" aria-hidden="true">
     <button class="manager-menu-backdrop" aria-label="Закрити меню" onclick="closeManagerMenu()"></button>
@@ -35,7 +150,7 @@
     <nav class="footer-inner" aria-label="Навігація">
       <a class="footer-link" href="#/">Головна</a>
       <span class="footer-separator">|</span>
-      <a class="footer-link" href="#/about">Про платформу</a>
+      <a class="footer-link" href="/about/">Про платформу</a>
       <span class="footer-separator">|</span>
       <a class="footer-link" href="#/feedback">Зворотний зв'язок</a>
       <span class="footer-separator">|</span>
@@ -44,6 +159,6 @@
   </footer>
   <div class="toast" id="toast">Оновлено</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script type="module" src="js/app.js?v=0.4.2-r36"></script>
+  <script type="module" src="js/app.js?v=0.4.2-r37"></script>
 </body>
 </html>

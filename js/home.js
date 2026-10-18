@@ -2,6 +2,10 @@ import { db } from './supabase.js';
 import { app } from './utils.js';
 import { hideManagerNavigation } from './navigation.js';
 
+// The landing is static HTML in index.html (so search engines and AI crawlers
+// can read it). Keep a copy to show it again after visiting other pages.
+const LANDING_HTML = app.innerHTML;
+
 export async function home() {
   hideManagerNavigation();
   document.body.classList.add('on-landing');
@@ -11,90 +15,6 @@ export async function home() {
     db.auth.getSession().then(({ data }) => { login.textContent = data?.session ? 'Кабінет' : 'Увійти'; });
   }
 
-  app.innerHTML = `
-    <div class="landing">
-      <section class="landing-hero">
-        <h1 class="landing-hero-title">Управління шкільною групою — просто і в одному місці</h1>
-        <div class="landing-hero-copy">
-          <p class="landing-lead">Збори, внески, оголошення, ініціативи й учасники класу — в одному зручному кабінеті.</p>
-        </div>
-        <div class="landing-hero-visual">
-          <img src="assets/landing/community_planning_at_school.png" alt="Батьківська група планує спільні справи">
-        </div>
-        <div class="landing-actions landing-hero-actions">
-          <a class="landing-create" href="#/communities/new">Створити спільноту</a>
-        </div>
-      </section>
-
-      <section class="landing-section">
-        <div class="landing-section-head">
-          <p class="landing-eyebrow">Все необхідне для спільноти</p>
-          <h2>Менше ручної координації — більше зрозумілого порядку</h2>
-        </div>
-        <div class="landing-features">
-          <article class="landing-feature">
-            <img src="assets/landing/community_school_fundraising_jar.png" alt="">
-            <div class="landing-feature-copy">
-              <h3>Збори</h3>
-              <p>Створюйте разові або регулярні збори та фіксуйте внески учасників.</p>
-            </div>
-          </article>
-          <article class="landing-feature">
-            <img src="assets/landing/community_noticeboard_in_the_courtyard.png" alt="">
-            <div class="landing-feature-copy">
-              <h3>Оголошення</h3>
-              <p>Публікуйте важливу інформацію для своєї спільноти в одному місці.</p>
-            </div>
-          </article>
-          <article class="landing-feature landing-feature-ideas">
-            <img src="assets/landing/community_planning_at_school.png" alt="">
-            <div class="landing-feature-copy">
-              <h3>Ініціативи</h3>
-              <p>Запитайте групу, скільки кожен готовий внести на нову ідею, перш ніж оголошувати збір.</p>
-            </div>
-          </article>
-          <article class="landing-feature">
-            <img src="assets/landing/collaborative_school_community_dashboard.png" alt="">
-            <div class="landing-feature-copy">
-              <h3>Учасники та статистика</h3>
-              <p>Ведіть список учасників і бачте, скільки вже зібрано та хто робив внески.</p>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="landing-section landing-how">
-        <div class="landing-section-head">
-          <p class="landing-eyebrow">Як це працює</p>
-          <h2>Три прості кроки</h2>
-        </div>
-        <div class="landing-steps">
-          <article><span>1</span><h3>Створіть спільноту</h3><p>Наприклад, свій клас або батьківську групу.</p></article>
-          <article><span>2</span><h3>Додайте учасників</h3><p>За потреби вкажіть email і надайте доступ до кабінету.</p></article>
-          <article><span>3</span><h3>Організовуйте роботу</h3><p>Створюйте збори, фіксуйте внески, публікуйте оголошення та запускайте ініціативи.</p></article>
-        </div>
-      </section>
-
-      <section class="landing-section landing-participant">
-        <div>
-          <p class="landing-eyebrow">Для учасників</p>
-          <h2>У кожного — свій простий кабінет</h2>
-          <p>Учасник бачить оголошення, свої збори, власну історію внесків та ініціативи — без зайвої інформації про інших.</p>
-        </div>
-        <ul>
-          <li>Оголошення своєї спільноти</li>
-          <li>Свої збори</li>
-          <li>Відповіді на ініціативи</li>
-          <li>Власна історія внесків</li>
-          <li>Особиста статистика</li>
-        </ul>
-      </section>
-
-      <section class="landing-cta">
-        <p class="landing-eyebrow">Почати просто</p>
-        <h2>Створіть простір для своєї спільноти</h2>
-        <p>Збори, внески, оголошення та ініціативи — в одному місці.</p>
-        <a class="landing-create" href="#/communities/new">Створити спільноту</a>
-      </section>
-    </div>`;
+  document.documentElement.classList.remove('has-route');
+  app.innerHTML = LANDING_HTML;
 }
