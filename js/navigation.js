@@ -159,7 +159,7 @@ export async function syncManagerNavigation(active = null, forceVisible = false)
     if (roles?.[0]?.is_participant) switchLink = '<a class="manager-menu-switch" href="#/me" onclick="closeManagerMenu()">Мій кабінет</a>';
   }
   account.innerHTML = currentSession
-    ? `${switchLink}<div class="manager-menu-email">${esc(currentSession.user.email || '')}</div><button class="manager-menu-signout" onclick="signOutManager()">Вийти</button>`
+    ? `${switchLink}<a class="manager-menu-feedback" href="#/feedback" onclick="closeManagerMenu()">Зворотний зв'язок</a><div class="manager-menu-email">${esc(currentSession.user.email || '')}</div><button class="manager-menu-signout" onclick="signOutManager()">Вийти</button>`
     : '<a class="manager-menu-login" href="#/login" onclick="closeManagerMenu()">Увійти</a>';
 }
 
@@ -207,7 +207,7 @@ export async function syncParticipantNavigation(active = 'my-collections', role 
   const switchLink = roles?.is_manager
     ? '<a class="manager-menu-switch" href="#/announcements" onclick="closeManagerMenu()">Кабінет менеджера</a>'
     : '';
-  account.innerHTML = `${switchLink}<div class="manager-menu-email">${esc(currentSession.user.email || '')}</div><button class="manager-menu-signout" onclick="signOutManager()">Вийти</button>`;
+  account.innerHTML = `${switchLink}<a class="manager-menu-feedback" href="#/feedback" onclick="closeManagerMenu()">Зворотний зв'язок</a><div class="manager-menu-email">${esc(currentSession.user.email || '')}</div><button class="manager-menu-signout" onclick="signOutManager()">Вийти</button>`;
 }
 
 export function switchManagerCommunity(id) {

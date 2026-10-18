@@ -178,8 +178,10 @@ button,.button{width:100%;min-height:50px;border:0;border-radius:999px;padding:1
 .collection-summary span:last-child{grid-column:auto}
 .collection-summary strong{font-size:15px;white-space:nowrap}
 
-/* Inside the cabinet the footer keeps only feedback. */
-.in-cabinet .footer-link:not([href="#/feedback"]),.in-cabinet .footer-separator{display:none}
+/* No footer inside the cabinet; feedback lives in the menu. */
+.in-cabinet .footer{display:none}
+.manager-menu-feedback{display:block;margin-bottom:10px;color:var(--muted);font-size:13px;font-weight:700;text-decoration:none}
+.manager-menu-feedback:hover{color:var(--accent);text-decoration:underline}
 
 /* Sign-in link in the header on the landing page. */
 .topbar-login{display:inline-flex;align-items:center;min-height:40px;padding:8px 16px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--accent);font-size:14px;font-weight:850;text-decoration:none;box-shadow:0 2px 8px rgba(31,33,31,.05);transition:border-color .15s ease,box-shadow .15s ease}
