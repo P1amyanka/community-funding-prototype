@@ -25,6 +25,21 @@ async function renderWelcome(session) {
     </section>`;
 }
 
+// Where to go after signing in (set when a signed-out person opens a shared link).
+// localStorage, because the email link may open in a new tab; kept for a day.
+const AFTER_LOGIN_KEY = 'comfundy:afterLogin';
+export function rememberAfterLogin(hash) {
+  try { localStorage.setItem(AFTER_LOGIN_KEY, JSON.stringify({ hash, at: Date.now() })); } catch {}
+}
+function takeAfterLogin() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(AFTER_LOGIN_KEY) || 'null');
+    localStorage.removeItem(AFTER_LOGIN_KEY);
+    if (saved?.hash?.startsWith('#/') && Date.now() - saved.at < 864e5) return saved.hash;
+  } catch {}
+  return null;
+}
+
 export async function login() {
   const { data, error } = await db.auth.getSession();
   if (error) {
@@ -36,6 +51,11 @@ export async function login() {
   await updateAccountNav();
   if (session) {
     await db.rpc('claim_my_memberships_v11_rpc');
+    const target = takeAfterLogin();
+    if (target) {
+      redirect(target);
+      return;
+    }
     const { data: roles } = await db.rpc('get_my_account_roles_v11_rpc');
     const role = roles?.[0];
     if (role?.is_manager) {

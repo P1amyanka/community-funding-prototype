@@ -6,7 +6,7 @@ import { feedback } from './info-pages.js';
 import { login } from './auth.js';
 import { communities, community, editCommunity, editMember, members, newCommunity, newMember } from './communities.js';
 import { collection, collections, editCollection, memberStats, newCollection, statistics } from './collections.js';
-import { announcements, editAnnouncement, myAnnouncements, newAnnouncement } from './announcements.js';
+import { announcements, editAnnouncement, myAnnouncements, newAnnouncement, sharedAnnouncement } from './announcements.js';
 import { myCollection, myCollections, myStatistics } from './participant-account.js';
 import { closeManagerMenu, hideManagerNavigation } from './navigation.js';
 import { app, fail, redirect } from './utils.js';
@@ -47,6 +47,7 @@ export function router() {
   if (k === 'about') { location.replace('/about/'); return; }
   if (k === 'feedback') { hideManagerNavigation(); return feedback(); }
   if (k === 'login') return login();
+  if (k === 'a' && t) return sharedAnnouncement(t);
   if (k === 'announcements' && t === 'new') return newAnnouncement();
   if (k === 'announcements' && t && section === 'edit') return editAnnouncement(t);
   if (k === 'announcements') return announcements();
