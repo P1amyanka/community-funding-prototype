@@ -43,7 +43,7 @@ export async function login() {
       return;
     }
     if (role?.is_participant) {
-      redirect('#/me');
+      redirect('#/me/announcements');
       return;
     }
     return renderWelcome(session);

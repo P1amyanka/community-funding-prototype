@@ -22,11 +22,19 @@ function renderTabBar(items, active) {
   bar.innerHTML = items.map(([key, href, label]) => `<a class="tab-item ${active === key ? 'active' : ''}" href="${href}" ${active === key ? 'aria-current="page"' : ''}>
       <svg viewBox="0 0 24 24" aria-hidden="true">${iconFor(key)}</svg><span>${label}</span></a>`).join('');
   bar.classList.remove('hidden');
+  // Phones: the tabs scroll sideways, so bring the current one into view.
+  const current = bar.querySelector('.tab-item.active');
+  if (current) bar.scrollLeft = current.offsetLeft - (bar.clientWidth - current.offsetWidth) / 2;
+}
+
+function setCreateFab(visible) {
+  document.getElementById('createFab')?.classList.toggle('hidden', !visible);
 }
 
 function hideTabBar() {
   document.getElementById('tabBar')?.classList.add('hidden');
   document.getElementById('communityPill')?.classList.add('hidden');
+  setCreateFab(false);
 }
 
 function setCommunityPill(name) {
@@ -47,7 +55,6 @@ const managerItems = [
 ];
 
 const participantItems = [
-  ['my-home', '#/me', 'Головна'],
   ['my-announcements', '#/me/announcements', 'Оголошення'],
   ['my-collections', '#/me/collections', 'Збори'],
   ['my-initiatives', '#/me/initiatives', 'Ініціативи'],
@@ -142,7 +149,8 @@ export async function syncManagerNavigation(active = null, forceVisible = false)
 
   if (visible) {
     renderTabBar(managerItems.filter(([key]) => key !== 'communities'), active);
-    setCommunityPill(communities.length > 1 ? activeCommunity?.name : null);
+    setCommunityPill(activeCommunity?.name || null);
+    setCreateFab(Boolean(activeCommunity) && managerItems.some(([key]) => key === active && key !== 'communities'));
   } else {
     hideTabBar();
   }
@@ -150,7 +158,7 @@ export async function syncManagerNavigation(active = null, forceVisible = false)
   links.innerHTML = `${communitySelector(communities, activeCommunity, 'switchManagerCommunity', true)}
     <div class="manager-menu-separator"></div>
     ${managerItems.map(([key, href, label]) =>
-      `<a class="manager-menu-link ${active === key ? 'active' : ''}" href="${href}" onclick="closeManagerMenu()"><svg viewBox="0 0 24 24" aria-hidden="true">${iconFor(key)}</svg>${label}</a>`
+      `<a class="manager-menu-link ${key === 'communities' ? '' : 'menu-section'} ${active === key ? 'active' : ''}" href="${href}" onclick="closeManagerMenu()"><svg viewBox="0 0 24 24" aria-hidden="true">${iconFor(key)}</svg>${label}</a>`
     ).join('')}`;
 
   let switchLink = '';
@@ -191,12 +199,13 @@ export async function syncParticipantNavigation(active = 'my-collections', role 
   } catch {}
 
   renderTabBar(participantItems, active);
-  setCommunityPill(communities.length > 1 ? activeCommunity?.name : null);
+  setCommunityPill(activeCommunity?.name || null);
+  setCreateFab(false);
 
   links.innerHTML = `${communitySelector(communities, activeCommunity, 'switchParticipantCommunity', false)}
     <div class="manager-menu-separator"></div>
     ${participantItems.map(([key, href, label]) =>
-      `<a class="manager-menu-link ${active === key ? 'active' : ''}" href="${href}" onclick="closeManagerMenu()"><svg viewBox="0 0 24 24" aria-hidden="true">${iconFor(key)}</svg>${label}</a>`
+      `<a class="manager-menu-link menu-section ${active === key ? 'active' : ''}" href="${href}" onclick="closeManagerMenu()"><svg viewBox="0 0 24 24" aria-hidden="true">${iconFor(key)}</svg>${label}</a>`
     ).join('')}`;
 
   let roles = role;

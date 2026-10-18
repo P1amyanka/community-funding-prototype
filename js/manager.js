@@ -74,7 +74,7 @@ export async function initiatives() {
   const active = items.filter(x => x.status === 'open');
   const closed = items.filter(x => x.status !== 'open');
 
-  app.innerHTML = `<section class="hero account-hero"><h1>Ініціативи</h1><p class="lead">${esc(community.name)}</p></section>
+  app.innerHTML = `<section class="hero account-hero tab-hero"><h1>Ініціативи</h1><p class="lead">${esc(community.name)}</p></section>
     <div class="account-create"><a class="button" href="#/initiatives/new">Створити ініціативу</a></div>
     <section class="account-section"><h2>Активні</h2><div class="initiative-list">${active.length ? active.map(initiativeCard).join('') : '<div class="privacy">Активних ініціатив немає.</div>'}</div></section>
     <section class="account-section"><h2>Завершені</h2><div class="initiative-list">${closed.length ? closed.map(initiativeCard).join('') : '<div class="privacy">Завершених ініціатив немає.</div>'}</div></section>`;

@@ -96,7 +96,7 @@ export async function myCollections() {
     </article>`;
   }).join('') : '<div class="privacy">У цій спільноті ще немає зборів.</div>';
 
-  app.innerHTML = `<section class="hero account-hero"><h1>Мої збори</h1><p class="lead">${esc(community.name)}</p></section>
+  app.innerHTML = `<section class="hero account-hero tab-hero"><h1>Мої збори</h1><p class="lead">${esc(community.name)}</p></section>
     <section class="account-section"><div class="collection-list">${cards}</div></section>`;
 }
 
@@ -156,54 +156,6 @@ export async function myCollection(collectionId) {
     <section class="account-section"><h2>Мої внески</h2><div class="list-rows">${history}</div></section>`;
 }
 
-const announcementDate = value => new Intl.DateTimeFormat('uk-UA', { day: 'numeric', month: 'long' }).format(new Date(value));
-const RECENT_DAYS = 14;
-
-export async function myHome() {
-  const session = await requireParticipant('my-home');
-  if (!session) return;
-  const community = await getActiveParticipantCommunity();
-  if (!community) return;
-
-  const [{ data: cols, error: e1 }, { data: inits, error: e2 }, { data: ann, error: e3 }] = await Promise.all([
-    db.rpc('get_my_participant_collections_v16_rpc'),
-    db.rpc('get_my_initiatives_v15_rpc', { p_community_id: community.id }),
-    db.rpc('get_participant_announcements_v12_rpc', { p_community_id: community.id }),
-  ]);
-  const err = e1 || e2 || e3;
-  if (err) return app.innerHTML = `<section class="card"><div class="error">${esc(err.message)}</div></section>`;
-
-
-  const toPay = (cols || []).filter(c => c.community_id === community.id && hasDues(c))
-    .map(c => ({ c, d: memberDues(c, Number(c.personal_amount)) }))
-    .filter(x => x.d.left > 0)
-    .sort((a, b) => b.d.left - a.d.left);
-  const toAnswer = (inits || []).filter(i => i.status === 'open' && (i.own_max_amount === null || i.own_max_amount === undefined));
-  const cutoff = Date.now() - RECENT_DAYS * 864e5;
-  const fresh = (ann || []).filter(a => new Date(a.created_at).getTime() >= cutoff).slice(0, 3);
-  const latest = fresh.length ? fresh : (ann || []).slice(0, 1);
-
-  const annBlock = `<section class="account-section"><div class="section-head-row"><h2>Оголошення</h2>${(ann || []).length ? '<a class="collection-settings-link" href="#/me/announcements">Усі →</a>' : ''}</div>
-      ${latest.length ? `<div class="announcement-list">${latest.map(a => `<article class="announcement-card compact-announcement">
-        <h3>${esc(a.title)}</h3><p>${esc(a.body)}</p><div class="announcement-date">${announcementDate(a.created_at)}</div></article>`).join('')}</div>` : '<div class="privacy">Оголошень ще немає.</div>'}</section>`;
-
-  const payBlock = `<section class="account-section"><div class="section-head-row"><h2>Збори</h2><a class="collection-settings-link" href="#/me/collections">Усі →</a></div>
-      ${toPay.length ? `<div class="list-rows">${toPay.map(({ c, d }) => `
-      <a class="list-row list-row-link" href="#/me/collections/${esc(c.id)}">
-        <span class="list-row-main"><strong>${esc(c.name)}</strong>${c.frequency === 'monthly' ? monthDots(d) : splitBar(d.paid, d.left)}</span>
-        <span class="list-row-side"><strong class="amt debt">${money(d.left)}</strong><svg class="row-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span>
-      </a>`).join('')}</div>` : '<div class="privacy home-ok">Усе сплачено.</div>'}</section>`;
-
-  const answerBlock = toAnswer.length ? `<section class="account-section"><div class="section-head-row"><h2>Ініціативи</h2><a class="collection-settings-link" href="#/me/initiatives">Усі →</a></div><div class="list-rows">${toAnswer.map(i => `
-      <a class="list-row list-row-link" href="#/me/initiatives/${esc(i.id)}">
-        <span class="list-row-main"><strong>${esc(i.title)}</strong>${i.deadline ? `<small>до ${announcementDate(i.deadline)}</small>` : ''}</span>
-        <span class="list-row-side"><svg class="row-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span>
-      </a>`).join('')}</div></section>` : '';
-
-  app.innerHTML = `<section class="hero account-hero"><h1>Головна</h1><p class="lead">${esc(community.name)}</p></section>
-    ${annBlock}${payBlock}${answerBlock}`;
-}
-
 export async function myStatistics() {
   const session = await requireParticipant('my-statistics');
   if (!session) return;
@@ -229,7 +181,7 @@ export async function myStatistics() {
       <span class="list-row-side">${amountOne(paid, left)}<svg class="row-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></a>`;
   }).join('') || '<div class="privacy">У цій спільноті ще немає зборів.</div>';
 
-  app.innerHTML = `<section class="hero account-hero"><h1>Статистика</h1><p class="lead">${esc(community.name)}</p></section>
+  app.innerHTML = `<section class="hero account-hero tab-hero"><h1>Статистика</h1><p class="lead">${esc(community.name)}</p></section>
     <section class="card dues-card">${duesTiles(paid, left)}</section>
     <section class="account-section"><h2>Мої збори</h2><div class="list-rows">${rows}</div></section>`;
 }

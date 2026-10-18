@@ -23,7 +23,7 @@ const memberStatus = m => {
 const memberCard = m => {
   const search = [m.full_name, m.email || '', m.community_name || ''].join(' ').toLocaleLowerCase('uk-UA');
   return `<article class="list-row member-row ${m.status !== 'active' ? 'is-inactive' : ''}" data-member-search="${esc(search)}">
-    <a class="list-row-main" href="#/members/${esc(m.id)}/edit" aria-label="Редагувати: ${esc(m.full_name)}">
+    <a class="list-row-main" href="#/members/${esc(m.id)}" aria-label="Відкрити: ${esc(m.full_name)}">
       <strong>${esc(m.full_name)}</strong>
       <small>${m.email ? esc(m.email) : 'Email не вказано'}</small>
     </a>
@@ -125,7 +125,7 @@ export async function members() {
   if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
   const rows = (data || []).length ? data.map(m => memberCard(m)).join('') : '<div class="privacy">У цій спільноті ще немає учасників.</div>';
 
-  app.innerHTML = `<section class="hero account-hero"><h1>Учасники</h1><p class="lead">${esc(community.name)}</p></section>
+  app.innerHTML = `<section class="hero account-hero tab-hero"><h1>Учасники</h1><p class="lead">${esc(community.name)}</p></section>
     <div class="account-create"><a class="button" href="#/members/new">Додати учасника</a></div>
     <div class="member-search"><span aria-hidden="true">⌕</span><input id="memberSearch" type="search" placeholder="Пошук за імʼям або email" oninput="filterMembers()"></div>
     <section class="account-section"><div class="list-rows">${rows}</div><div id="memberSearchEmpty" class="privacy hidden">Нічого не знайдено.</div></section>`;
@@ -218,8 +218,8 @@ export async function editMember(memberId) {
 
   app.innerHTML = `<a class="page-back" href="#/members" aria-label="Повернутися до учасників">← Учасники</a>
     <section class="hero account-hero"><h1>Редагувати учасника</h1><p class="lead">${esc(community.name)}</p></section>
-    <a class="list-rows stats-link" href="#/statistics/members/${esc(member.id)}">
-      <span class="list-row"><span class="list-row-main"><strong>${esc(member.full_name)}</strong></span><span class="list-row-side"><span class="collection-settings-link">Статистика учасника</span><svg class="row-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></span>
+    <a class="list-rows stats-link" href="#/members/${esc(member.id)}">
+      <span class="list-row"><span class="list-row-main"><strong>${esc(member.full_name)}</strong></span><span class="list-row-side"><span class="collection-settings-link">Збори учасника</span><svg class="row-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></span>
     </a>
     <section class="card">
       <input id="editMemberId" type="hidden" value="${esc(member.id)}">

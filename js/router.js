@@ -5,11 +5,11 @@ import { initiative, initiatives, newInitiative } from './manager.js';
 import { about, feedback } from './info-pages.js';
 import { login } from './auth.js';
 import { communities, community, editCommunity, editMember, members, newCommunity, newMember } from './communities.js';
-import { collection, collections, editCollection, newCollection, statistics } from './collections.js';
+import { collection, collections, editCollection, memberStats, newCollection, statistics } from './collections.js';
 import { announcements, editAnnouncement, myAnnouncements, newAnnouncement } from './announcements.js';
-import { myCollection, myCollections, myHome, myStatistics } from './participant-account.js';
+import { myCollection, myCollections, myStatistics } from './participant-account.js';
 import { closeManagerMenu, hideManagerNavigation } from './navigation.js';
-import { app, fail } from './utils.js';
+import { app, fail, redirect } from './utils.js';
 
 export function parts() {
   return location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
@@ -50,7 +50,7 @@ export function router() {
   if (k === 'announcements' && t === 'new') return newAnnouncement();
   if (k === 'announcements' && t && section === 'edit') return editAnnouncement(t);
   if (k === 'announcements') return announcements();
-  if (k === 'me' && !t) return myHome();
+  if (k === 'me' && !t) return redirect('#/me/announcements');
   if (k === 'me' && t === 'announcements') return myAnnouncements();
   if (k === 'me' && t === 'initiatives' && section) return myInitiative(section);
   if (k === 'me' && t === 'initiatives') return myInitiatives();
@@ -67,6 +67,7 @@ export function router() {
   if (k === 'statistics') return statistics(t || 'collections', section || null);
   if (k === 'members' && t === 'new') return newMember();
   if (k === 'members' && t && section === 'edit') return editMember(t);
+  if (k === 'members' && t) return memberStats(t);
   if (k === 'members') return members();
   if (k === 'community' && t && section === 'edit') return editCommunity(t);
   if (k === 'community' && t === 'edit') return editCommunity();

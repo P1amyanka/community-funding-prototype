@@ -52,8 +52,8 @@ export async function announcements() {
   const { data, error } = await db.rpc('get_manager_announcements_v12_rpc', { p_community_id: community.id });
   if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
   const items = data || [];
-  app.innerHTML = `<section class="hero account-hero"><h1>Оголошення</h1><p class="lead">${esc(community.name)}</p></section>
-    <div class="account-create"><a class="button" href="#/announcements/new">Створити оголошення</a></div>
+  app.innerHTML = `<section class="hero account-hero tab-hero"><h1>Оголошення</h1><p class="lead">${esc(community.name)}</p></section>
+    <div class="account-create create-main"><a class="button" href="#/announcements/new">Створити оголошення</a></div>
     <section class="account-section"><div class="announcement-list">${items.length ? items.map(managerCard).join('') : '<div class="privacy">Оголошень ще немає.</div>'}</div></section>`;
 }
 
@@ -147,6 +147,6 @@ export async function myAnnouncements() {
   const { data, error } = await db.rpc('get_participant_announcements_v12_rpc', { p_community_id: community.id });
   if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
   const items = data || [];
-  app.innerHTML = `<section class="hero account-hero"><h1>Оголошення</h1><p class="lead">${esc(community.name)}</p></section>
+  app.innerHTML = `<section class="hero account-hero tab-hero"><h1>Оголошення</h1><p class="lead">${esc(community.name)}</p></section>
     <section class="account-section"><div class="announcement-list">${items.length ? items.map(card).join('') : '<div class="privacy">Оголошень ще немає.</div>'}</div></section>`;
 }

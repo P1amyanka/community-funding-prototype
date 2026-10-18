@@ -50,7 +50,7 @@ export async function myInitiatives() {
     </article>`;
   }).join('') : '<div class="privacy">У цій спільноті ще немає ініціатив.</div>';
 
-  app.innerHTML = `<section class="hero account-hero"><h1>Ініціативи</h1><p class="lead">${esc(community.name)}</p></section>
+  app.innerHTML = `<section class="hero account-hero tab-hero"><h1>Ініціативи</h1><p class="lead">${esc(community.name)}</p></section>
     <section class="account-section"><div class="initiative-list">${cards}</div></section>`;
 }
 
