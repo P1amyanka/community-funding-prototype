@@ -1,5 +1,5 @@
 import { db } from './supabase.js';
-import { app, count, esc, money, plural, W } from './utils.js';
+import { app, count, esc, money, plural, redirect, W } from './utils.js';
 import { getActiveParticipantCommunity, syncParticipantNavigation } from './navigation.js';
 import { coveredRange, hasDues, memberDues, schoolYearLabel } from './dues.js';
 import { amountOne, duesTiles, monthDots, splitBar } from './dues-ui.js';
@@ -9,7 +9,7 @@ const months = ['Січень','Лютий','Березень','Квітень',
 export async function requireParticipant(active = 'my-collections') {
   const { data } = await db.auth.getSession();
   if (!data?.session) {
-    location.hash = '#/login';
+    redirect('#/login');
     return null;
   }
   await db.rpc('claim_my_memberships_v11_rpc');

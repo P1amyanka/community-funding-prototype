@@ -1,5 +1,5 @@
 import { db } from './supabase.js';
-import { app, esc, ferr } from './utils.js';
+import { app, esc, ferr, redirect } from './utils.js';
 import { syncManagerNavigation, closeManagerMenu } from './navigation.js';
 
 const redirectUrl = `${window.location.origin}${window.location.pathname}`;
@@ -39,11 +39,11 @@ export async function login() {
     const { data: roles } = await db.rpc('get_my_account_roles_v11_rpc');
     const role = roles?.[0];
     if (role?.is_manager) {
-      location.hash = '#/announcements';
+      redirect('#/announcements');
       return;
     }
     if (role?.is_participant) {
-      location.hash = '#/me';
+      redirect('#/me');
       return;
     }
     return renderWelcome(session);
