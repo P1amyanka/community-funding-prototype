@@ -20,9 +20,9 @@ export async function home() {
         </div>
         <div class="landing-hero-visual">
           <img src="assets/landing/community_planning_at_school.png" alt="Батьківська група планує спільні справи">
-          <div class="landing-actions landing-actions-under-image">
-            <a class="landing-create" href="#/communities/new">Створити спільноту</a>
-          </div>
+        </div>
+        <div class="landing-actions landing-hero-actions">
+          <a class="landing-create" href="#/communities/new">Створити спільноту</a>
         </div>
       </section>
 
