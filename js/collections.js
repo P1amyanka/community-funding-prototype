@@ -2,8 +2,8 @@ import { db } from './supabase.js';
 import { getActiveManagerCommunity, syncManagerNavigation } from './navigation.js';
 import { app, esc, ferr, money, plural, redirect, W } from './utils.js';
 import { state } from './state.js';
-import { amountOne, duesTiles, monthDots, splitBar } from './dues-ui.js';
-import { currentSchoolYear, dueToDate, duesLine, hasDues, memberDues, monthsElapsed, schoolMonths, schoolYearLabel } from './dues.js';
+import { amountOne, collectionStatusTag, duesTiles, monthDots, splitBar } from './dues-ui.js';
+import { currentSchoolYear, dueToDate, duesLine, hasDues, isClosed, memberDues, monthsElapsed, schoolMonths, schoolYearLabel } from './dues.js';
 
 const months = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
 let contributionMembers = [];
@@ -62,7 +62,7 @@ export async function collections() {
   const { data, error } = await db.rpc('get_my_collections_v16_rpc');
   if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
   const rows = (data || []).filter(x => x.community_id === community.id);
-  const cards = rows.length ? rows.map(c => {
+  const card = c => {
     const body = hasDues(c)
       ? `<p class="caption collection-amount-line">${amountLine(c)}</p>${progressBlock(Number(c.total_amount), dueToDate(c) * Number(c.active_members_count || 0))}`
       : `<div class="collection-summary">
@@ -73,16 +73,21 @@ export async function collections() {
     return `<article class="collection-card">
       <div class="collection-card-head">
         <div><h3>${esc(c.name)}</h3></div>
-        <span class="tag ok">${collectionTag(c)}</span>
+        ${collectionStatusTag(c, collectionTag(c))}
       </div>
       ${body}
       <a class="initiative-open" href="#/collections/${esc(c.id)}">Відкрити →</a>
     </article>`;
-  }).join('') : '<div class="privacy">У цій спільноті ще немає зборів.</div>';
+  };
+  const active = rows.filter(c => !isClosed(c));
+  const finished = rows.filter(isClosed);
+  const cards = active.length ? active.map(card).join('')
+    : `<div class="privacy">${finished.length ? 'Активних зборів немає.' : 'У цій спільноті ще немає зборів.'}</div>`;
 
   app.innerHTML = `<section class="hero account-hero"><h1>Збори</h1><p class="lead">${esc(community.name)}</p></section>
     <div class="account-create"><a class="button" href="#/collections/new">Створити збір</a></div>
-    <section class="account-section"><div class="collection-list">${cards}</div></section>`;
+    <section class="account-section"><div class="collection-list">${cards}</div></section>
+    ${finished.length ? `<section class="account-section"><h2>Завершені</h2><div class="collection-list finished-list">${finished.map(card).join('')}</div></section>` : ''}`;
 }
 
 function collectionForm(c = null) {
@@ -189,7 +194,46 @@ export async function editCollection(collectionId) {
       ${collectionForm(c)}
       <div class="buttons"><button id="saveCollectionBtn" onclick="saveCollection()">Зберегти</button></div>
       <div id="collectionError" class="error hidden"></div>
-    </section>`;
+    </section>
+    ${collectionStateCard(c)}`;
+}
+
+function collectionStateCard(c) {
+  const closed = isClosed(c);
+  const toggle = closed
+    ? `<button id="collectionStatusBtn" class="secondary" onclick="setCollectionStatus('${esc(c.id)}','active')">Відновити збір</button>`
+    : `<button id="collectionStatusBtn" class="secondary" onclick="setCollectionStatus('${esc(c.id)}','closed')">Завершити збір</button>`;
+  const remove = Number(c.contributions_count) > 0 ? ''
+    : `<button id="deleteCollectionBtn" class="secondary contribution-delete" onclick="deleteCollection('${esc(c.id)}')">Видалити збір</button>`;
+  return `<section class="card compact"><div class="buttons stacked-buttons">${toggle}${remove}</div>
+      <div id="collectionStateError" class="error hidden"></div></section>`;
+}
+
+export async function setCollectionStatus(collectionId, status) {
+  const closing = status === 'closed';
+  if (closing && !confirm('Завершити збір? Учасники більше не бачитимуть боргу, нові внески не додаватимуться. Історія і статистика збережуться, збір можна буде відновити.')) return;
+  const button = document.getElementById('collectionStatusBtn');
+  const errorBox = document.getElementById('collectionStateError');
+  if (button) { button.disabled = true; button.textContent = 'Зберігаємо...'; }
+  const { error } = await db.rpc('set_collection_status_v18_rpc', { p_collection_id: collectionId, p_status: status });
+  if (error) {
+    if (button) { button.disabled = false; button.textContent = closing ? 'Завершити збір' : 'Відновити збір'; }
+    return ferr(errorBox, error.message);
+  }
+  redirect(`#/collections/${collectionId}`);
+}
+
+export async function deleteCollection(collectionId) {
+  if (!confirm('Видалити збір? Це не можна скасувати.')) return;
+  const button = document.getElementById('deleteCollectionBtn');
+  const errorBox = document.getElementById('collectionStateError');
+  if (button) { button.disabled = true; button.textContent = 'Видаляємо...'; }
+  const { error } = await db.rpc('delete_collection_v18_rpc', { p_collection_id: collectionId });
+  if (error) {
+    if (button) { button.disabled = false; button.textContent = 'Видалити збір'; }
+    return ferr(errorBox, error.message);
+  }
+  redirect('#/collections');
 }
 
 export async function saveCollection() {
@@ -254,9 +298,11 @@ export async function collection(collectionId) {
     <section class="hero collection-hero">
       <p class="eyebrow">${esc(item.community_name)}</p>
       <h1>${esc(item.name)}</h1>
-      <div class="collection-hero-meta"><span class="tag ok">${collectionTag(item)}</span>${amountLine(item) ? `<span class="caption">${amountLine(item)}</span>` : ''}</div>
+      <div class="collection-hero-meta">${collectionStatusTag(item, collectionTag(item))}${amountLine(item) ? `<span class="caption">${amountLine(item)}</span>` : ''}</div>
     </section>
-    <div class="account-create collection-actions"><button onclick="openContributionDrawer('${esc(item.id)}','${esc(item.community_id)}')">Додати внесок</button><a class="collection-settings-link" href="#/collections/${esc(item.id)}/edit">Налаштування</a></div>
+    <div class="account-create collection-actions">${isClosed(item)
+      ? '<p class="caption closed-note">Збір завершено. Відновити його можна в налаштуваннях.</p>'
+      : `<button onclick="openContributionDrawer('${esc(item.id)}','${esc(item.community_id)}')">Додати внесок</button>`}<a class="collection-settings-link" href="#/collections/${esc(item.id)}/edit">Налаштування</a></div>
     <a class="list-rows stats-link" href="#/statistics/collections/${esc(item.id)}">
       <span class="list-row"><span class="list-row-main"><strong>Зібрано ${money(item.total_amount)}</strong></span><span class="list-row-side"><span class="collection-settings-link">Статистика збору</span><svg class="row-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></span>
     </a>

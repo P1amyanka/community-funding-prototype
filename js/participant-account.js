@@ -1,8 +1,8 @@
 import { db } from './supabase.js';
 import { app, count, esc, money, plural, redirect, W } from './utils.js';
 import { getActiveParticipantCommunity, syncParticipantNavigation } from './navigation.js';
-import { coveredRange, hasDues, memberDues, schoolYearLabel } from './dues.js';
-import { amountOne, duesTiles, monthDots, splitBar } from './dues-ui.js';
+import { coveredRange, hasDues, isClosed, memberDues, schoolYearLabel } from './dues.js';
+import { amountOne, collectionStatusTag, duesTiles, monthDots, splitBar } from './dues-ui.js';
 
 const months = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
 
@@ -73,7 +73,8 @@ export async function myCollections() {
   const { data, error } = await db.rpc('get_my_participant_collections_v16_rpc');
   if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
 
-  const items = (data || []).filter(x => x.community_id === community.id);
+  const items = (data || []).filter(x => x.community_id === community.id)
+    .sort((a, b) => isClosed(a) - isClosed(b));
   const cards = items.length ? items.map(c => {
     let body;
     if (hasDues(c)) {
@@ -88,7 +89,7 @@ export async function myCollections() {
     return `<article class="collection-card participant-collection-card">
       <div class="collection-card-head">
         <div><h3>${esc(c.name)}</h3></div>
-        <span class="tag ok">${collectionTag(c)}</span>
+        ${collectionStatusTag(c, collectionTag(c))}
       </div>
       ${body}
       <a class="initiative-open" href="#/me/collections/${esc(c.id)}">Відкрити →</a>
@@ -140,14 +141,16 @@ export async function myCollection(collectionId) {
     status = `<section class="simple-stats">
         <div class="simple-stats-primary"><strong>${money(item.personal_amount)}</strong><span>ви внесли</span></div>
         <div class="simple-stats-meta"><strong>${item.personal_contributions_count}</strong> ${plural(item.personal_contributions_count, ...W.contributions)}</div>
-      </section>${item.payment_details ? `<section class="card compact">${paymentBlock(item.payment_details)}</section>` : ''}`;
+      </section>${isClosed(item)
+        ? '<p class="caption closed-note">Збір завершено — більше нічого вносити не потрібно.</p>'
+        : item.payment_details ? `<section class="card compact">${paymentBlock(item.payment_details)}</section>` : ''}`;
   }
 
   app.innerHTML = `<a class="page-back" href="#/me/collections" aria-label="Повернутися до моїх зборів">← Мої збори</a>
     <section class="hero collection-hero">
       <p class="eyebrow">${esc(item.community_name)}</p>
       <h1>${esc(item.name)}</h1>
-      <span class="tag ok">${collectionTag(item)}</span>
+      ${collectionStatusTag(item, collectionTag(item))}
     </section>
     ${status}
     <section class="account-section"><h2>Мої внески</h2><div class="list-rows">${history}</div></section>`;
@@ -210,7 +213,8 @@ export async function myStatistics() {
   const { data, error } = await db.rpc('get_my_participant_collections_v16_rpc');
   if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
 
-  const items = (data || []).filter(c => c.community_id === community.id).map(c => {
+  const items = (data || []).filter(c => c.community_id === community.id)
+    .sort((a, b) => isClosed(a) - isClosed(b)).map(c => {
     const paid = Number(c.personal_amount);
     const d = hasDues(c) ? memberDues(c, paid) : null;
     return { c, paid, d, left: d ? d.left : 0 };

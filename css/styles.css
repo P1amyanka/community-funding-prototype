@@ -395,3 +395,13 @@ a.list-row-main:hover strong{color:var(--accent);text-decoration:underline}
 .compact-announcement p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .amt{font-weight:900}
 .home-ok{background:#eef6f0;color:var(--ok);font-weight:800}
+
+/* Edit/delete announcements, finished collections (v18) */
+.tag.muted{background:#eeebe5;color:var(--muted)}
+.announcement-footer{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.announcement-edit{color:var(--accent);font-size:13px;line-height:20px;font-weight:850;text-decoration:none}
+.announcement-edit:hover{text-decoration:underline}
+.closed-note{margin:0;flex:1}
+.finished-list .collection-card{opacity:.78}
+.stacked-buttons{display:grid;gap:10px}
+.card.compact>.buttons:first-child{margin-top:0}
