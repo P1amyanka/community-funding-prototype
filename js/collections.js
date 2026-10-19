@@ -110,8 +110,8 @@ function collectionForm(c = null) {
       <input id="collectionAmount" type="number" min="1" step="1" inputmode="decimal" value="${c?.amount_per_member ?? ''}" placeholder="Наприклад: 500">
       <p class="field-note">Якщо вказати суму, Comfundy покаже, хто скільки має внести і хто ще не здав.</p>
       <label>Реквізити для оплати <span class="muted">необовʼязково</span></label>
-      <input id="collectionPayment" type="text" value="${esc(c?.payment_details || '')}" placeholder="Посилання на банку або номер картки">
-      <p class="field-note">Учасники побачать їх у своєму кабінеті.</p>`;
+      <input id="collectionPayment" type="text" value="${esc(c?.payment_details || '')}" placeholder="Наприклад: посилання на банку">
+      <p class="field-note">Радимо посилання на банку — так не потрібно ділитися номером картки. Учасники побачать реквізити у своєму кабінеті.</p>`;
 }
 
 export function toggleCollectionFields() {
