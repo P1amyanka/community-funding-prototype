@@ -2,6 +2,7 @@
 <html lang="uk">
 <head>
   <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://rcnyixakafcpmigojfhe.supabase.co wss://rcnyixakafcpmigojfhe.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#245447">
   <title>Comfundy — оголошення, збори і внески батьківського комітету</title>
@@ -49,7 +50,7 @@
   }]
   </script>
   <script>if (location.hash.length > 2) document.documentElement.classList.add('has-route');</script>
-  <link rel="stylesheet" href="css/styles.css?v=0.4.2-r41">
+  <link rel="stylesheet" href="css/styles.css?v=0.4.2-r42">
 </head>
 <body>
   <div class="topbar">
@@ -173,7 +174,7 @@
     </nav>
   </footer>
   <div class="toast" id="toast">Оновлено</div>
-  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script type="module" src="js/app.js?v=0.4.2-r41"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
+  <script type="module" src="js/app.js?v=0.4.2-r42"></script>
 </body>
 </html>
