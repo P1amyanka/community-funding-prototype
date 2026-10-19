@@ -8,6 +8,6 @@ export function feedback() {
     </section>
     <section class="card info-card contact-card">
       <h2>Яна Осипова</h2>
-      <a class="contact-phone" href="mailto:osyyana@gmail.com">osyyana@gmail.com</a>
+      <a class="contact-phone" href="mailto:comfundy.support@gmail.com">comfundy.support@gmail.com</a>
     </section>`;
 }
