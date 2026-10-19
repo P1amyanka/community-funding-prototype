@@ -462,3 +462,4 @@ a.list-row-main:hover strong{color:var(--accent);text-decoration:underline}
 .info-card.faq h3{margin-top:20px}
 .info-cta{margin:24px 0 8px}
 .landing-hero-visual img{height:auto}
+.not-found a:not(.button){color:var(--accent);font-weight:700}

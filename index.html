@@ -6,6 +6,12 @@
   <meta name="theme-color" content="#245447">
   <title>Comfundy — оголошення, збори і внески батьківського комітету</title>
   <meta name="description" content="Comfundy допомагає батьківському комітету вести клас: оголошення, збори і внески — без таблиць і нагадувань у чаті. Безкоштовно.">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://rcnyixakafcpmigojfhe.supabase.co" crossorigin>
   <link rel="canonical" href="https://comfundy.com/">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="uk_UA">
@@ -18,7 +24,7 @@
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <script type="application/ld+json">
-  {
+  [{
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "Comfundy",
@@ -31,10 +37,19 @@
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "UAH" },
     "audience": { "@type": "Audience", "audienceType": "Батьківські комітети шкільних класів" },
     "featureList": ["Оголошення для батьків класу", "Разові й щомісячні збори", "Облік внесків і боргів", "Ініціативи: скільки кожен готовий внести", "Особистий кабінет для кожного з батьків"]
-  }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Comfundy",
+    "url": "https://comfundy.com/",
+    "logo": "https://comfundy.com/assets/icons/icon-512.png",
+    "email": "osyyana@gmail.com",
+    "contactPoint": { "@type": "ContactPoint", "contactType": "customer support", "email": "osyyana@gmail.com", "availableLanguage": "uk" }
+  }]
   </script>
   <script>if (location.hash.length > 2) document.documentElement.classList.add('has-route');</script>
-  <link rel="stylesheet" href="css/styles.css?v=0.4.2-r37">
+  <link rel="stylesheet" href="css/styles.css?v=0.4.2-r38">
 </head>
 <body>
   <div class="topbar">
@@ -158,7 +173,7 @@
     </nav>
   </footer>
   <div class="toast" id="toast">Оновлено</div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script type="module" src="js/app.js?v=0.4.2-r37"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="js/app.js?v=0.4.2-r38"></script>
 </body>
 </html>
