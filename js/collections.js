@@ -211,7 +211,7 @@ function collectionStateCard(c) {
 
 export async function setCollectionStatus(collectionId, status) {
   const closing = status === 'closed';
-  if (closing && !confirm('Завершити збір? Учасники більше не бачитимуть боргу, нові внески не додаватимуться. Історія і статистика збережуться, збір можна буде відновити.')) return;
+  if (closing && !confirm('Завершити збір? Учасники більше не бачитимуть, скільки залишилось внести, нові внески не додаватимуться. Історія і статистика збережуться, збір можна буде відновити.')) return;
   const button = document.getElementById('collectionStatusBtn');
   const errorBox = document.getElementById('collectionStateError');
   if (button) { button.disabled = true; button.textContent = 'Зберігаємо...'; }
@@ -517,7 +517,7 @@ function duesPanel(item, members, contributions) {
     return `<section class="card dues-card">
         <div class="dues-tiles"><div class="dues-tile paid"><strong>${money(item.total_amount)}</strong><span>внесено</span></div>
           <div class="dues-tile"><strong>${item.contributions_count}</strong><span>${plural(item.contributions_count, ...W.contributions)}</span></div></div>
-        <p class="caption" style="margin-top:12px"><a href="#/collections/${esc(item.id)}/edit">Вкажіть суму з учасника</a>, щоб бачити борги.</p></section>
+        <p class="caption" style="margin-top:12px"><a href="#/collections/${esc(item.id)}/edit">Вкажіть суму з учасника</a>, щоб бачити, скільки залишилось внести.</p></section>
       <section class="account-section"><h2>Оплати учасників</h2><div class="list-rows">${rows.map(({ m, paid }) => `
         <article class="list-row"><div class="list-row-main"><strong>${esc(m.full_name)}</strong></div>
           <div class="list-row-side">${amountOne(paid, 0)}</div></article>`).join('') || '<div class="privacy">Немає активних учасників.</div>'}</div></section>`;
@@ -542,7 +542,7 @@ function duesPanel(item, members, contributions) {
         <div class="list-row-main"><strong>${esc(m.full_name)}</strong>${monthly ? monthDots(d) : splitBar(d.paid, d.left)}</div>
         <div class="list-row-side">${amountOne(d.paid, d.left)}</div>
       </article>`).join('') || '<div class="privacy">Немає активних учасників.</div>'}</div>
-      ${monthly ? '<p class="caption dots-legend"><i class="paid"></i> внесено <i class="owed"></i> борг <i></i> ще не настав</p>' : ''}</section>`;
+      ${monthly ? '<p class="caption dots-legend"><i class="paid"></i> внесено <i class="owed"></i> залишилось <i></i> ще не настав</p>' : ''}</section>`;
 
   let grid = '';
   if (monthly && rows.length) {
@@ -557,7 +557,7 @@ function duesPanel(item, members, contributions) {
           return `<td class="${cls}${i === elapsed - 1 ? ' current' : ''}" title="${esc(m.full_name)} · ${mo.long} ${mo.year}">${cls === 'paid' ? '✓' : cls === 'owed' ? '•' : ''}</td>`;
         }).join('')}</tr>`).join('')}</tbody>
       </table></div>
-      <p class="caption month-grid-legend"><span class="lg paid">✓</span> внесено <span class="lg owed">•</span> борг <span class="lg future"></span> ще не настав</p>
+      <p class="caption month-grid-legend"><span class="lg paid">✓</span> внесено <span class="lg owed">•</span> залишилось <span class="lg future"></span> ще не настав</p>
     </section>`;
   }
   return summary + list + grid;

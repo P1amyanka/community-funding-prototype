@@ -67,7 +67,7 @@ export function coveredRange(d) {
 export function duesLine(d, c) {
   if (c.frequency !== 'monthly') {
     if (d.state === 'paid') return 'Здано';
-    return d.state === 'partial' ? `Внесено ${fmt(d.paid)} з ${fmt(c.amount_per_member)}` : 'Ще не здано';
+    return d.state === 'partial' ? `Внесено ${fmt(d.paid)} з ${fmt(c.amount_per_member)}` : 'Ще не внесено';
   }
   if (d.state === 'upcoming') return `Збір почнеться у вересні ${c.school_year}`;
   if (d.state === 'paid') return d.covered >= d.months.length ? 'Сплачено за весь рік' : `Усе вчасно · сплачено ${coveredRange(d)}`;
