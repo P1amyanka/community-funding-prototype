@@ -22,7 +22,7 @@ export const monthDots = d => `<span class="month-dots" aria-hidden="true">${d.m
 
 export const duesTiles = (paid, left) => `<div class="dues-tiles">
     <div class="dues-tile paid"><strong>${money(paid)}</strong><span>внесено</span></div>
-    <div class="dues-tile ${left > 0 ? 'debt' : 'paid'}"><strong>${money(left)}</strong><span>борг</span></div>
+    <div class="dues-tile ${left > 0 ? 'debt' : 'paid'}"><strong>${money(left)}</strong><span>залишилось</span></div>
   </div>`;
 
 // Collection tag: its schedule, or «Завершено» once the manager has finished it.
