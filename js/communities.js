@@ -173,6 +173,16 @@ export async function community(communityId) {
   redirect('#/announcements');
 }
 
+// A manager may add themselves as a member (same email as their account).
+// Their email is already confirmed by signing in, so link the record right away:
+// «Перейти в кабінет учасника» appears without signing in again.
+async function linkIfMyEmail(email) {
+  if (!email) return;
+  const { data } = await db.auth.getSession();
+  const mine = (data?.session?.user?.email || '').toLowerCase();
+  if (mine && email.trim().toLowerCase() === mine) await db.rpc('claim_my_memberships_v11_rpc');
+}
+
 export async function addCommunityMember() {
   const communityId = document.getElementById('memberCommunity')?.value || '';
   const nameInput = document.getElementById('memberName');
@@ -197,6 +207,7 @@ export async function addCommunityMember() {
   button.disabled = false;
   button.textContent = 'Додати учасника';
   if (error) return ferr(errorBox, error.message);
+  await linkIfMyEmail(email);
   redirect('#/members');
 }
 
@@ -262,6 +273,7 @@ export async function saveMember() {
   button.disabled = false;
   button.textContent = 'Зберегти';
   if (error) return ferr(errorBox, error.message);
+  await linkIfMyEmail(email);
   redirect('#/members');
 }
 

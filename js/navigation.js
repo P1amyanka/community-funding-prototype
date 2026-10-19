@@ -13,6 +13,10 @@ const ICONS = {
   communities: '<path d="M3 10.5 12 4l9 6.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/>',
   statistics: '<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/>',
 };
+// Circular arrows: switch between the manager's and the participant's cabinet.
+const SWITCH_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/></svg>';
+const cabinetSwitch = (href, label) => `<a class="manager-menu-switch" href="${href}" onclick="closeManagerMenu()">${SWITCH_ICON}<span>${label}</span></a>`;
+
 const iconFor = key => ICONS[key.replace(/^my-/, '')] || '';
 
 function renderTabBar(items, active) {
@@ -164,7 +168,7 @@ export async function syncManagerNavigation(active = null, forceVisible = false)
   let switchLink = '';
   if (currentSession) {
     const { data: roles } = await db.rpc('get_my_account_roles_v11_rpc');
-    if (roles?.[0]?.is_participant) switchLink = '<a class="manager-menu-switch" href="#/me" onclick="closeManagerMenu()">Мій кабінет</a>';
+    if (roles?.[0]?.is_participant) switchLink = cabinetSwitch('#/me', 'Перейти в кабінет учасника');
   }
   account.innerHTML = currentSession
     ? `${switchLink}<a class="manager-menu-feedback" href="#/feedback" onclick="closeManagerMenu()">Зворотний зв'язок</a><div class="manager-menu-email">${esc(currentSession.user.email || '')}</div><button class="manager-menu-signout" onclick="signOutManager()">Вийти</button>`
@@ -213,9 +217,7 @@ export async function syncParticipantNavigation(active = 'my-collections', role 
     const { data: roleRows } = await db.rpc('get_my_account_roles_v11_rpc');
     roles = roleRows?.[0] || null;
   }
-  const switchLink = roles?.is_manager
-    ? '<a class="manager-menu-switch" href="#/announcements" onclick="closeManagerMenu()">Кабінет менеджера</a>'
-    : '';
+  const switchLink = roles?.is_manager ? cabinetSwitch('#/announcements', 'Перейти в кабінет менеджера') : '';
   account.innerHTML = `${switchLink}<a class="manager-menu-feedback" href="#/feedback" onclick="closeManagerMenu()">Зворотний зв'язок</a><div class="manager-menu-email">${esc(currentSession.user.email || '')}</div><button class="manager-menu-signout" onclick="signOutManager()">Вийти</button>`;
 }
 
