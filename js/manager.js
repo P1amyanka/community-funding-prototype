@@ -94,7 +94,7 @@ export async function newInitiative() {
       <label>Назва ініціативи</label><input id="title" placeholder="Наприклад: новий принтер для класу">
       <label>Опис</label>${richEditor('description', '', 'Опишіть, що саме планується зробити')}
       <label>Бюджет, грн <span class="muted">необовʼязково</span></label><input id="target" type="number" min="1" placeholder="Наприклад: 12000">
-      <label>Платіжні реквізити <span class="muted">необовʼязково</span></label><input id="paymentDetails" type="text" inputmode="text" placeholder="Наприклад: посилання на банку">
+      <label>Платіжні реквізити <span class="muted">необовʼязково</span></label><input id="paymentDetails" type="text" inputmode="text" placeholder="Посилання або номер картки">
       <label>Дедлайн <span class="muted">необовʼязково</span></label><input id="deadline" type="datetime-local">
       <label>Очікувана кількість відповідей <span class="muted">необовʼязково</span></label><input id="expected" type="number" min="1" value="${community.members_count || ''}">
       <p class="field-note">За замовчуванням — кількість активних учасників спільноти.</p>
@@ -241,7 +241,7 @@ export function showNextRoundForm(id) {
     <label>Назва ініціативи</label><input id="nextTitle" value="${esc(r.title)}">
     <label>Опис</label>${richEditor('nextDescription', r.description || '', 'Опишіть, що саме планується зробити')}
     <label>Бюджет, грн <span class="muted">необовʼязково</span></label><input id="nextTarget" type="number" min="1" value="${r.target_amount ?? ''}">
-    <label>Платіжні реквізити <span class="muted">необовʼязково</span></label><input id="nextPaymentDetails" type="text" value="${esc(r.payment_details || '')}" placeholder="Наприклад: посилання на банку">
+    <label>Платіжні реквізити <span class="muted">необовʼязково</span></label><input id="nextPaymentDetails" type="text" value="${esc(r.payment_details || '')}" placeholder="Посилання або номер картки">
     <label>Дедлайн <span class="muted">необовʼязково</span></label><input id="nextDeadline" type="datetime-local" value="${datetimeLocalValue(r.deadline)}">
     <label>Очікувана кількість відповідей <span class="muted">необовʼязково</span></label><input id="nextExpected" type="number" min="1" value="${r.expected_participants ?? ''}">
     <label class="check-row"><input id="nextCommentsEnabled" type="checkbox" ${r.comments_enabled ? 'checked' : ''}><span>Дозволити коментарі учасникам</span></label>
