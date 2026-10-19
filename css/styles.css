@@ -463,3 +463,4 @@ a.list-row-main:hover strong{color:var(--accent);text-decoration:underline}
 .info-cta{margin:24px 0 8px}
 .landing-hero-visual img{height:auto}
 .not-found a:not(.button){color:var(--accent);font-weight:700}
+.resend-note{display:inline-block;margin-top:6px;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
