@@ -479,3 +479,4 @@ a.list-row-main:hover strong{color:var(--accent);text-decoration:underline}
 .manager-menu-switch{gap:10px}
 .manager-menu-switch svg{flex:none;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .manager-menu-switch:hover span{text-decoration:underline}
+.info-card p a,.info-card li a{color:var(--accent);font-weight:750;text-underline-offset:3px}
