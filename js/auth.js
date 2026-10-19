@@ -56,8 +56,57 @@ export async function login() {
       <p class="field-note">Якщо акаунта ще немає, він буде створений після переходу за посиланням із листа.</p>
       <div class="buttons"><button id="authBtn" onclick="sendManagerMagicLink()">Надіслати посилання</button></div>
       <div id="authError" class="error hidden"></div>
-      <div id="authSuccess" class="privacy hidden" style="margin-top:14px">Перевірте пошту. Ми надіслали одноразове посилання для входу.</div>
+      <div id="authSuccess" class="privacy hidden" style="margin-top:14px"></div>
     </section>`;
+  resumeResendTimer();
+}
+
+// ---------- Resend timer: one link per minute ----------
+// The time of the last send is kept in sessionStorage, so the countdown
+// survives re-rendering the page (e.g. going back and forth).
+const RESEND_SECONDS = 60;
+const SENT_KEY = 'comfundy:linkSent';
+let resendTicker = null;
+
+function remember(email, seconds = RESEND_SECONDS) {
+  try { sessionStorage.setItem(SENT_KEY, JSON.stringify({ email, until: Date.now() + seconds * 1000 })); } catch {}
+}
+function recall() {
+  try { return JSON.parse(sessionStorage.getItem(SENT_KEY) || 'null'); } catch { return null; }
+}
+const mmss = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+
+function renderResend() {
+  const button = document.getElementById('authBtn');
+  const box = document.getElementById('authSuccess');
+  const saved = recall();
+  if (!button || !box || !saved) { clearInterval(resendTicker); return; }
+  const left = Math.ceil((saved.until - Date.now()) / 1000);
+  box.classList.remove('hidden');
+  if (left > 0) {
+    button.disabled = true;
+    button.textContent = 'Посилання надіслано';
+    box.innerHTML = `Ми надіслали посилання для входу на <strong>${esc(saved.email)}</strong>. Перевірте пошту.<br><span class="resend-note">Надіслати ще раз можна через ${mmss(left)}</span>`;
+  } else {
+    clearInterval(resendTicker);
+    button.disabled = false;
+    button.textContent = 'Надіслати ще раз';
+    box.innerHTML = `Лист на <strong>${esc(saved.email)}</strong> не прийшов? Перевірте папку «Спам» або надішліть посилання ще раз.`;
+  }
+}
+
+function startResendTimer() {
+  clearInterval(resendTicker);
+  renderResend();
+  resendTicker = setInterval(renderResend, 1000);
+}
+
+function resumeResendTimer() {
+  const saved = recall();
+  if (!saved) return;
+  const input = document.getElementById('authEmail');
+  if (input && !input.value) input.value = saved.email;
+  startResendTimer();
 }
 
 export async function sendManagerMagicLink() {
@@ -72,17 +121,27 @@ export async function sendManagerMagicLink() {
   successBox.classList.add('hidden');
   if (!email || !input.checkValidity()) return ferr(errorBox, 'Перевірте правильність email.');
 
+  const wasResend = Boolean(recall());
   button.disabled = true;
   button.textContent = 'Надсилаємо...';
   const { error } = await db.auth.signInWithOtp({
     email,
     options: { emailRedirectTo: redirectUrl },
   });
-  button.disabled = false;
-  button.textContent = 'Надіслати посилання';
 
-  if (error) return ferr(errorBox, error.message);
-  successBox.classList.remove('hidden');
+  if (error) {
+    // Supabase limits how often a link can be requested; show it as our countdown.
+    const wait = Number((error.message || '').match(/after (\d+) second/)?.[1]);
+    if (wait) {
+      remember(email, wait);
+      return startResendTimer();
+    }
+    button.disabled = false;
+    button.textContent = wasResend ? 'Надіслати ще раз' : 'Надіслати посилання';
+    return ferr(errorBox, error.message);
+  }
+  remember(email);
+  startResendTimer();
 }
 
 export async function signOutManager() {
