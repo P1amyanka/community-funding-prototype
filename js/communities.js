@@ -1,6 +1,6 @@
 import { db } from './supabase.js';
 import { getActiveManagerCommunity, syncManagerNavigation } from './navigation.js';
-import { app, esc, ferr, redirect, toast } from './utils.js';
+import { app, esc, ferr, plural, redirect, toast, W } from './utils.js';
 
 async function requireSession(active) {
   const { data, error } = await db.auth.getSession();
@@ -56,25 +56,24 @@ export async function communities() {
 
   const list = data || [];
   const active = await getActiveManagerCommunity();
-  const cards = list.length ? list.map(item => {
+  const gear = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
+  const rows = list.length ? `<div class="list-rows community-rows">${list.map(item => {
     const isActive = item.id === active?.id;
+    const meta = [`${item.members_count} ${plural(item.members_count, ...W.members)}`, item.description].filter(Boolean).map(esc).join(' · ');
     return `
-      <article class="community-card ${isActive ? 'active-community-card' : ''}">
-        <button class="community-card-open" onclick="activateCommunity('${esc(item.id)}')" aria-label="Відкрити спільноту ${esc(item.name)}">
-          <div class="community-card-title-row">
-            <h3>${esc(item.name)}</h3>
-            ${isActive ? '<span class="tag ok">Активна</span>' : ''}
-          </div>
-          ${item.description ? `<p class="caption community-description">${esc(item.description)}</p>` : ''}
-          <div class="community-meta"><span>Учасників: <strong>${item.members_count}</strong></span><span>Ініціатив: <strong>${item.initiatives_count}</strong></span></div>
-        </button>
-        <a class="community-edit-link" href="#/community/${esc(item.id)}/edit">Редагувати</a>
-      </article>`;
-  }).join('') : '<div class="privacy">У вас ще немає спільнот.</div>';
+      <div class="list-row community-row ${isActive ? 'is-active' : ''}" role="button" tabindex="0" aria-label="Відкрити спільноту ${esc(item.name)}"
+        onclick="activateCommunity('${esc(item.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
+        <span class="list-row-main"><strong>${esc(item.name)}${isActive ? ' <span class="row-status ok">Активна</span>' : ''}</strong><small>${meta}</small></span>
+        <span class="list-row-side">
+          <a class="community-row-settings" href="#/community/${esc(item.id)}/edit" onclick="event.stopPropagation()" aria-label="Налаштування спільноти ${esc(item.name)}" title="Налаштування">${gear}</a>
+          <svg class="row-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </span>
+      </div>`;
+  }).join('')}</div>` : '<div class="privacy">У вас ще немає спільнот.</div>';
 
   app.innerHTML = `<section class="hero account-hero"><h1>Спільноти</h1></section>
     <div class="account-create"><a class="button" href="#/communities/new">Створити спільноту</a></div>
-    <section class="account-section"><div class="community-list">${cards}</div></section>`;
+    <section class="account-section">${rows}</section>`;
 }
 
 export async function newCommunity() {

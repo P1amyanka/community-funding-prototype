@@ -464,3 +464,14 @@ a.list-row-main:hover strong{color:var(--accent);text-decoration:underline}
 .landing-hero-visual img{height:auto}
 .not-found a:not(.button){color:var(--accent);font-weight:700}
 .resend-note{display:inline-block;margin-top:6px;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+/* «Спільноти»: rows with a chevron (whole row opens the community) */
+.community-row{cursor:pointer}
+.community-row:hover{background:#f8fbf9}
+.community-row:hover .list-row-main>strong{color:var(--accent)}
+.community-row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.community-row .list-row-main>strong{display:flex;align-items:center;gap:8px;white-space:normal}
+.community-row .row-status{font-size:11px;padding:3px 8px}
+.community-row .list-row-side{gap:6px}
+.community-row-settings{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;color:var(--muted)}
+.community-row-settings:hover{background:var(--soft);color:var(--accent)}
+.community-row-settings svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
