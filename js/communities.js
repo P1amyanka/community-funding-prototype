@@ -13,12 +13,33 @@ async function requireSession(active) {
   return data.session;
 }
 
+const shortDate = v => new Date(v).toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit' });
+
+// Статус доступу до кабінету: підключено → запрошено <дата> → ще не запрошено.
 const memberStatus = m => {
   if (m.status !== 'active') return '<span class="row-status warn">Неактивний</span>';
   if (!m.email) return '<span class="row-status muted">Без email</span>';
   if (m.user_id) return '<span class="row-status ok">Кабінет підключено</span>';
-  return `<button class="secondary small member-access-button" onclick="sendMemberAccess('${esc(m.id)}','${esc(m.email)}')">Надіслати доступ</button>`;
+  const sendButton = label => `<button class="link-button member-access-button" data-member-id="${esc(m.id)}" onclick="sendMemberAccess('${esc(m.id)}','${esc(m.email)}')">${label}</button>`;
+  if (m.access_sent_at) {
+    return `<span class="member-access"><span class="row-status muted">Запрошено ${esc(shortDate(m.access_sent_at))}</span>${sendButton('Надіслати ще раз')}</span>`;
+  }
+  return `<span class="member-access"><span class="row-status warn">Не запрошено</span>${sendButton('Надіслати доступ')}</span>`;
 };
+
+const inviteNote = '<p class="field-note">На цю адресу одразу надійде лист із посиланням для входу в кабінет.</p>';
+
+// Надсилає посилання для входу і запамʼятовує дату. Повертає текст помилки або null.
+async function inviteMember(memberId, email) {
+  const redirectUrl = `${window.location.origin}${window.location.pathname}`;
+  const { error } = await db.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectUrl } });
+  if (error) {
+    const wait = Number((error.message || '').match(/after (\d+) second/)?.[1]);
+    return wait ? `Лист на цю адресу вже надіслано. Спробуйте ще раз через ${wait} с.` : error.message;
+  }
+  if (memberId) await db.rpc('mark_member_access_sent_v19_rpc', { p_member_id: memberId });
+  return null;
+}
 
 const memberCard = m => {
   const search = [m.full_name, m.email || '', m.community_name || ''].join(' ').toLocaleLowerCase('uk-UA');
@@ -121,7 +142,7 @@ export async function members() {
     return;
   }
 
-  const { data, error } = await db.rpc('get_my_members_v06_rpc', { p_community_id: community.id });
+  const { data, error } = await db.rpc('get_my_members_v19_rpc', { p_community_id: community.id });
   if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
   const rows = (data || []).length ? data.map(m => memberCard(m)).join('') : '<div class="privacy">У цій спільноті ще немає учасників.</div>';
 
@@ -157,6 +178,7 @@ export async function newMember(communityId = null) {
       ${communityField}
       <label>Імʼя / ПІБ</label><input id="memberName" placeholder="Наприклад: Ірина Протас">
       <label>Email <span class="muted">необовʼязково</span></label><input id="memberEmail" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com">
+      ${inviteNote}
       <div class="buttons"><button id="addMemberBtn" onclick="addCommunityMember()">Додати учасника</button></div>
       <div id="memberError" class="error hidden"></div>
     </section>`;
@@ -177,11 +199,15 @@ export async function community(communityId) {
 // A manager may add themselves as a member (same email as their account).
 // Their email is already confirmed by signing in, so link the record right away:
 // «Перейти в кабінет учасника» appears without signing in again.
-async function linkIfMyEmail(email) {
-  if (!email) return;
+async function isMyEmail(email) {
+  if (!email) return false;
   const { data } = await db.auth.getSession();
   const mine = (data?.session?.user?.email || '').toLowerCase();
-  if (mine && email.trim().toLowerCase() === mine) await db.rpc('claim_my_memberships_v11_rpc');
+  return Boolean(mine) && email.trim().toLowerCase() === mine;
+}
+
+async function linkIfMyEmail(email) {
+  if (await isMyEmail(email)) await db.rpc('claim_my_memberships_v11_rpc');
 }
 
 export async function addCommunityMember() {
@@ -200,15 +226,25 @@ export async function addCommunityMember() {
 
   button.disabled = true;
   button.textContent = 'Додаємо...';
-  const { error } = await db.rpc('create_community_member_v06_rpc', {
+  const { data, error } = await db.rpc('create_community_member_v06_rpc', {
     p_community_id: communityId,
     p_full_name: fullName,
     p_email: email || null,
   });
-  button.disabled = false;
-  button.textContent = 'Додати учасника';
-  if (error) return ferr(errorBox, error.message);
+  if (error) {
+    button.disabled = false;
+    button.textContent = 'Додати учасника';
+    return ferr(errorBox, error.message);
+  }
   await linkIfMyEmail(email);
+  const memberId = data?.[0]?.id || data?.id || null;
+  if (email && !(await isMyEmail(email))) {
+    button.textContent = 'Надсилаємо запрошення...';
+    const sendError = await inviteMember(memberId, email);
+    toast(sendError ? `Учасника додано, але лист не надіслано: ${sendError}` : `Учасника додано. Запрошення надіслано на ${email}`, sendError ? 5000 : 3000);
+  } else {
+    toast('Учасника додано');
+  }
   redirect('#/members');
 }
 
@@ -235,14 +271,14 @@ export async function editMember(memberId) {
     <section class="card">
       <input id="editMemberId" type="hidden" value="${esc(member.id)}">
       <label>Імʼя / ПІБ</label><input id="editMemberName" value="${esc(member.full_name)}">
-      <label>Email <span class="muted">необовʼязково</span></label><input id="editMemberEmail" type="email" inputmode="email" autocomplete="email" value="${esc(member.email || '')}" placeholder="name@example.com">
+      <label>Email <span class="muted">необовʼязково</span></label><input id="editMemberEmail" type="email" inputmode="email" autocomplete="email" value="${esc(member.email || '')}" placeholder="name@example.com" data-original="${esc(member.email || '')}">
+      <p class="field-note">Якщо вказати нову адресу, на неї одразу надійде лист із посиланням для входу.</p>
       <label>Статус</label>
       <select id="editMemberStatus">
         <option value="active" ${member.status === 'active' ? 'selected' : ''}>Активний</option>
         <option value="inactive" ${member.status === 'inactive' ? 'selected' : ''}>Неактивний</option>
       </select>
       <p class="field-note">Не активний учасник не має доступу до кабінету учасника.</p>
-      <p class="field-note">Якщо змінити email, доступ учасника потрібно буде надіслати повторно на нову адресу.</p>
       <div class="buttons"><button id="saveMemberBtn" onclick="saveMember()">Зберегти</button></div>
       <div id="memberEditError" class="error hidden"></div>
     </section>`;
@@ -263,6 +299,8 @@ export async function saveMember() {
   if (!fullName) return ferr(errorBox, 'Вкажіть імʼя учасника.');
   if (email && !emailInput.checkValidity()) return ferr(errorBox, 'Перевірте правильність email.');
 
+  const emailChanged = email.toLowerCase() !== (emailInput?.dataset.original || '').trim().toLowerCase();
+
   button.disabled = true;
   button.textContent = 'Зберігаємо...';
   const { error } = await db.rpc('update_community_member_v13_rpc', {
@@ -271,31 +309,48 @@ export async function saveMember() {
     p_email: email || null,
     p_status: status,
   });
-  button.disabled = false;
-  button.textContent = 'Зберегти';
-  if (error) return ferr(errorBox, error.message);
+  if (error) {
+    button.disabled = false;
+    button.textContent = 'Зберегти';
+    return ferr(errorBox, error.message);
+  }
   await linkIfMyEmail(email);
+  if (email && emailChanged && status === 'active' && !(await isMyEmail(email))) {
+    button.textContent = 'Надсилаємо запрошення...';
+    const sendError = await inviteMember(memberId, email);
+    toast(sendError ? `Збережено, але лист не надіслано: ${sendError}` : `Збережено. Запрошення надіслано на ${email}`, sendError ? 5000 : 3000);
+  } else {
+    toast('Збережено');
+  }
   redirect('#/members');
 }
 
 
 export async function sendMemberAccess(memberId, email) {
   if (!email) return;
-  const button = [...document.querySelectorAll('.member-access-button')].find(x => x.getAttribute('onclick')?.includes(memberId));
+  const button = document.querySelector(`.member-access-button[data-member-id="${CSS.escape(memberId)}"]`);
   if (button) {
     button.disabled = true;
     button.textContent = 'Надсилаємо...';
   }
-  const redirectUrl = `${window.location.origin}${window.location.pathname}`;
-  const { error } = await db.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: redirectUrl },
-  });
+  const sendError = await inviteMember(memberId, email);
+  if (sendError) {
+    if (button) {
+      button.disabled = false;
+      button.textContent = 'Спробувати ще раз';
+    }
+    return toast(sendError, 5000);
+  }
+  const status = button?.closest('.member-access')?.querySelector('.row-status');
+  if (status) {
+    status.className = 'row-status muted';
+    status.textContent = `Запрошено ${shortDate(new Date())}`;
+  }
   if (button) {
     button.disabled = false;
-    button.textContent = error ? 'Спробувати ще раз' : 'Посилання надіслано';
+    button.textContent = 'Надіслати ще раз';
   }
-  if (error) alert(error.message);
+  toast(`Запрошення надіслано на ${email}`, 3000);
 }
 
 
