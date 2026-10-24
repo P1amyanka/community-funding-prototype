@@ -128,7 +128,7 @@ button,.button{width:100%;min-height:50px;border:0;border-radius:999px;padding:1
 }
 
 /* Cabinet buttons in the landing style (rounded rectangle, soft gradient, subtle lift). */
-:is(.app,.comment-drawer) :is(button,.button):not(.comment-link,.drawer-close,.drawer-backdrop,.community-card-open,.autosuggest-option,.menu-button){
+:is(.app,.comment-drawer) :is(button,.button):not(.comment-link,.drawer-close,.drawer-backdrop,.community-card-open,.autosuggest-option,.menu-button,.link-button){
   border-radius:12px;
   border:1px solid #1f4a3f;
   background:linear-gradient(180deg,#2d6a5a 0%,#245447 100%);
@@ -138,12 +138,12 @@ button,.button{width:100%;min-height:50px;border:0;border-radius:999px;padding:1
   letter-spacing:-.01em;
   transition:transform .15s ease,box-shadow .15s ease,background .15s ease;
 }
-:is(.app,.comment-drawer) :is(button,.button):not(.comment-link,.drawer-close,.drawer-backdrop,.community-card-open,.autosuggest-option,.menu-button):hover{
+:is(.app,.comment-drawer) :is(button,.button):not(.comment-link,.drawer-close,.drawer-backdrop,.community-card-open,.autosuggest-option,.menu-button,.link-button):hover{
   transform:translateY(-1px);
   background:linear-gradient(180deg,#275f51 0%,#1f4a3f 100%);
   box-shadow:0 8px 18px rgba(36,84,71,.2);
 }
-:is(.app,.comment-drawer) :is(button,.button):not(.comment-link,.drawer-close,.drawer-backdrop,.community-card-open,.autosuggest-option,.menu-button):active{
+:is(.app,.comment-drawer) :is(button,.button):not(.comment-link,.drawer-close,.drawer-backdrop,.community-card-open,.autosuggest-option,.menu-button,.link-button):active{
   transform:translateY(0);
   box-shadow:0 3px 10px rgba(36,84,71,.16);
 }
@@ -480,3 +480,8 @@ a.list-row-main:hover strong{color:var(--accent);text-decoration:underline}
 .manager-menu-switch svg{flex:none;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .manager-menu-switch:hover span{text-decoration:underline}
 .info-card p a,.info-card li a{color:var(--accent);font-weight:750;text-underline-offset:3px}
+
+/* Статус доступу учасника: плашка + текстова кнопка під нею */
+.member-access{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+button.link-button{background:transparent;border:0;border-radius:0;min-height:0;width:auto;display:inline;padding:2px 0;font:inherit;font-size:12.5px;font-weight:800;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px;box-shadow:none;transform:none}
+button.link-button:disabled{color:var(--muted);cursor:default}

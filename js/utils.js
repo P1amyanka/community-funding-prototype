@@ -75,11 +75,13 @@ export function richTextToPlainText(value) {
   return [...root.childNodes].map(read).join('').replace(/\n{3,}/g, '\n\n').trim();
 }
 
-export function toast(x) {
+let toastTimer = null;
+export function toast(x, ms = 1800) {
   const t = document.getElementById('toast');
   t.textContent = x;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 1800);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), ms);
 }
 
 export function date(v) {
