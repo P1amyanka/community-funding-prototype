@@ -141,6 +141,7 @@ export async function sendManagerMagicLink() {
     return ferr(errorBox, error.message);
   }
   remember(email);
+  window.comfundyTrack?.('login-link-sent');
   startResendTimer();
 }
 
