@@ -108,6 +108,7 @@ export async function createCommunity() {
 
   const id = data?.[0]?.id;
   if (id) localStorage.setItem('comfundy:managerCommunityId', id);
+  window.comfundyTrack?.('community-created');
   redirect('#/communities');
 }
 
