@@ -88,7 +88,7 @@ export async function newInitiative() {
   if (!community) return app.innerHTML = noCommunity('Нове опитування');
 
   app.innerHTML = `<a class="page-back" href="#/initiatives">← Опитування</a>
-    <section class="card"><p class="eyebrow">Скільки готові внести</p><h2>Нове опитування</h2><p class="lead form-intro">Опишіть ідею. Кожен учасник у своєму кабінеті вкаже максимальну суму, яку готовий внести; інші учасники цих сум не бачать.</p>
+    <section class="card"><p class="eyebrow">Бюджет</p><h2>Нове опитування</h2><p class="lead form-intro">Опишіть ідею. Кожен учасник у своєму кабінеті вкаже максимальну суму, яку готовий внести; інші учасники цих сум не бачать.</p>
       <div class="privacy community-context">Спільнота: <strong>${esc(community.name)}</strong></div>
       <input id="communityId" type="hidden" value="${esc(community.id)}">
       <label>Назва опитування</label><input id="title" placeholder="Наприклад: новий принтер для класу">

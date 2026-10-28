@@ -97,7 +97,7 @@ export async function myInitiative(id, silent = false) {
   }
 
   app.innerHTML = `<a class="page-back" href="#/me/initiatives">← Опитування</a>
-    <section class="hero"><p class="eyebrow">${esc(r.community_name)}</p><h1>${esc(r.title)}</h1><div class="lead rich-content">${richText(r.description, 'Опитування: скільки готові внести.')}</div></section>${details}<section class="card">${content}</section>`;
+    <section class="hero"><p class="eyebrow">${esc(r.community_name)}</p><h1>${esc(r.title)}</h1><div class="lead rich-content">${richText(r.description, 'Опитування «Бюджет».')}</div></section>${details}<section class="card">${content}</section>`;
 }
 
 export function refreshMyInitiative(id) {
