@@ -23,9 +23,9 @@ function cardStatus(item) {
       : { tag: '', label: 'Нове', line: 'Вкажіть, скільки готові внести' };
   }
   if (item.feasible === true) {
-    return { tag: 'ok', label: 'Мету досягнуто', line: item.own_recommended_amount !== null && item.own_recommended_amount !== undefined ? `Ваш внесок: <strong>${money(item.own_recommended_amount)}</strong>` : 'Раунд завершено' };
+    return { tag: 'ok', label: 'Зібрано', line: item.own_recommended_amount !== null && item.own_recommended_amount !== undefined ? `Ваш внесок: <strong>${money(item.own_recommended_amount)}</strong>` : 'Раунд завершено' };
   }
-  if (item.feasible === false) return { tag: '', label: 'Мету не досягнуто', line: 'Менеджер може відкрити новий раунд' };
+  if (item.feasible === false) return { tag: '', label: 'Не зібрано', line: 'Менеджер може відкрити новий раунд' };
   return { tag: 'ok', label: 'Раунд завершено', line: '' };
 }
 
