@@ -1,6 +1,6 @@
 // «Що додати в Comfundy?»: менеджери ставлять ❤️ запланованим можливостям.
 import { db } from './supabase.js';
-import { app, esc, fail, loading, redirect, toast } from './utils.js';
+import { app, esc, fail, ferr, loading, redirect, toast } from './utils.js';
 import { syncManagerNavigation } from './navigation.js';
 
 const HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-9.2-8.6C1.3 8.5 3 5 6.4 5c2 0 3.3 1.1 4.1 2.3h3C14.3 6.1 15.6 5 17.6 5 21 5 22.7 8.5 21.2 11.4 19 15.6 12 20 12 20Z"/></svg>';
@@ -17,11 +17,10 @@ const ideaCard = i => {
 
 function render(items) {
   const list = items.filter(i => i.status !== 'done').sort((a, b) => b.votes - a.votes);
-  app.innerHTML = `<section class="hero account-hero"><h1>Що додати в Comfundy?</h1>
-      <p class="lead">Поставте ❤️ тому, що вам потрібно. Ми робимо спершу те, що набирає найбільше голосів.</p></section>
-    <div class="account-create"><a class="button" href="#/feedback">Запропонувати ідею</a></div>
+  app.innerHTML = `<section class="hero account-hero"><h1>Що додати в Comfundy?</h1></section>
+    <div class="account-create"><a class="button" href="#/ideas/new">Запропонувати ідею</a></div>
     <div class="member-search"><span aria-hidden="true">⌕</span><input id="ideaSearch" type="search" placeholder="Пошук" oninput="filterIdeas()"></div>
-    <section class="account-section"><div class="idea-list">${list.map(ideaCard).join('')}</div><div id="ideaSearchEmpty" class="privacy hidden">Нічого не знайдено. Запропонуйте свою ідею — додамо в перелік.</div></section>`;
+    <section class="account-section"><div class="idea-list">${list.map(ideaCard).join('')}</div><div id="ideaSearchEmpty" class="privacy hidden">Нічого не знайдено. Запропонуйте свою ідею.</div></section>`;
 }
 
 export async function ideas() {
@@ -61,4 +60,35 @@ export async function toggleIdeaVote(id) {
     button.setAttribute('aria-label', row.my_vote ? 'Прибрати лайк' : 'Мені це потрібно');
     button.querySelector('span').textContent = row.votes;
   }
+}
+
+// --- Запропонувати ідею --------------------------------------------------------
+
+export async function newIdea() {
+  const { data: s } = await db.auth.getSession();
+  if (!s?.session) return redirect('#/login');
+  await syncManagerNavigation('ideas');
+  app.innerHTML = `<a class="page-back" href="#/ideas">← Що додати в Comfundy?</a>
+    <section class="card"><h2>Нова ідея</h2>
+      <label>Назва</label><input id="ideaTitle" maxlength="120" placeholder="Наприклад: нагадування в Viber">
+      <label>Опис</label><textarea id="ideaDescription" maxlength="2000" placeholder="Що саме і навіщо це вашому класу"></textarea>
+      <div class="buttons"><button id="ideaBtn" onclick="submitIdea()">Надіслати</button></div>
+      <div id="ideaError" class="error hidden"></div>
+    </section>`;
+}
+
+export async function submitIdea() {
+  const title = document.getElementById('ideaTitle')?.value.trim() || '';
+  const description = document.getElementById('ideaDescription')?.value.trim() || '';
+  const e = document.getElementById('ideaError');
+  const b = document.getElementById('ideaBtn');
+  e.classList.add('hidden');
+  if (!title) return ferr(e, 'Вкажіть назву ідеї.');
+  if (!description) return ferr(e, 'Опишіть ідею.');
+  b.disabled = true; b.textContent = 'Надсилаємо...';
+  const { error } = await db.rpc('suggest_feature_idea_v22_rpc', { p_title: title, p_description: description });
+  b.disabled = false; b.textContent = 'Надіслати';
+  if (error) return ferr(e, error.message);
+  toast('Дякуємо! Ідею отримали — додамо в перелік після перегляду', 4000);
+  redirect('#/ideas');
 }

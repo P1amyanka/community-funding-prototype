@@ -8,8 +8,9 @@ create table if not exists public.feature_ideas_v22 (
   id uuid primary key default gen_random_uuid(),
   title text not null check (length(trim(title)) > 0),
   description text,
-  status text not null default 'planned' check (status in ('planned', 'in_progress', 'done')),
+  status text not null default 'planned' check (status in ('suggested', 'planned', 'in_progress', 'done')),
   position integer not null default 100,
+  created_by uuid references auth.users(id) on delete set null,
   created_at timestamptz not null default now()
 );
 
@@ -73,6 +74,7 @@ begin
     exists (select 1 from public.feature_idea_votes_v22 v where v.idea_id = i.id and v.user_id = auth.uid()),
     i.created_at
   from public.feature_ideas_v22 i
+  where i.status in ('planned', 'in_progress')
   order by i.position, i.created_at;
 end;
 $$;
@@ -90,7 +92,7 @@ begin
   if not public.is_any_manager_v22() then raise exception 'Розділ доступний менеджерам спільнот.'; end if;
   select i.status into v_status from public.feature_ideas_v22 i where i.id = p_idea_id;
   if v_status is null then raise exception 'Ідею не знайдено.'; end if;
-  if v_status = 'done' then raise exception 'Це вже зроблено.'; end if;
+  if v_status not in ('planned', 'in_progress') then raise exception 'Ідею не знайдено.'; end if;
 
   if exists (select 1 from public.feature_idea_votes_v22 v where v.idea_id = p_idea_id and v.user_id = auth.uid()) then
     delete from public.feature_idea_votes_v22 v where v.idea_id = p_idea_id and v.user_id = auth.uid();
@@ -104,6 +106,35 @@ begin
 end;
 $$;
 
+-- Менеджер пропонує свою ідею. Вона не зʼявляється в переліку, доки власниця
+-- не перегляне її і не поставить status = 'planned'.
+create or replace function public.suggest_feature_idea_v22_rpc(p_title text, p_description text)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_id uuid;
+begin
+  if not public.is_any_manager_v22() then raise exception 'Розділ доступний менеджерам спільнот.'; end if;
+  if nullif(trim(p_title), '') is null then raise exception 'Вкажіть назву ідеї.'; end if;
+  if nullif(trim(p_description), '') is null then raise exception 'Опишіть ідею.'; end if;
+  if length(trim(p_title)) > 120 then raise exception 'Назва задовга (до 120 символів).'; end if;
+  if length(trim(p_description)) > 2000 then raise exception 'Опис задовгий (до 2000 символів).'; end if;
+  if (select count(*) from public.feature_ideas_v22 where created_by = auth.uid() and created_at > now() - interval '1 day') >= 10 then
+    raise exception 'Забагато ідей за добу. Спробуйте завтра.';
+  end if;
+  insert into public.feature_ideas_v22 (title, description, status, created_by)
+  values (trim(p_title), trim(p_description), 'suggested', auth.uid())
+  returning id into v_id;
+  return v_id;
+end;
+$$;
+
+revoke all on function public.suggest_feature_idea_v22_rpc(text, text) from public;
+grant execute on function public.suggest_feature_idea_v22_rpc(text, text) to authenticated;
+
 revoke all on function public.is_any_manager_v22() from public;
 revoke all on function public.get_feature_ideas_v22_rpc() from public;
 revoke all on function public.toggle_feature_idea_vote_v22_rpc(uuid) from public;
@@ -112,6 +143,8 @@ grant execute on function public.toggle_feature_idea_vote_v22_rpc(uuid) to authe
 
 -- Як вести перелік (SQL Editor):
 --   додати:      insert into feature_ideas_v22 (title, description, position) values ('Назва', 'Що це дасть', 100);
---   статус:      update feature_ideas_v22 set status = 'in_progress' where title = 'Назва';   -- 'planned' (Плануємо) | 'in_progress' (Робимо) | 'done' (зроблено — зникає зі сторінки)
+--   нові пропозиції менеджерів: select title, description, created_at from feature_ideas_v22 where status = 'suggested' order by created_at desc;
+--   показати в переліку: update feature_ideas_v22 set status = 'planned' where title = 'Назва';
+--   статус:      update feature_ideas_v22 set status = 'in_progress' where title = 'Назва';   -- 'planned' (Плануємо) | 'in_progress' (Робимо) | 'done' (зроблено — зникає зі сторінки) | 'suggested' (пропозиція, на сторінці не видно)
 --   порядок:     update feature_ideas_v22 set position = 5 where title = 'Назва';
 --   хто голосує: select i.title, count(v.*) from feature_ideas_v22 i left join feature_idea_votes_v22 v on v.idea_id = i.id group by i.id order by 2 desc;

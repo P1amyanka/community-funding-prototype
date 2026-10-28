@@ -8,11 +8,11 @@ import { closeManagerMenu, openManagerMenu, switchManagerCommunity, switchPartic
 import { createAnnouncement, deleteAnnouncement, saveAnnouncement } from './announcements.js?v=0.4.2-r49';
 import { closeCreateSheet, openCreateSheet } from './create-sheet.js?v=0.4.2-r49';
 import { route, router } from './router.js?v=0.4.2-r49';
-import { filterIdeas, toggleIdeaVote } from './ideas.js?v=0.4.2-r49';
+import { filterIdeas, submitIdea, toggleIdeaVote } from './ideas.js?v=0.4.2-r49';
 import { addPollOption, createChoicePoll, removePollOption, setChoicePollStatus, submitChoiceVote } from './polls.js?v=0.4.2-r49';
 
 Object.assign(window, {
-  filterIdeas, toggleIdeaVote, setPollType, addPollOption, removePollOption, createChoicePoll, setChoicePollStatus, submitChoiceVote,
+  filterIdeas, submitIdea, toggleIdeaVote, setPollType, addPollOption, removePollOption, createChoicePoll, setChoicePollStatus, submitChoiceVote,
   state, createInitiative, submitProposal, refreshMyInitiative, copyPaymentValue, closeRound,
   downloadCsv, downloadCurrentCsv, downloadHistoryCsv, initiative, showNextRoundForm, startNextRound, showProposalComment,
   closeProposalComment, sendManagerMagicLink, signOutManager, addCommunityMember, createCommunity, saveCommunity, saveMember, activateCommunity, sendMemberAccess,
