@@ -19,8 +19,8 @@ const refreshButton = id => `<button class="ghost" onclick="refreshMyInitiative(
 function cardStatus(item) {
   if (item.status === 'open') {
     return item.own_max_amount !== null && item.own_max_amount !== undefined
-      ? { tag: 'ok', label: 'Ви відповіли', line: `Ваш максимум: <strong>${money(item.own_max_amount)}</strong>` }
-      : { tag: '', label: 'Чекає на вашу відповідь', line: 'Вкажіть, скільки готові внести' };
+      ? { tag: 'ok', label: 'Відповіли', line: `Ваш максимум: <strong>${money(item.own_max_amount)}</strong>` }
+      : { tag: '', label: 'Нове', line: 'Вкажіть, скільки готові внести' };
   }
   if (item.feasible === true) {
     return { tag: 'ok', label: 'Мету досягнуто', line: item.own_recommended_amount !== null && item.own_recommended_amount !== undefined ? `Ваш внесок: <strong>${money(item.own_recommended_amount)}</strong>` : 'Раунд завершено' };

@@ -17,7 +17,7 @@ export function choiceCard(item, href, extraTag = null) {
   const answers = item.answers_count ?? null;
   const meta = closed
     ? `Завершено${item.closed_at ? ` ${date(item.closed_at)}` : ''}`
-    : `${answers !== null ? `Відповідей: ${answers}` : 'Голосування'}${item.deadline ? ` · до ${date(item.deadline)}` : ''}`;
+    : `${[answers !== null ? `Відповідей: ${answers}` : '', item.deadline ? `до ${date(item.deadline)}` : ''].filter(Boolean).join(' · ')}`;
   const tag = extraTag || { cls: closed ? 'ok' : '', label: closed ? 'Завершено' : 'Активне' };
   return `<article class="initiative-card">
     <div class="initiative-card-head">
@@ -148,8 +148,8 @@ export async function setChoicePollStatus(id, status) {
 export function myChoiceStatus(item) {
   if (item.status !== 'open') return { cls: 'ok', label: 'Завершено', line: 'Подивіться результати' };
   return item.own_voted
-    ? { cls: 'ok', label: 'Ви відповіли', line: 'Відповідь можна змінити до завершення' }
-    : { cls: '', label: 'Чекає на вашу відповідь', line: 'Оберіть варіант' };
+    ? { cls: 'ok', label: 'Відповіли', line: 'Відповідь можна змінити до завершення' }
+    : { cls: '', label: 'Нове', line: 'Оберіть варіант' };
 }
 
 export async function myChoicePoll(id) {
