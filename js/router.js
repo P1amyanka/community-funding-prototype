@@ -4,6 +4,7 @@ import { myInitiative, myInitiatives } from './participant.js';
 import { initiative, initiatives, newInitiative } from './manager.js';
 import { feedback } from './info-pages.js';
 import { choicePoll, myChoicePoll } from './polls.js';
+import { ideas } from './ideas.js';
 import { login } from './auth.js';
 import { communities, community, editCommunity, editMember, members, newCommunity, newMember } from './communities.js';
 import { collection, collections, editCollection, memberStats, newCollection, statistics } from './collections.js';
@@ -59,6 +60,7 @@ export function router() {
   if (k === 'me' && t === 'collections' && section) return myCollection(section);
   if (k === 'me' && t === 'collections') return myCollections();
   if (k === 'me' && t === 'statistics') return myStatistics();
+  if (k === 'ideas') return ideas();
   if (k === 'polls' && t) return choicePoll(t);
   if (k === 'initiatives' && t === 'new') return newInitiative();
   if (k === 'initiatives' && t) return initiative(t);

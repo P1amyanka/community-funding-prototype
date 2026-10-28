@@ -12,6 +12,7 @@ const ICONS = {
   members: '<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6"/><path d="M17 14.2a5 5 0 0 1 3.5 4.8"/>',
   communities: '<path d="M3 10.5 12 4l9 6.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/>',
   statistics: '<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/>',
+  ideas: '<path d="M12 20s-7-4.4-9.2-8.6C1.3 8.5 3 5 6.4 5c2 0 3.3 1.1 4.1 2.3h3C14.3 6.1 15.6 5 17.6 5 21 5 22.7 8.5 21.2 11.4 19 15.6 12 20 12 20Z"/>',
 };
 // Circular arrows: switch between the manager's and the participant's cabinet.
 const SWITCH_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/></svg>';
@@ -163,7 +164,8 @@ export async function syncManagerNavigation(active = null, forceVisible = false)
     <div class="manager-menu-separator"></div>
     ${managerItems.map(([key, href, label]) =>
       `<a class="manager-menu-link ${key === 'communities' ? '' : 'menu-section'} ${active === key ? 'active' : ''}" href="${href}" onclick="closeManagerMenu()"><svg viewBox="0 0 24 24" aria-hidden="true">${iconFor(key)}</svg>${label}</a>`
-    ).join('')}`;
+    ).join('')}
+    <a class="manager-menu-link ${active === 'ideas' ? 'active' : ''}" href="#/ideas" onclick="closeManagerMenu()"><svg viewBox="0 0 24 24" aria-hidden="true">${iconFor('ideas')}</svg>Що зробити далі?</a>`;
 
   let switchLink = '';
   if (currentSession) {
