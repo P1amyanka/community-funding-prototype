@@ -374,12 +374,17 @@ export async function editCommunity(communityId = null) {
   }
 
   if (!community) return newCommunity();
+  const { data: messenger } = await db.rpc('get_community_chat_messenger_v20_rpc', { p_community_id: community.id });
+  const messengerOption = (value, label) => `<option value="${value}" ${(messenger || '') === value ? 'selected' : ''}>${label}</option>`;
 
   app.innerHTML = `<section class="hero account-hero"><h1>Редагувати спільноту</h1></section>
     <section class="card">
       <input id="editCommunityId" type="hidden" value="${esc(community.id)}">
       <label>Назва</label><input id="editCommunityName" value="${esc(community.name)}">
       <label>Опис <span class="muted">необовʼязково</span></label><textarea id="editCommunityDescription">${esc(community.description || '')}</textarea>
+      <label>Чат класу</label>
+      <select id="editCommunityMessenger">${messengerOption('', 'Не вказано')}${messengerOption('telegram', 'Telegram')}${messengerOption('viber', 'Viber')}</select>
+      <p class="field-note">Кнопка «Поділитися» на оголошенні відкриватиме цей месенджер.</p>
       <div class="buttons"><button id="saveCommunityBtn" onclick="saveCommunity()">Зберегти</button></div>
       <div id="communityEditError" class="error hidden"></div>
     </section>
@@ -488,8 +493,10 @@ export async function saveCommunity() {
   if (!communityId) return ferr(errorBox, 'Спільноту не знайдено.');
   if (!name) return ferr(errorBox, 'Вкажіть назву спільноти.');
   button.disabled = true; button.textContent = 'Зберігаємо...';
+  const messenger = document.getElementById('editCommunityMessenger')?.value || null;
   const { error } = await db.rpc('update_community_v12_rpc', { p_community_id: communityId, p_name: name, p_description: description || null });
+  const { error: messengerError } = error ? {} : await db.rpc('set_community_chat_messenger_v20_rpc', { p_community_id: communityId, p_messenger: messenger });
   button.disabled = false; button.textContent = 'Зберегти';
-  if (error) return ferr(errorBox, error.message);
+  if (error || messengerError) return ferr(errorBox, (error || messengerError).message);
   redirect('#/communities');
 }

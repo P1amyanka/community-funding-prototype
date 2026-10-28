@@ -14,14 +14,16 @@ const card = a => `<article class="announcement-card">
   <div class="announcement-date">${publishedLabel(a.created_at)}</div>
 </article>`;
 
+const MESSENGERS = { telegram: 'Telegram', viber: 'Viber' };
+
 // Manager view: the same card with an edit link (delete lives on the edit page).
-const managerCard = a => `<article class="announcement-card">
+const managerCard = (a, messenger) => `<article class="announcement-card">
   <h3>${esc(a.title)}</h3>
   <p>${esc(a.body)}</p>
   <div class="announcement-date announcement-footer">
     <span>${publishedLabel(a.created_at)}</span>
     <span class="announcement-actions">
-      <button class="comment-link announcement-share" onclick="shareAnnouncement('${esc(a.id)}')">Поділитися</button>
+      <button class="comment-link announcement-share" onclick="shareAnnouncement('${esc(a.id)}')">${MESSENGERS[messenger] ? `Поділитися у ${MESSENGERS[messenger]}` : 'Поділитися'}</button>
       <a class="announcement-edit" href="#/announcements/${esc(a.id)}/edit">Змінити</a>
     </span>
   </div>
@@ -54,13 +56,18 @@ export async function announcements() {
     app.innerHTML = '<section class="hero account-hero"><h1>Оголошення</h1></section><section class="card"><div class="privacy">Спочатку створіть спільноту.</div><div class="buttons"><a class="button" href="#/communities/new">Створити спільноту</a></div></section>';
     return;
   }
-  const { data, error } = await db.rpc('get_manager_announcements_v12_rpc', { p_community_id: community.id });
+  const [{ data, error }, { data: messenger }] = await Promise.all([
+    db.rpc('get_manager_announcements_v12_rpc', { p_community_id: community.id }),
+    db.rpc('get_community_chat_messenger_v20_rpc', { p_community_id: community.id }),
+  ]);
   if (error) return app.innerHTML = `<section class="card"><div class="error">${esc(error.message)}</div></section>`;
   const items = data || [];
   state.shareAnnouncements = new Map(items.map(a => [a.id, a]));
+  state.shareMessenger = MESSENGERS[messenger] ? messenger : null;
+  state.shareCommunityId = community.id;
   app.innerHTML = `<section class="hero account-hero tab-hero"><h1>Оголошення</h1><p class="lead">${esc(community.name)}</p></section>
     <div class="account-create create-main"><a class="button" href="#/announcements/new">Створити оголошення</a></div>
-    <section class="account-section"><div class="announcement-list">${items.length ? items.map(managerCard).join('') : '<div class="privacy">Оголошень ще немає.</div>'}</div></section>`;
+    <section class="account-section"><div class="announcement-list">${items.length ? items.map(a => managerCard(a, state.shareMessenger)).join('') : '<div class="privacy">Оголошень ще немає.</div>'}</div></section>`;
 }
 
 export async function newAnnouncement() {
@@ -168,38 +175,62 @@ function shareText(a) {
   return `📢 ${a.title}\n\n${excerpt}`;
 }
 
+const shareLinks = (text, url) => {
+  const full = `${text}\n\nЧитати повністю: ${url}`;
+  return {
+    full,
+    telegram: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
+    viber: `viber://forward?text=${encodeURIComponent(full)}`,
+  };
+};
+
+const isPhone = () => matchMedia('(pointer: coarse)').matches;
+
 export async function shareAnnouncement(id) {
   // Shared module state: the page and the button handler may be different module copies.
   const a = state.shareAnnouncements?.get(id);
   if (!a) return;
   const text = shareText(a);
   const url = announcementLink(id);
-  // Phones: the system share sheet (Viber, Telegram, WhatsApp…).
-  if (navigator.share && matchMedia('(pointer: coarse)').matches) {
+  const messenger = state.shareMessenger;
+  const links = shareLinks(text, url);
+  // Phone + chat messenger set in the community settings: open it right away.
+  if (messenger && isPhone()) {
+    if (messenger === 'telegram') window.open(links.telegram, '_blank', 'noopener');
+    else location.href = links.viber;
+    return;
+  }
+  // Phone without a chosen messenger: the system share sheet (Viber, Telegram, WhatsApp…).
+  if (!messenger && navigator.share && isPhone()) {
     try { await navigator.share({ title: a.title, text: `${text}\n\nЧитати повністю:`, url }); return; }
     catch (e) { if (e?.name === 'AbortError') return; }
   }
-  openShareDrawer(text, url);
+  openShareDrawer(links, messenger);
 }
 
-function openShareDrawer(text, url) {
+function openShareDrawer(links, messenger) {
   closeShareDrawer();
-  const full = `${text}\n\nЧитати повністю: ${url}`;
+  const telegram = `<a class="button" href="${esc(links.telegram)}" target="_blank" rel="noopener" onclick="closeShareDrawer()">${messenger ? 'Відкрити Telegram' : 'Telegram'}</a>`;
+  const viber = `<a class="button" href="${esc(links.viber)}" onclick="closeShareDrawer()">${messenger ? 'Відкрити Viber' : 'Viber'}</a>`;
+  const buttons = messenger === 'telegram' ? telegram : messenger === 'viber' ? viber : telegram + viber;
+  const hint = messenger
+    ? ''
+    : `<p class="field-note">Вкажіть у <a href="#/community/${esc(state.shareCommunityId || '')}/edit" onclick="closeShareDrawer()">налаштуваннях спільноти</a>, де чат класу, — і кнопка відкриватиме його одразу.</p>`;
   const overlay = document.createElement('div');
   overlay.id = 'shareDrawer';
   overlay.className = 'drawer-overlay';
   overlay.innerHTML = `
     <button class="drawer-backdrop" aria-label="Закрити" onclick="closeShareDrawer()"></button>
     <aside class="comment-drawer share-drawer" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
-      <div class="drawer-head"><div><h2 id="shareTitle">Поділитися в групу</h2><p class="caption">Батьки відкриють повний текст у своєму кабінеті Comfundy.</p></div><button class="drawer-close" aria-label="Закрити" onclick="closeShareDrawer()">×</button></div>
-      <pre class="share-preview">${esc(full)}</pre>
-      <div class="buttons share-buttons">
-        <a class="button" href="https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}" target="_blank" rel="noopener" onclick="closeShareDrawer()">Telegram</a>
-        <a class="button" href="viber://forward?text=${encodeURIComponent(full)}" onclick="closeShareDrawer()">Viber</a>
+      <div class="drawer-head"><div><h2 id="shareTitle">${messenger ? `Поділитися у ${MESSENGERS[messenger]}` : 'Поділитися в групу'}</h2><p class="caption">Батьки відкриють повний текст у своєму кабінеті Comfundy.</p></div><button class="drawer-close" aria-label="Закрити" onclick="closeShareDrawer()">×</button></div>
+      <pre class="share-preview">${esc(links.full)}</pre>
+      <div class="buttons share-buttons${messenger ? ' single' : ''}">
+        ${buttons}
         <button class="secondary" id="shareCopyBtn" onclick="copyShareText()">Копіювати текст</button>
       </div>
+      ${hint}
     </aside>`;
-  overlay.dataset.text = full;
+  overlay.dataset.text = links.full;
   document.body.appendChild(overlay);
 }
 

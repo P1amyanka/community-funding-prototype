@@ -494,3 +494,4 @@ button.link-button:disabled{color:var(--muted);cursor:default}
 .share-buttons{grid-template-columns:1fr 1fr}
 .share-buttons .secondary{grid-column:1/-1}
 .announcement-single h1{margin:0 0 10px;font-size:clamp(26px,7vw,36px);letter-spacing:-.04em}
+.share-buttons.single{grid-template-columns:1fr}
