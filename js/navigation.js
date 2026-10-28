@@ -165,7 +165,7 @@ export async function syncManagerNavigation(active = null, forceVisible = false)
     ${managerItems.map(([key, href, label]) =>
       `<a class="manager-menu-link ${key === 'communities' ? '' : 'menu-section'} ${active === key ? 'active' : ''}" href="${href}" onclick="closeManagerMenu()"><svg viewBox="0 0 24 24" aria-hidden="true">${iconFor(key)}</svg>${label}</a>`
     ).join('')}
-    <a class="manager-menu-link ${active === 'ideas' ? 'active' : ''}" href="#/ideas" onclick="closeManagerMenu()"><svg viewBox="0 0 24 24" aria-hidden="true">${iconFor('ideas')}</svg>Що зробити далі?</a>`;
+    <a class="manager-menu-link ${active === 'ideas' ? 'active' : ''}" href="#/ideas" onclick="closeManagerMenu()"><svg viewBox="0 0 24 24" aria-hidden="true">${iconFor('ideas')}</svg>Що додати в Comfundy?</a>`;
 
   let switchLink = '';
   if (currentSession) {

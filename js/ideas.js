@@ -1,4 +1,4 @@
-// «Що зробити далі?»: менеджери ставлять ❤️ запланованим можливостям.
+// «Що додати в Comfundy?»: менеджери ставлять ❤️ запланованим можливостям.
 import { db } from './supabase.js';
 import { app, esc, fail, loading, redirect, toast } from './utils.js';
 import { syncManagerNavigation } from './navigation.js';
@@ -29,10 +29,10 @@ const sorters = {
 };
 
 function render(items) {
-  const groups = ['in_progress', 'planned', 'done']
+  const groups = ['in_progress', 'planned']
     .map(status => [status, items.filter(i => i.status === status).sort(sorters[sortMode])])
     .filter(([, list]) => list.length);
-  app.innerHTML = `<section class="hero account-hero"><h1>Що зробити далі?</h1>
+  app.innerHTML = `<section class="hero account-hero"><h1>Що додати в Comfundy?</h1>
       <p class="lead">Поставте ❤️ тому, що вам потрібно. Ми робимо спершу те, що набирає найбільше голосів.</p></section>
     <div class="idea-sort" role="group" aria-label="Сортування">
       <button class="idea-sort-btn${sortMode === 'popular' ? ' is-active' : ''}" onclick="setIdeaSort('popular')">Популярні</button>
