@@ -93,11 +93,9 @@ export async function newInitiative() {
 
   app.innerHTML = `<a class="page-back" href="#/initiatives">← Опитування</a>
     <section class="card"><h2>Нове опитування</h2>
-      <div class="poll-type-switch" role="tablist" aria-label="Тип опитування">
-        <button type="button" role="tab" id="pollTypeBudget" class="poll-type-btn is-active" aria-selected="true" onclick="setPollType('budget')">${POLL_TYPES.budget}</button>
-        <button type="button" role="tab" id="pollTypeChoice" class="poll-type-btn" aria-selected="false" onclick="setPollType('choice')">${POLL_TYPES.choice}</button>
-      </div>
-      <p class="lead form-intro" id="pollTypeIntro">Кожен учасник у своєму кабінеті вкаже максимальну суму, яку готовий внести на ідею; інші учасники цих сум не бачать.</p>
+      <label for="pollType">Тип опитування</label>
+      <select id="pollType" onchange="setPollType(this.value)">${Object.entries(POLL_TYPES).map(([value, label]) => `<option value="${value}">${label}</option>`).join('')}</select>
+      <p class="field-note" id="pollTypeIntro">Кожен учасник у своєму кабінеті вкаже максимальну суму, яку готовий внести на ідею; інші учасники цих сум не бачать.</p>
       <div class="privacy community-context">Спільнота: <strong>${esc(community.name)}</strong></div>
       <input id="communityId" type="hidden" value="${esc(community.id)}">
       <div id="choicePollFields" class="hidden">${choiceFields()}</div>
@@ -124,12 +122,8 @@ export function setPollType(type) {
   const choice = type === 'choice';
   document.getElementById('choicePollFields')?.classList.toggle('hidden', !choice);
   document.getElementById('budgetPollFields')?.classList.toggle('hidden', choice);
-  [['pollTypeBudget', !choice], ['pollTypeChoice', choice]].forEach(([id, on]) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.classList.toggle('is-active', on);
-    el.setAttribute('aria-selected', String(on));
-  });
+  const select = document.getElementById('pollType');
+  if (select && select.value !== type) select.value = type;
   const intro = document.getElementById('pollTypeIntro');
   if (intro) intro.textContent = POLL_INTRO[choice ? 'choice' : 'budget'];
 }
