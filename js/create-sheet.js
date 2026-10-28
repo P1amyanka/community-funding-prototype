@@ -26,7 +26,7 @@ export function openCreateSheet(communityId = localStorage.getItem('comfundy:man
       ${sheetOption('contribution', 'Внесок', 'Позначити, що учасник оплатив збір', `closeCreateSheet();openContributionDrawer('','${esc(communityId)}')`)}
       ${sheetOption('announcement', 'Оголошення', 'Новина чи нагадування для всіх учасників', "closeCreateSheet();location.hash='#/announcements/new'")}
       ${sheetOption('collection', 'Збір', 'Гроші на щось спільне — разово чи щомісяця', "closeCreateSheet();location.hash='#/collections/new'")}
-      ${sheetOption('poll', 'Опитування', 'Скільки батьки готові внести на нову ідею', "closeCreateSheet();location.hash='#/initiatives/new'")}
+      ${sheetOption('poll', 'Опитування', 'Бюджет на ідею або вибір із варіантів', "closeCreateSheet();location.hash='#/initiatives/new'")}
     </aside>`;
   document.body.appendChild(overlay);
   document.addEventListener('keydown', closeOnEscape);

@@ -2,6 +2,7 @@ import { db } from './supabase.js';
 import { app, date, esc, fail, ferr, getRichText, loading, money, richEditor, richText, toast } from './utils.js';
 import { getActiveParticipantCommunity } from './navigation.js';
 import { requireParticipant } from './participant-account.js';
+import { POLL_TYPES, choiceCard, myChoiceStatus } from './polls.js';
 
 const isUrl = value => /^https?:\/\//i.test(String(value || '').trim());
 
@@ -35,14 +36,18 @@ export async function myInitiatives() {
   const community = await getActiveParticipantCommunity();
   if (!community) return;
 
-  const { data, error } = await db.rpc('get_my_initiatives_v15_rpc', { p_community_id: community.id });
+  const { data, error } = await db.rpc('get_my_polls_v21_rpc', { p_community_id: community.id });
   if (error) return fail(error.message);
   const items = data || [];
   const cards = items.length ? items.map(item => {
+    if (item.poll_type === 'choice') {
+      const c = myChoiceStatus(item);
+      return choiceCard({ ...item, answers_count: null }, `#/me/polls/${esc(item.id)}`, { cls: c.cls, label: c.label });
+    }
     const s = cardStatus(item);
     return `<article class="initiative-card">
       <div class="initiative-card-head">
-        <div><h3>${esc(item.title)}</h3><p class="caption">Раунд ${item.round_number}${item.deadline ? ` · до ${date(item.deadline)}` : ''}</p></div>
+        <div><p class="poll-type-label">${POLL_TYPES.budget}</p><h3>${esc(item.title)}</h3><p class="caption">Раунд ${item.round_number}${item.deadline ? ` · до ${date(item.deadline)}` : ''}</p></div>
         <span class="tag ${s.tag}">${s.label}</span>
       </div>
       ${s.line ? `<p class="status-text">${s.line}</p>` : ''}

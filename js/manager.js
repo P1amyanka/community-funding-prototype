@@ -3,6 +3,7 @@ import { state } from './state.js';
 import { allocationV02, downloadCsv, proposalsWithoutTarget } from './equilibrium.js';
 import { app, date, esc, fail, ferr, getRichText, loading, money, redirect, richEditor, richText, richTextToPlainText, toast } from './utils.js';
 import { getActiveManagerCommunity, syncManagerNavigation } from './navigation.js';
+import { POLL_TYPES, choiceCard, choiceFields, initChoiceFields } from './polls.js';
 
 let managerPoll = null;
 
@@ -53,7 +54,7 @@ const initiativeCard = item => {
     : `Раунд ${item.round_number} · Відповідей: ${item.proposals_count}`;
   return `<article class="initiative-card">
     <div class="initiative-card-head">
-      <div><h3>${esc(item.title)}</h3><p class="caption">${meta}</p></div>
+      <div><p class="poll-type-label">${POLL_TYPES.budget}</p><h3>${esc(item.title)}</h3><p class="caption">${meta}</p></div>
       <span class="tag ${closed ? 'ok' : ''}">${closed ? 'Завершено' : 'Активне'}</span>
     </div>
     ${finance}
@@ -68,16 +69,19 @@ export async function initiatives() {
   const community = await getActiveManagerCommunity();
   if (!community) return app.innerHTML = noCommunity('Опитування');
 
-  const { data, error } = await db.rpc('get_community_initiatives_v15_rpc', { p_community_id: community.id });
+  const { data, error } = await db.rpc('get_community_polls_v21_rpc', { p_community_id: community.id });
   if (error) return fail(error.message);
   const items = data || [];
+  const card = x => x.poll_type === 'choice'
+    ? choiceCard(x, `#/polls/${esc(x.id)}`)
+    : initiativeCard({ ...x, proposals_count: x.answers_count });
   const active = items.filter(x => x.status === 'open');
   const closed = items.filter(x => x.status !== 'open');
 
   app.innerHTML = `<section class="hero account-hero tab-hero"><h1>Опитування</h1><p class="lead">${esc(community.name)}</p></section>
     <div class="account-create"><a class="button" href="#/initiatives/new">Створити опитування</a></div>
-    <section class="account-section"><h2>Активні</h2><div class="initiative-list">${active.length ? active.map(initiativeCard).join('') : '<div class="privacy">Активних опитувань немає.</div>'}</div></section>
-    <section class="account-section"><h2>Завершені</h2><div class="initiative-list">${closed.length ? closed.map(initiativeCard).join('') : '<div class="privacy">Завершених опитувань немає.</div>'}</div></section>`;
+    <section class="account-section"><h2>Активні</h2><div class="initiative-list">${active.length ? active.map(card).join('') : '<div class="privacy">Активних опитувань немає.</div>'}</div></section>
+    <section class="account-section"><h2>Завершені</h2><div class="initiative-list">${closed.length ? closed.map(card).join('') : '<div class="privacy">Завершених опитувань немає.</div>'}</div></section>`;
 }
 
 // --- Create ------------------------------------------------------------------
@@ -88,9 +92,16 @@ export async function newInitiative() {
   if (!community) return app.innerHTML = noCommunity('Нове опитування');
 
   app.innerHTML = `<a class="page-back" href="#/initiatives">← Опитування</a>
-    <section class="card"><p class="eyebrow">Бюджет</p><h2>Нове опитування</h2><p class="lead form-intro">Опишіть ідею. Кожен учасник у своєму кабінеті вкаже максимальну суму, яку готовий внести; інші учасники цих сум не бачать.</p>
+    <section class="card"><h2>Нове опитування</h2>
+      <div class="poll-type-switch" role="tablist" aria-label="Тип опитування">
+        <button type="button" role="tab" id="pollTypeBudget" class="poll-type-btn is-active" aria-selected="true" onclick="setPollType('budget')">${POLL_TYPES.budget}</button>
+        <button type="button" role="tab" id="pollTypeChoice" class="poll-type-btn" aria-selected="false" onclick="setPollType('choice')">${POLL_TYPES.choice}</button>
+      </div>
+      <p class="lead form-intro" id="pollTypeIntro">Кожен учасник у своєму кабінеті вкаже максимальну суму, яку готовий внести на ідею; інші учасники цих сум не бачать.</p>
       <div class="privacy community-context">Спільнота: <strong>${esc(community.name)}</strong></div>
       <input id="communityId" type="hidden" value="${esc(community.id)}">
+      <div id="choicePollFields" class="hidden">${choiceFields()}</div>
+      <div id="budgetPollFields">
       <label>Назва опитування</label><input id="title" placeholder="Наприклад: новий принтер для класу">
       <label>Опис</label>${richEditor('description', '', 'Опишіть, що саме планується зробити')}
       <label>Бюджет, грн <span class="muted">необовʼязково</span></label><input id="target" type="number" min="1" placeholder="Наприклад: 12000">
@@ -99,7 +110,28 @@ export async function newInitiative() {
       <label>Очікувана кількість відповідей <span class="muted">необовʼязково</span></label><input id="expected" type="number" min="1" value="${community.members_count || ''}">
       <p class="field-note">За замовчуванням — кількість активних учасників спільноти.</p>
       <label class="check-row"><input id="commentsEnabled" type="checkbox" checked><span>Дозволити коментарі учасникам</span></label>
-      <div class="buttons"><button id="createBtn" onclick="createInitiative()">Створити опитування</button></div><div id="createError" class="error hidden"></div></section>`;
+      <div class="buttons"><button id="createBtn" onclick="createInitiative()">Створити опитування</button></div><div id="createError" class="error hidden"></div>
+      </div></section>`;
+  initChoiceFields();
+}
+
+const POLL_INTRO = {
+  budget: 'Кожен учасник у своєму кабінеті вкаже максимальну суму, яку готовий внести на ідею; інші учасники цих сум не бачать.',
+  choice: 'Задайте питання і варіанти відповіді — наприклад, який подарунок обрати чи куди поїхати на екскурсію.',
+};
+
+export function setPollType(type) {
+  const choice = type === 'choice';
+  document.getElementById('choicePollFields')?.classList.toggle('hidden', !choice);
+  document.getElementById('budgetPollFields')?.classList.toggle('hidden', choice);
+  [['pollTypeBudget', !choice], ['pollTypeChoice', choice]].forEach(([id, on]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('is-active', on);
+    el.setAttribute('aria-selected', String(on));
+  });
+  const intro = document.getElementById('pollTypeIntro');
+  if (intro) intro.textContent = POLL_INTRO[choice ? 'choice' : 'budget'];
 }
 
 export async function createInitiative() {
