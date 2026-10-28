@@ -63,6 +63,15 @@ export async function toggleIdeaVote(id) {
 }
 
 // --- Запропонувати ідею --------------------------------------------------------
+// Лише простий текст в один рядок; ті самі межі перевіряє база.
+const TITLE_MAX = 60;
+const DESCRIPTION_MAX = 160;
+const plain = v => String(v || '').replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
+
+export function countIdeaChars(input) {
+  const note = document.querySelector(`.char-count[data-for="${input.id}"]`);
+  if (note) note.textContent = `${input.value.length} / ${input.maxLength}`;
+}
 
 export async function newIdea() {
   const { data: s } = await db.auth.getSession();
@@ -70,16 +79,18 @@ export async function newIdea() {
   await syncManagerNavigation('ideas');
   app.innerHTML = `<a class="page-back" href="#/ideas">← Що додати в Comfundy?</a>
     <section class="card"><h2>Нова ідея</h2>
-      <label>Назва</label><input id="ideaTitle" maxlength="120" placeholder="Наприклад: нагадування в Viber">
-      <label>Опис</label><textarea id="ideaDescription" maxlength="2000" placeholder="Що саме і навіщо це вашому класу"></textarea>
+      <label>Назва</label><input id="ideaTitle" maxlength="${TITLE_MAX}" placeholder="Наприклад: нагадування в Viber" oninput="countIdeaChars(this)">
+      <p class="field-note char-count" data-for="ideaTitle">0 / ${TITLE_MAX}</p>
+      <label>Опис</label><textarea id="ideaDescription" maxlength="${DESCRIPTION_MAX}" rows="3" placeholder="Одним-двома реченнями: що це дасть вашому класу" oninput="countIdeaChars(this)"></textarea>
+      <p class="field-note char-count" data-for="ideaDescription">0 / ${DESCRIPTION_MAX}</p>
       <div class="buttons"><button id="ideaBtn" onclick="submitIdea()">Надіслати</button></div>
       <div id="ideaError" class="error hidden"></div>
     </section>`;
 }
 
 export async function submitIdea() {
-  const title = document.getElementById('ideaTitle')?.value.trim() || '';
-  const description = document.getElementById('ideaDescription')?.value.trim() || '';
+  const title = plain(document.getElementById('ideaTitle')?.value);
+  const description = plain(document.getElementById('ideaDescription')?.value);
   const e = document.getElementById('ideaError');
   const b = document.getElementById('ideaBtn');
   e.classList.add('hidden');
@@ -89,6 +100,6 @@ export async function submitIdea() {
   const { error } = await db.rpc('suggest_feature_idea_v22_rpc', { p_title: title, p_description: description });
   b.disabled = false; b.textContent = 'Надіслати';
   if (error) return ferr(e, error.message);
-  toast('Дякуємо! Ідею отримали — додамо в перелік після перегляду', 4000);
+  toast('Дякуємо! Ідею додано в перелік', 3000);
   redirect('#/ideas');
 }

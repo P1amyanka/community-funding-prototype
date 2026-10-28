@@ -514,8 +514,9 @@ button.poll-option-remove:disabled{opacity:.4;cursor:default}
 .idea-card.hidden{display:none}
 .idea-card{display:flex;align-items:flex-start;gap:14px;padding:16px;border:1px solid var(--line);border-radius:18px;background:#fff}
 .idea-text{flex:1;min-width:0}
-.idea-text h3{margin:0;font-size:16px;line-height:1.3}
-.idea-text p{margin:4px 0 0;color:var(--muted);font-size:14px;line-height:1.45}
+.idea-text h3{margin:0;font-size:16px;line-height:1.3;overflow-wrap:anywhere}
+.idea-text p{margin:4px 0 0;color:var(--muted);font-size:14px;line-height:1.45;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.char-count{text-align:right;font-variant-numeric:tabular-nums}
 .idea-card.is-done{background:#f8f6f1}
 button.idea-like,.idea-likes{flex:none;display:inline-flex;align-items:center;gap:5px;width:auto;min-height:40px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--muted);box-shadow:none;font-size:14px;font-weight:850;font-variant-numeric:tabular-nums}
 button.idea-like:hover{transform:none;background:#fbf3f1;box-shadow:none}
