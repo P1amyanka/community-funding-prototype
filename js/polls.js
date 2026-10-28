@@ -118,10 +118,11 @@ export async function choicePoll(id) {
 
   const closed = p.status !== 'open';
   const total = p.voters_count || 0;
+  const names = list => `<ul class="poll-names">${list.map(n => `<li>${esc(n)}</li>`).join('')}</ul>`;
   const results = p.options.map(o => `${resultBar(o, total)}
-      ${o.voters.length ? `<p class="poll-voters">${o.voters.map(esc).join(', ')}</p>` : ''}`).join('');
+      ${o.voters.length ? `<details class="poll-voters"><summary>Хто обрав</summary>${names(o.voters)}</details>` : ''}`).join('');
   const notVoted = p.not_voted.length
-    ? `<section class="card"><h2>Ще не відповіли · ${p.not_voted.length}</h2><p class="status-text">${p.not_voted.map(esc).join(', ')}</p></section>`
+    ? `<section class="card"><details class="poll-voters poll-not-voted"><summary><strong>Ще не відповіли · ${p.not_voted.length}</strong></summary>${names(p.not_voted)}</details></section>`
     : '';
 
   app.innerHTML = `<a class="page-back" href="#/initiatives">← Опитування</a>

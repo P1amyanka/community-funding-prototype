@@ -101,7 +101,7 @@ export async function newInitiative() {
       <div id="choicePollFields" class="hidden">${choiceFields()}</div>
       <div id="budgetPollFields">
       <label>Назва опитування</label><input id="title" placeholder="Наприклад: новий принтер для класу">
-      <label>Опис</label>${richEditor('description', '', 'Опишіть, що саме планується зробити')}
+      <label>Опис <span class="muted">необовʼязково</span></label>${richEditor('description', '', 'Опишіть, що саме планується зробити')}
       <label>Бюджет, грн <span class="muted">необовʼязково</span></label><input id="target" type="number" min="1" placeholder="Наприклад: 12000">
       <label>Платіжні реквізити <span class="muted">необовʼязково</span></label><input id="paymentDetails" type="text" inputmode="text" placeholder="Посилання або номер картки">
       <label>Дедлайн <span class="muted">необовʼязково</span></label><input id="deadline" type="datetime-local">

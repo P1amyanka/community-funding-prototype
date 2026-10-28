@@ -499,5 +499,12 @@ button.poll-option-remove:disabled{opacity:.4;cursor:default}
 .poll-result-head strong{white-space:nowrap;font-variant-numeric:tabular-nums}
 .poll-result .dues-progress-bar span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#2d6a5a,#245447)}
 .poll-result.is-mine .poll-result-head>span{font-weight:800}
-.poll-voters{margin:6px 0 0;color:var(--muted);font-size:12.5px;line-height:1.4}
+.poll-voters{margin:8px 0 0}
+.poll-voters summary{cursor:pointer;color:var(--accent);font-size:13px;font-weight:800;list-style:none}
+.poll-voters summary::-webkit-details-marker{display:none}
+.poll-voters summary::after{content:' ▾';font-size:11px}
+.poll-voters[open] summary::after{content:' ▴'}
+.poll-not-voted summary{color:var(--ink);font-size:16px}
+.poll-names{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0;padding:0;list-style:none}
+.poll-names li{padding:4px 10px;border-radius:999px;background:#f2eee7;color:var(--ink);font-size:12.5px;line-height:1.4}
 .poll-choices .poll-choice{margin-top:12px}
