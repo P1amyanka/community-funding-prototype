@@ -3,6 +3,7 @@ import { home } from './home.js';
 import { myInitiative, myInitiatives } from './participant.js';
 import { initiative, initiatives, newInitiative } from './manager.js';
 import { feedback } from './info-pages.js';
+import { choicePoll, myChoicePoll } from './polls.js';
 import { login } from './auth.js';
 import { communities, community, editCommunity, editMember, members, newCommunity, newMember } from './communities.js';
 import { collection, collections, editCollection, memberStats, newCollection, statistics } from './collections.js';
@@ -31,7 +32,7 @@ async function finishAuthRedirect() {
 
 function outdatedLink() {
   app.innerHTML = `<section class="card"><h2>Посилання більше не діє</h2>
-    <p class="status-text">Ініціативи тепер живуть у спільнотах. Увійдіть у свій кабінет, щоб побачити їх у розділі «Ініціативи».</p>
+    <p class="status-text">Опитування тепер живуть у спільнотах. Увійдіть у свій кабінет, щоб побачити їх у розділі «Опитування».</p>
     <div class="buttons"><a class="button" href="#/login">Увійти</a></div></section>`;
 }
 
@@ -52,11 +53,13 @@ export function router() {
   if (k === 'announcements') return announcements();
   if (k === 'me' && !t) return redirect('#/me/announcements');
   if (k === 'me' && t === 'announcements') return myAnnouncements();
+  if (k === 'me' && t === 'polls' && section) return myChoicePoll(section);
   if (k === 'me' && t === 'initiatives' && section) return myInitiative(section);
   if (k === 'me' && t === 'initiatives') return myInitiatives();
   if (k === 'me' && t === 'collections' && section) return myCollection(section);
   if (k === 'me' && t === 'collections') return myCollections();
   if (k === 'me' && t === 'statistics') return myStatistics();
+  if (k === 'polls' && t) return choicePoll(t);
   if (k === 'initiatives' && t === 'new') return newInitiative();
   if (k === 'initiatives' && t) return initiative(t);
   if (k === 'initiatives') return initiatives();

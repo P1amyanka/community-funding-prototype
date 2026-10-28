@@ -1,10 +1,11 @@
-// «+» on phones: «Що створити?» — внесок, оголошення або збір в активній спільноті.
+// «+» on phones: «Що створити?» — внесок, оголошення, збір або опитування в активній спільноті.
 import { esc } from './utils.js';
 
 const ICON = {
   contribution: '<circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/>',
   announcement: '<path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1Z"/><path d="M16 9a4 4 0 0 1 0 6"/>',
   collection: '<rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18"/><path d="M16 15h2"/>',
+  poll: '<path d="M5 19V11M12 19V5M19 19v-6"/>',
 };
 
 const sheetOption = (icon, title, text, action) => `<button class="sheet-option" onclick="${action}">
@@ -25,6 +26,7 @@ export function openCreateSheet(communityId = localStorage.getItem('comfundy:man
       ${sheetOption('contribution', 'Внесок', 'Позначити, що учасник оплатив збір', `closeCreateSheet();openContributionDrawer('','${esc(communityId)}')`)}
       ${sheetOption('announcement', 'Оголошення', 'Новина чи нагадування для всіх учасників', "closeCreateSheet();location.hash='#/announcements/new'")}
       ${sheetOption('collection', 'Збір', 'Гроші на щось спільне — разово чи щомісяця', "closeCreateSheet();location.hash='#/collections/new'")}
+      ${sheetOption('poll', 'Опитування', 'Бюджет на ідею або вибір із варіантів', "closeCreateSheet();location.hash='#/initiatives/new'")}
     </aside>`;
   document.body.appendChild(overlay);
   document.addEventListener('keydown', closeOnEscape);

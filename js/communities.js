@@ -100,7 +100,7 @@ export async function communities() {
 export async function newCommunity() {
   const session = await requireSession('communities');
   if (!session) return;
-  app.innerHTML = `<section class="hero account-hero"><h1>Нова спільнота</h1><p class="lead">Створіть постійний простір для учасників та ініціатив.</p></section>
+  app.innerHTML = `<section class="hero account-hero"><h1>Нова спільнота</h1><p class="lead">Створіть постійний простір для учасників та опитувань.</p></section>
     <section class="card">
       <label>Назва</label><input id="communityName" placeholder="Наприклад: 5-А клас">
       <label>Опис <span class="muted">необовʼязково</span></label><textarea id="communityDescription" placeholder="Коротко опишіть спільноту"></textarea>
@@ -385,7 +385,7 @@ export async function editCommunity(communityId = null) {
     </section>
     <section class="account-section">
       <h2>Менеджери</h2>
-      <p class="caption">Усі менеджери мають однакові права: учасники, збори, внески, оголошення, статистика та ініціативи цієї спільноти.</p>
+      <p class="caption">Усі менеджери мають однакові права: учасники, збори, внески, оголошення, статистика та опитування цієї спільноти.</p>
       <div id="managerList" class="member-list" style="margin-top:12px"><div class="privacy">Завантажуємо менеджерів...</div></div>
     </section>
     <section class="card">

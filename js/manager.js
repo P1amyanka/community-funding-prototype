@@ -3,6 +3,7 @@ import { state } from './state.js';
 import { allocationV02, downloadCsv, proposalsWithoutTarget } from './equilibrium.js';
 import { app, date, esc, fail, ferr, getRichText, loading, money, redirect, richEditor, richText, richTextToPlainText, toast } from './utils.js';
 import { getActiveManagerCommunity, syncManagerNavigation } from './navigation.js';
+import { POLL_TYPES, choiceCard, choiceFields, initChoiceFields } from './polls.js';
 
 let managerPoll = null;
 
@@ -53,8 +54,8 @@ const initiativeCard = item => {
     : `Раунд ${item.round_number} · Відповідей: ${item.proposals_count}`;
   return `<article class="initiative-card">
     <div class="initiative-card-head">
-      <div><h3>${esc(item.title)}</h3><p class="caption">${meta}</p></div>
-      <span class="tag ${closed ? 'ok' : ''}">${closed ? 'Завершена' : 'Активна'}</span>
+      <div><p class="poll-type-label">${POLL_TYPES.budget}</p><h3>${esc(item.title)}</h3><p class="caption">${meta}</p></div>
+      <span class="tag ${closed ? 'ok' : ''}">${closed ? 'Завершено' : 'Активне'}</span>
     </div>
     ${finance}
     <a class="initiative-open" href="#/initiatives/${esc(item.id)}">Відкрити →</a>
@@ -66,18 +67,21 @@ const initiativeCard = item => {
 export async function initiatives() {
   if (!await requireManager()) return;
   const community = await getActiveManagerCommunity();
-  if (!community) return app.innerHTML = noCommunity('Ініціативи');
+  if (!community) return app.innerHTML = noCommunity('Опитування');
 
-  const { data, error } = await db.rpc('get_community_initiatives_v15_rpc', { p_community_id: community.id });
+  const { data, error } = await db.rpc('get_community_polls_v21_rpc', { p_community_id: community.id });
   if (error) return fail(error.message);
   const items = data || [];
+  const card = x => x.poll_type === 'choice'
+    ? choiceCard(x, `#/polls/${esc(x.id)}`)
+    : initiativeCard({ ...x, proposals_count: x.answers_count });
   const active = items.filter(x => x.status === 'open');
   const closed = items.filter(x => x.status !== 'open');
 
-  app.innerHTML = `<section class="hero account-hero tab-hero"><h1>Ініціативи</h1><p class="lead">${esc(community.name)}</p></section>
-    <div class="account-create"><a class="button" href="#/initiatives/new">Створити ініціативу</a></div>
-    <section class="account-section"><h2>Активні</h2><div class="initiative-list">${active.length ? active.map(initiativeCard).join('') : '<div class="privacy">Активних ініціатив немає.</div>'}</div></section>
-    <section class="account-section"><h2>Завершені</h2><div class="initiative-list">${closed.length ? closed.map(initiativeCard).join('') : '<div class="privacy">Завершених ініціатив немає.</div>'}</div></section>`;
+  app.innerHTML = `<section class="hero account-hero tab-hero"><h1>Опитування</h1><p class="lead">${esc(community.name)}</p></section>
+    <div class="account-create"><a class="button" href="#/initiatives/new">Створити опитування</a></div>
+    <section class="account-section"><h2>Активні</h2><div class="initiative-list">${active.length ? active.map(card).join('') : '<div class="privacy">Активних опитувань немає.</div>'}</div></section>
+    <section class="account-section"><h2>Завершені</h2><div class="initiative-list">${closed.length ? closed.map(card).join('') : '<div class="privacy">Завершених опитувань немає.</div>'}</div></section>`;
 }
 
 // --- Create ------------------------------------------------------------------
@@ -85,21 +89,43 @@ export async function initiatives() {
 export async function newInitiative() {
   if (!await requireManager()) return;
   const community = await getActiveManagerCommunity();
-  if (!community) return app.innerHTML = noCommunity('Нова ініціатива');
+  if (!community) return app.innerHTML = noCommunity('Нове опитування');
 
-  app.innerHTML = `<a class="page-back" href="#/initiatives">← Ініціативи</a>
-    <section class="card"><h2>Створити ініціативу</h2><p class="lead form-intro">Опишіть ідею. Кожен учасник у своєму кабінеті вкаже максимальну суму, яку готовий внести; інші учасники цих сум не бачать.</p>
+  app.innerHTML = `<a class="page-back" href="#/initiatives">← Опитування</a>
+    <section class="card"><h2>Нове опитування</h2>
+      <label for="pollType">Тип опитування</label>
+      <select id="pollType" onchange="setPollType(this.value)">${Object.entries(POLL_TYPES).map(([value, label]) => `<option value="${value}">${label}</option>`).join('')}</select>
+      <p class="field-note" id="pollTypeIntro">Кожен учасник у своєму кабінеті вкаже максимальну суму, яку готовий внести на ідею; інші учасники цих сум не бачать.</p>
       <div class="privacy community-context">Спільнота: <strong>${esc(community.name)}</strong></div>
       <input id="communityId" type="hidden" value="${esc(community.id)}">
-      <label>Назва ініціативи</label><input id="title" placeholder="Наприклад: новий принтер для класу">
-      <label>Опис</label>${richEditor('description', '', 'Опишіть, що саме планується зробити')}
+      <div id="choicePollFields" class="hidden">${choiceFields()}</div>
+      <div id="budgetPollFields">
+      <label>Назва опитування</label><input id="title" placeholder="Наприклад: новий принтер для класу">
+      <label>Опис <span class="muted">необовʼязково</span></label>${richEditor('description', '', 'Опишіть, що саме планується зробити')}
       <label>Бюджет, грн <span class="muted">необовʼязково</span></label><input id="target" type="number" min="1" placeholder="Наприклад: 12000">
       <label>Платіжні реквізити <span class="muted">необовʼязково</span></label><input id="paymentDetails" type="text" inputmode="text" placeholder="Посилання або номер картки">
       <label>Дедлайн <span class="muted">необовʼязково</span></label><input id="deadline" type="datetime-local">
       <label>Очікувана кількість відповідей <span class="muted">необовʼязково</span></label><input id="expected" type="number" min="1" value="${community.members_count || ''}">
       <p class="field-note">За замовчуванням — кількість активних учасників спільноти.</p>
       <label class="check-row"><input id="commentsEnabled" type="checkbox" checked><span>Дозволити коментарі учасникам</span></label>
-      <div class="buttons"><button id="createBtn" onclick="createInitiative()">Створити ініціативу</button></div><div id="createError" class="error hidden"></div></section>`;
+      <div class="buttons"><button id="createBtn" onclick="createInitiative()">Створити опитування</button></div><div id="createError" class="error hidden"></div>
+      </div></section>`;
+  initChoiceFields();
+}
+
+const POLL_INTRO = {
+  budget: 'Кожен учасник у своєму кабінеті вкаже максимальну суму, яку готовий внести на ідею; інші учасники цих сум не бачать.',
+  choice: 'Задайте питання і варіанти відповіді — наприклад, який подарунок обрати чи куди поїхати на екскурсію.',
+};
+
+export function setPollType(type) {
+  const choice = type === 'choice';
+  document.getElementById('choicePollFields')?.classList.toggle('hidden', !choice);
+  document.getElementById('budgetPollFields')?.classList.toggle('hidden', choice);
+  const select = document.getElementById('pollType');
+  if (select && select.value !== type) select.value = type;
+  const intro = document.getElementById('pollTypeIntro');
+  if (intro) intro.textContent = POLL_INTRO[choice ? 'choice' : 'budget'];
 }
 
 export async function createInitiative() {
@@ -117,7 +143,7 @@ export async function createInitiative() {
   const commentsEnabled = document.getElementById('commentsEnabled').checked;
 
   e.classList.add('hidden');
-  if (!title) return ferr(e, 'Вкажіть назву ініціативи.');
+  if (!title) return ferr(e, 'Вкажіть назву опитування.');
   if (target !== null && (!Number.isFinite(target) || target <= 0)) return ferr(e, 'Бюджет має бути більшим за 0.');
   if (expected !== null && (!Number.isInteger(expected) || expected <= 0)) return ferr(e, 'Кількість має бути більшою за 0.');
 
@@ -132,7 +158,7 @@ export async function createInitiative() {
     p_payment_details: paymentDetails || null,
     p_comments_enabled: commentsEnabled,
   });
-  b.disabled = false; b.textContent = 'Створити ініціативу';
+  b.disabled = false; b.textContent = 'Створити опитування';
   if (error) return ferr(e, error.message);
   const id = data?.[0]?.id;
   redirect(id ? `#/initiatives/${id}` : '#/initiatives');
@@ -154,7 +180,7 @@ function startManagerPolling(id) {
 
 export async function initiative(id, silent = false) {
   if (!silent && !await requireManager()) return;
-  if (!silent) loading('Завантажуємо ініціативу');
+  if (!silent) loading('Завантажуємо опитування');
   const [{ data: rd, error: re }, { data: p, error: pe }, { data: h, error: he }] = await Promise.all([
     db.rpc('get_initiative_v15_rpc', { p_initiative_id: id }),
     db.rpc('get_initiative_proposals_v15_rpc', { p_initiative_id: id }),
@@ -165,7 +191,7 @@ export async function initiative(id, silent = false) {
   if (he) return fail(he.message);
 
   const r = rd && rd[0];
-  if (!r) return fail('Ініціативу не знайдено.');
+  if (!r) return fail('Опитування не знайдено.');
 
   const proposals = p || [];
   const history = h || [];
@@ -198,11 +224,11 @@ export async function initiative(id, silent = false) {
       : `<div class="row"><strong>${esc(x.participant_label)}</strong><span>${money(x.max)}</span><span>${closed && allocation.feasible ? money(x.recommended) : '—'}</span></div>`).join('')
     : '<div class="privacy">Поки немає відповідей.</div>';
 
-  app.innerHTML = `<a class="page-back" href="#/initiatives">← Ініціативи</a>
+  app.innerHTML = `<a class="page-back" href="#/initiatives">← Опитування</a>
     <section class="hero"><p class="eyebrow">${esc(r.community_name)}</p><h1>${esc(r.title)}</h1></section>
     <section class="card"><div class="title-row"><div><h2>Раунд ${r.round_number}</h2><div class="caption rich-content">${richText(r.description)}</div></div><span class="tag ${closed ? 'ok' : ''}">${closed ? 'Раунд завершено' : 'Збір відповідей'}</span></div>
     <div class="status simple-status">${statusContent}${hasTarget ? `<div class="simple-stats-primary"><strong>${money(allocation.sumMax)}</strong><span>із ${money(r.target_amount)} цілі</span></div>` : proposals.length ? `<div class="simple-stats-primary"><strong>${money(allocation.sumMax)}</strong><span>сума максимумів</span></div>` : ''}${proposalStats}${r.deadline ? `<div class="simple-stats-detail">Дедлайн: ${date(r.deadline)}</div>` : ''}</div>
-    ${closed ? '' : '<div class="privacy" style="margin-top:14px">Учасники бачать цю ініціативу у своєму кабінеті в розділі «Ініціативи». Суми одне одного вони не бачать.</div>'}
+    ${closed ? '' : '<div class="privacy" style="margin-top:14px">Учасники бачать це опитування у своєму кабінеті в розділі «Опитування». Суми одне одного вони не бачать.</div>'}
     <div class="buttons">${closed ? `<button onclick="showNextRoundForm('${esc(id)}')">Новий раунд</button><button class="secondary" onclick="downloadCurrentCsv()">Завантажити CSV</button>` : `<button id="closeRoundBtn" class="danger" onclick="closeRound('${esc(id)}')">Завершити раунд</button>`}<button class="ghost" onclick="initiative('${esc(id)}')">Оновити</button></div>
     <div id="managerError" class="error hidden"></div></section>
     <section class="card compact"><h2>${proposalTitle}</h2><div class="table" style="margin-top:12px">${tableHeader}${tableRows}</div></section>
@@ -236,9 +262,9 @@ export function showNextRoundForm(id) {
   clearInterval(managerPoll);
   const r = state.currentRound;
   if (!r) return;
-  app.innerHTML = `<section class="hero"><h1>Ви створюєте новий раунд</h1><p class="lead">Підтвердьте дані ініціативи або змініть їх перед відкриттям нового раунду.</p></section>
+  app.innerHTML = `<section class="hero"><h1>Ви створюєте новий раунд</h1><p class="lead">Підтвердьте дані опитування або змініть їх перед відкриттям нового раунду.</p></section>
     <section class="card"><div class="title-row"><div><h2>Новий раунд</h2><p class="caption">Учасники побачать новий раунд у своєму кабінеті; попередні відповіді не переносяться.</p></div><div class="step">${r.round_number + 1}</div></div>
-    <label>Назва ініціативи</label><input id="nextTitle" value="${esc(r.title)}">
+    <label>Назва опитування</label><input id="nextTitle" value="${esc(r.title)}">
     <label>Опис</label>${richEditor('nextDescription', r.description || '', 'Опишіть, що саме планується зробити')}
     <label>Бюджет, грн <span class="muted">необовʼязково</span></label><input id="nextTarget" type="number" min="1" value="${r.target_amount ?? ''}">
     <label>Платіжні реквізити <span class="muted">необовʼязково</span></label><input id="nextPaymentDetails" type="text" value="${esc(r.payment_details || '')}" placeholder="Посилання або номер картки">
@@ -280,7 +306,7 @@ export async function startNextRound(id) {
   const commentsEnabled = document.getElementById('nextCommentsEnabled').checked;
 
   errorBox.classList.add('hidden');
-  if (!title) return ferr(errorBox, 'Вкажіть назву ініціативи.');
+  if (!title) return ferr(errorBox, 'Вкажіть назву опитування.');
   if (target !== null && (!Number.isFinite(target) || target <= 0)) return ferr(errorBox, 'Бюджет має бути більшим за 0.');
   if (expected !== null && (!Number.isInteger(expected) || expected <= 0)) return ferr(errorBox, 'Кількість має бути більшою за 0.');
 
