@@ -31,7 +31,7 @@ async function finishAuthRedirect() {
 
 function outdatedLink() {
   app.innerHTML = `<section class="card"><h2>Посилання більше не діє</h2>
-    <p class="status-text">Ініціативи тепер живуть у спільнотах. Увійдіть у свій кабінет, щоб побачити їх у розділі «Ініціативи».</p>
+    <p class="status-text">Опитування тепер живуть у спільнотах. Увійдіть у свій кабінет, щоб побачити їх у розділі «Опитування».</p>
     <div class="buttons"><a class="button" href="#/login">Увійти</a></div></section>`;
 }
 

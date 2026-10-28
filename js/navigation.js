@@ -52,7 +52,7 @@ function setCommunityPill(name) {
 const managerItems = [
   ['announcements', '#/announcements', 'Оголошення'],
   ['collections', '#/collections', 'Збори'],
-  ['initiatives', '#/initiatives', 'Ініціативи'],
+  ['initiatives', '#/initiatives', 'Опитування'],
   ['members', '#/members', 'Учасники'],
   ['communities', '#/communities', 'Спільноти'],
   ['statistics', '#/statistics', 'Статистика'],
@@ -61,7 +61,7 @@ const managerItems = [
 const participantItems = [
   ['my-announcements', '#/me/announcements', 'Оголошення'],
   ['my-collections', '#/me/collections', 'Збори'],
-  ['my-initiatives', '#/me/initiatives', 'Ініціативи'],
+  ['my-initiatives', '#/me/initiatives', 'Опитування'],
   ['my-statistics', '#/me/statistics', 'Статистика'],
 ];
 

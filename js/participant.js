@@ -22,7 +22,7 @@ function cardStatus(item) {
       : { tag: '', label: 'Чекає на вашу відповідь', line: 'Вкажіть, скільки готові внести' };
   }
   if (item.feasible === true) {
-    return { tag: 'ok', label: 'Підтверджена', line: item.own_recommended_amount !== null && item.own_recommended_amount !== undefined ? `Ваш внесок: <strong>${money(item.own_recommended_amount)}</strong>` : 'Раунд завершено' };
+    return { tag: 'ok', label: 'Мету досягнуто', line: item.own_recommended_amount !== null && item.own_recommended_amount !== undefined ? `Ваш внесок: <strong>${money(item.own_recommended_amount)}</strong>` : 'Раунд завершено' };
   }
   if (item.feasible === false) return { tag: '', label: 'Мету не досягнуто', line: 'Менеджер може відкрити новий раунд' };
   return { tag: 'ok', label: 'Раунд завершено', line: '' };
@@ -48,9 +48,9 @@ export async function myInitiatives() {
       ${s.line ? `<p class="status-text">${s.line}</p>` : ''}
       <a class="initiative-open" href="#/me/initiatives/${esc(item.id)}">Відкрити →</a>
     </article>`;
-  }).join('') : '<div class="privacy">У цій спільноті ще немає ініціатив.</div>';
+  }).join('') : '<div class="privacy">У цій спільноті ще немає опитувань.</div>';
 
-  app.innerHTML = `<section class="hero account-hero tab-hero"><h1>Ініціативи</h1><p class="lead">${esc(community.name)}</p></section>
+  app.innerHTML = `<section class="hero account-hero tab-hero"><h1>Опитування</h1><p class="lead">${esc(community.name)}</p></section>
     <section class="account-section"><div class="initiative-list">${cards}</div></section>`;
 }
 
@@ -58,11 +58,11 @@ export async function myInitiatives() {
 
 export async function myInitiative(id, silent = false) {
   if (!silent && !await requireParticipant('my-initiatives')) return;
-  if (!silent) loading('Завантажуємо ініціативу');
+  if (!silent) loading('Завантажуємо опитування');
   const { data, error } = await db.rpc('get_my_initiative_v15_rpc', { p_initiative_id: id });
   if (error) return fail(error.message);
   const r = data && data[0];
-  if (!r) return fail('Ініціативу не знайдено.');
+  if (!r) return fail('Опитування не знайдено.');
 
   const closed = r.status !== 'open';
   const hasTarget = r.target_amount !== null && r.target_amount !== undefined;
@@ -87,7 +87,7 @@ export async function myInitiative(id, silent = false) {
       ${commentField}
       <div class="buttons"><button id="submitBtn" onclick="submitProposal('${esc(id)}')">${hasProposal ? 'Зберегти зміни' : 'Надіслати відповідь'}</button>${refreshButton(id)}</div><div id="submitError" class="error hidden"></div>`;
   } else if (confirmed) {
-    content = `<div class="status"><div class="status-main">Ініціатива підтверджена</div>${hasProposal ? `<p class="status-text">Ваш внесок — <strong>${money(r.own_recommended_amount)}</strong>.</p>` : '<p class="status-text">Раунд завершено успішно. Ви не відповідали в цьому раунді.</p>'}${paymentBlock(r.payment_details)}</div><div class="buttons">${refreshButton(id)}</div>`;
+    content = `<div class="status"><div class="status-main">Мету досягнуто</div>${hasProposal ? `<p class="status-text">Ваш внесок — <strong>${money(r.own_recommended_amount)}</strong>.</p>` : '<p class="status-text">Раунд завершено успішно. Ви не відповідали в цьому раунді.</p>'}${paymentBlock(r.payment_details)}</div><div class="buttons">${refreshButton(id)}</div>`;
   } else if (notFunded) {
     content = `<div class="status"><div class="status-main">Мету не досягнуто</div><p class="status-text">Не вистачає: <strong>${money(r.gap)}</strong>. Менеджер може відкрити новий раунд.</p></div><div class="buttons">${refreshButton(id)}</div>`;
   } else if (closedWithoutTarget) {
@@ -96,8 +96,8 @@ export async function myInitiative(id, silent = false) {
     content = `<div class="privacy"><b>Раунд завершено.</b> Очікуйте подальших дій менеджера.</div><div class="buttons">${refreshButton(id)}</div>`;
   }
 
-  app.innerHTML = `<a class="page-back" href="#/me/initiatives">← Ініціативи</a>
-    <section class="hero"><p class="eyebrow">${esc(r.community_name)}</p><h1>${esc(r.title)}</h1><div class="lead rich-content">${richText(r.description, 'Спільна фінансова ініціатива.')}</div></section>${details}<section class="card">${content}</section>`;
+  app.innerHTML = `<a class="page-back" href="#/me/initiatives">← Опитування</a>
+    <section class="hero"><p class="eyebrow">${esc(r.community_name)}</p><h1>${esc(r.title)}</h1><div class="lead rich-content">${richText(r.description, 'Опитування: скільки готові внести.')}</div></section>${details}<section class="card">${content}</section>`;
 }
 
 export function refreshMyInitiative(id) {

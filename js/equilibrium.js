@@ -68,7 +68,7 @@ export function downloadCsv(r, a) {
     ? ['Ідентифікація', 'Максимальна сума внеску', 'Розрахований внесок']
     : ['Ідентифікація', 'Максимальна сума внеску'];
   if (hasComments) header.push('Коментар');
-  header.push('Ініціатива', hasTarget ? 'Алгоритм' : 'Режим');
+  header.push('Опитування', hasTarget ? 'Алгоритм' : 'Режим');
   const lines = [header.join(';')];
 
   a.rows.forEach(x => {
