@@ -54,6 +54,8 @@ export function router() {
   if (k === 'announcements') return announcements();
   if (k === 'me' && !t) return redirect('#/me/announcements');
   if (k === 'me' && t === 'announcements') return myAnnouncements();
+  if (k === 'me' && t === 'ideas' && section === 'new') return newIdea();
+  if (k === 'me' && t === 'ideas') return ideas();
   if (k === 'me' && t === 'polls' && section) return myChoicePoll(section);
   if (k === 'me' && t === 'initiatives' && section) return myInitiative(section);
   if (k === 'me' && t === 'initiatives') return myInitiatives();

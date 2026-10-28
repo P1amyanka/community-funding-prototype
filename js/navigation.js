@@ -212,7 +212,8 @@ export async function syncParticipantNavigation(active = 'my-collections', role 
     <div class="manager-menu-separator"></div>
     ${participantItems.map(([key, href, label]) =>
       `<a class="manager-menu-link menu-section ${active === key ? 'active' : ''}" href="${href}" onclick="closeManagerMenu()"><svg viewBox="0 0 24 24" aria-hidden="true">${iconFor(key)}</svg>${label}</a>`
-    ).join('')}`;
+    ).join('')}
+    <a class="manager-menu-link ${active === 'my-ideas' ? 'active' : ''}" href="#/me/ideas" onclick="closeManagerMenu()"><svg viewBox="0 0 24 24" aria-hidden="true">${iconFor('ideas')}</svg>Що додати в Comfundy?</a>`;
 
   let roles = role;
   if (!roles) {

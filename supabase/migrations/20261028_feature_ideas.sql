@@ -1,8 +1,10 @@
 -- «Що додати в Comfundy?» (v22): перелік запланованих можливостей, за які
--- менеджери ставлять ❤️. Голосують лише менеджери (хоч однієї спільноти);
--- кількість лайків бачать усі менеджери. Перелік і статуси власниця веде
+-- ставлять ❤️ і куди пропонують свої ідеї менеджери й учасники (батьки) —
+-- будь-хто, хто є в спільноті (рішення власниці 28.10). Кількість лайків
+-- бачать усі. Перелік і статуси власниця веде
 -- через SQL Editor (див. приклади наприкінці файлу).
--- Залежить від 20261014_community_managers.sql (community_managers_v14).
+-- Залежить від 20261014_community_managers.sql (community_managers_v14) і
+-- 20261007_communities_members.sql (community_members_v06).
 
 create table if not exists public.feature_ideas_v22 (
   id uuid primary key default gen_random_uuid(),
@@ -40,15 +42,18 @@ from (values
 ) as x(title, description, position)
 where not exists (select 1 from public.feature_ideas_v22);
 
-create or replace function public.is_any_manager_v22()
+-- Чи є користувач менеджером або активним учасником хоча б однієї спільноти.
+create or replace function public.is_comfundy_member_v22()
 returns boolean
 language sql
 stable
 security definer
 set search_path = public
 as $$
-  select auth.uid() is not null
-    and exists (select 1 from public.community_managers_v14 cm where cm.user_id = auth.uid());
+  select auth.uid() is not null and (
+    exists (select 1 from public.community_managers_v14 cm where cm.user_id = auth.uid())
+    or exists (select 1 from public.community_members_v06 m where m.user_id = auth.uid() and m.status = 'active')
+  );
 $$;
 
 create or replace function public.get_feature_ideas_v22_rpc()
@@ -67,7 +72,7 @@ security definer
 set search_path = public
 as $$
 begin
-  if not public.is_any_manager_v22() then raise exception 'Розділ доступний менеджерам спільнот.'; end if;
+  if not public.is_comfundy_member_v22() then raise exception 'Розділ доступний учасникам спільнот.'; end if;
   return query
   select i.id, i.title, i.description, i.status,
     (select count(*) from public.feature_idea_votes_v22 v where v.idea_id = i.id)::integer,
@@ -89,7 +94,7 @@ as $$
 declare
   v_status text;
 begin
-  if not public.is_any_manager_v22() then raise exception 'Розділ доступний менеджерам спільнот.'; end if;
+  if not public.is_comfundy_member_v22() then raise exception 'Розділ доступний учасникам спільнот.'; end if;
   select i.status into v_status from public.feature_ideas_v22 i where i.id = p_idea_id;
   if v_status is null then raise exception 'Ідею не знайдено.'; end if;
   if v_status not in ('planned', 'in_progress') then raise exception 'Ідею не знайдено.'; end if;
@@ -106,7 +111,7 @@ begin
 end;
 $$;
 
--- Менеджер пропонує свою ідею — вона одразу зʼявляється в переліку (рішення
+-- Менеджер або учасник пропонує свою ідею — вона одразу зʼявляється в переліку (рішення
 -- власниці 28.10). Прибрати недоречну: status = 'hidden'.
 create or replace function public.suggest_feature_idea_v22_rpc(p_title text, p_description text)
 returns uuid
@@ -121,7 +126,7 @@ declare
   v_title text := trim(regexp_replace(regexp_replace(coalesce(p_title, ''), '[[:cntrl:]]', ' ', 'g'), '\s+', ' ', 'g'));
   v_description text := trim(regexp_replace(regexp_replace(coalesce(p_description, ''), '[[:cntrl:]]', ' ', 'g'), '\s+', ' ', 'g'));
 begin
-  if not public.is_any_manager_v22() then raise exception 'Розділ доступний менеджерам спільнот.'; end if;
+  if not public.is_comfundy_member_v22() then raise exception 'Розділ доступний учасникам спільнот.'; end if;
   if v_title = '' then raise exception 'Вкажіть назву ідеї.'; end if;
   if v_description = '' then raise exception 'Опишіть ідею.'; end if;
   if length(v_title) > 60 then raise exception 'Назва задовга (до 60 символів).'; end if;
@@ -139,7 +144,7 @@ $$;
 revoke all on function public.suggest_feature_idea_v22_rpc(text, text) from public;
 grant execute on function public.suggest_feature_idea_v22_rpc(text, text) to authenticated;
 
-revoke all on function public.is_any_manager_v22() from public;
+revoke all on function public.is_comfundy_member_v22() from public;
 revoke all on function public.get_feature_ideas_v22_rpc() from public;
 revoke all on function public.toggle_feature_idea_vote_v22_rpc(uuid) from public;
 grant execute on function public.get_feature_ideas_v22_rpc() to authenticated;

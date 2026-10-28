@@ -1,7 +1,11 @@
-// «Що додати в Comfundy?»: менеджери ставлять ❤️ запланованим можливостям.
+// «Що додати в Comfundy?»: менеджери й батьки ставлять ❤️ запланованим можливостям і пропонують свої.
 import { db } from './supabase.js';
 import { app, esc, fail, ferr, loading, redirect, toast } from './utils.js';
-import { syncManagerNavigation } from './navigation.js';
+import { syncManagerNavigation, syncParticipantNavigation } from './navigation.js';
+
+// Той самий розділ у кабінеті менеджера (#/ideas) і учасника (#/me/ideas).
+const base = () => (location.hash.startsWith('#/me/') ? '#/me/ideas' : '#/ideas');
+const syncNav = () => (base() === '#/me/ideas' ? syncParticipantNavigation('my-ideas') : syncManagerNavigation('ideas'));
 
 const HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-9.2-8.6C1.3 8.5 3 5 6.4 5c2 0 3.3 1.1 4.1 2.3h3C14.3 6.1 15.6 5 17.6 5 21 5 22.7 8.5 21.2 11.4 19 15.6 12 20 12 20Z"/></svg>';
 
@@ -18,7 +22,7 @@ const ideaCard = i => {
 function render(items) {
   const list = items.filter(i => i.status !== 'done').sort((a, b) => b.votes - a.votes);
   app.innerHTML = `<section class="hero account-hero"><h1>Що додати в Comfundy?</h1></section>
-    <div class="account-create"><a class="button" href="#/ideas/new">Запропонувати ідею</a></div>
+    <div class="account-create"><a class="button" href="${base()}/new">Запропонувати ідею</a></div>
     <div class="member-search"><span aria-hidden="true">⌕</span><input id="ideaSearch" type="search" placeholder="Пошук" oninput="filterIdeas()"></div>
     <section class="account-section"><div class="idea-list">${list.map(ideaCard).join('')}</div><div id="ideaSearchEmpty" class="privacy hidden">Нічого не знайдено. Запропонуйте свою ідею.</div></section>`;
 }
@@ -26,7 +30,7 @@ function render(items) {
 export async function ideas() {
   const { data: s } = await db.auth.getSession();
   if (!s?.session) return redirect('#/login');
-  await syncManagerNavigation('ideas');
+  await syncNav();
   loading('Завантажуємо');
   const { data, error } = await db.rpc('get_feature_ideas_v22_rpc');
   if (error) return fail(error.message);
@@ -76,8 +80,8 @@ export function countIdeaChars(input) {
 export async function newIdea() {
   const { data: s } = await db.auth.getSession();
   if (!s?.session) return redirect('#/login');
-  await syncManagerNavigation('ideas');
-  app.innerHTML = `<a class="page-back" href="#/ideas">← Що додати в Comfundy?</a>
+  await syncNav();
+  app.innerHTML = `<a class="page-back" href="${base()}">← Що додати в Comfundy?</a>
     <section class="card"><h2>Нова ідея</h2>
       <label>Назва</label><input id="ideaTitle" maxlength="${TITLE_MAX}" placeholder="Наприклад: нагадування в Viber" oninput="countIdeaChars(this)">
       <p class="field-note char-count" data-for="ideaTitle">0 / ${TITLE_MAX}</p>
@@ -101,5 +105,5 @@ export async function submitIdea() {
   b.disabled = false; b.textContent = 'Надіслати';
   if (error) return ferr(e, error.message);
   toast('Дякуємо! Ідею додано в перелік', 3000);
-  redirect('#/ideas');
+  redirect(base());
 }
